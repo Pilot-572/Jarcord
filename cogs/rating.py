@@ -3,6 +3,15 @@ import discord
 from discord.ext import commands
 
 from db import conn
+from ui import embed
+
+STARS_FULL = "★"   # ★
+STARS_EMPTY = "☆"  # ☆
+
+
+def stars(score: float) -> str:
+    n = round(score)
+    return STARS_FULL * n + STARS_EMPTY * (5 - n)
 
 
 class Rating(commands.Cog):
@@ -27,9 +36,9 @@ class Rating(commands.Cog):
             (member.id, ctx.author.id, score, note),
         )
         conn.commit()
-        msg = f"Rated {member.display_name} **{score}/5**."
+        msg = f"{stars(score)} Rated **{member.display_name}** {score}/5."
         if note:
-            msg += f" Note: {note}"
+            msg += f"\n> {note}"
         await ctx.send(msg)
 
     @commands.hybrid_command(name="rating-history", description="Average score + recent notes for a member")
@@ -39,20 +48,26 @@ class Rating(commands.Cog):
             (member.id,),
         ).fetchone()
         if summary["n"] == 0:
-            await ctx.send(f"No ratings for {member.display_name} yet.")
+            await ctx.send(embed=embed(description=f"No ratings for **{member.display_name}** yet."))
             return
         recent = conn.execute(
             """SELECT score, note, rater_id, rated_at FROM ratings
                WHERE user_id = ? ORDER BY id DESC LIMIT 5""",
             (member.id,),
         ).fetchall()
-        lines = [f"**{member.display_name}** — avg **{summary['avg']:.2f}/5** over {summary['n']} rating(s)"]
+        e = embed(
+            title=member.display_name,
+            description=f"{stars(summary['avg'])} **{summary['avg']:.2f} / 5** · {summary['n']} rating(s)",
+        )
+        e.set_thumbnail(url=member.display_avatar.url)
+        lines = []
         for r in recent:
-            line = f"`{r['rated_at']}` {r['score']}/5 by <@{r['rater_id']}>"
+            line = f"**{r['score']}/5** by <@{r['rater_id']}> · {r['rated_at']} UTC"
             if r["note"]:
-                line += f" — {r['note']}"
+                line += f"\n> {r['note']}"
             lines.append(line)
-        await ctx.send("\n".join(lines))
+        e.add_field(name="Recent", value="\n".join(lines), inline=False)
+        await ctx.send(embed=e)
 
 
 async def setup(bot: commands.Bot):

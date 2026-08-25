@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Noto+Sans:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #818cf8; } a:hover { color: #a5b4fc; }
+  </style>
+</helmet>
+<div style="position: relative; width: 1280px; height: 640px; overflow: hidden; background-color: #0b0d12; font-family: Sora, 'Segoe UI', sans-serif;">
+
+  <!-- subtle depth -->
+  <div style="position: absolute; top: -200px; right: -100px; width: 800px; height: 800px; background: radial-gradient(closest-side, rgba(99,102,241,0.14), transparent 70%);"></div>
+  <div style="position: absolute; bottom: -300px; left: -200px; width: 700px; height: 700px; background: radial-gradient(closest-side, rgba(99,102,241,0.06), transparent 70%);"></div>
+
+  <!-- left: wordmark + pitch -->
+  <div style="position: absolute; top: 150px; left: 96px; width: 520px; display: flex; flex-direction: column; gap: 28px;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, #6366f1, #4f46e5); display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 700; color: #ffffff;">J</div>
+      <div style="font-size: 44px; font-weight: 700; letter-spacing: -1px; color: #f4f5f7;">Jarcord</div>
+    </div>
+    <div style="font-size: 40px; font-weight: 600; line-height: 1.2; letter-spacing: -1px; color: #f4f5f7; text-wrap: balance;">Run your team's operations inside Discord.</div>
+    <div style="font-size: 19px; font-weight: 400; line-height: 1.6; color: #9aa1ad; font-family: 'Noto Sans', 'Segoe UI', sans-serif;">Scheduled op signups, member performance ratings, and activity tracking — without leaving your server.</div>
+    <div style="display: flex; gap: 12px; font-family: 'Noto Sans', 'Segoe UI', sans-serif;">
+      <div style="padding: 8px 16px; border: 1px solid #2a2f3a; border-radius: 999px; font-size: 14px; font-weight: 500; color: #c6cbd4;">Op signups</div>
+      <div style="padding: 8px 16px; border: 1px solid #2a2f3a; border-radius: 999px; font-size: 14px; font-weight: 500; color: #c6cbd4;">Ratings</div>
+      <div style="padding: 8px 16px; border: 1px solid #2a2f3a; border-radius: 999px; font-size: 14px; font-weight: 500; color: #c6cbd4;">Activity</div>
+    </div>
+  </div>
+
+  <!-- right: Discord message mock -->
+  <div style="position: absolute; top: 138px; right: 84px; width: 470px; background-color: #313338; border-radius: 12px; padding: 20px 22px; box-shadow: 0 24px 60px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.4); font-family: 'Noto Sans', 'Segoe UI', sans-serif;">
+    <div style="display: flex; align-items: flex-start; gap: 14px;">
+      <div style="width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #4f46e5); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #ffffff; flex-shrink: 0;">J</div>
+      <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="font-size: 16px; font-weight: 600; color: #f2f3f5;">Jarcord</div>
+          <div style="background-color: #5865f2; border-radius: 4px; padding: 1px 5px; font-size: 10px; font-weight: 600; color: #ffffff;">APP</div>
+          <div style="font-size: 12px; color: #949ba4;">Today at 21:00</div>
+        </div>
+        <div style="background-color: #2b2d31; border-left: 4px solid #6366f1; border-radius: 5px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 16px; font-weight: 600; color: #f2f3f5;">Operation Nightfall</div>
+          <div style="display: flex; gap: 32px;">
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 12px; font-weight: 600; color: #b5bac1;">When</div>
+              <div style="font-size: 14px; color: #dbdee1;">Saturday 21:00 UTC</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 12px; font-weight: 600; color: #b5bac1;">Roster</div>
+              <div style="font-size: 14px; color: #dbdee1;">8 signed up</div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-size: 12px; font-weight: 600; color: #b5bac1;">Join</div>
+            <div style="font-size: 14px; color: #dbdee1;"><span style="background-color: #3c3f45; border-radius: 3px; padding: 1px 6px; color: #dee0e3;">/op-join 12</span></div>
+          </div>
+          <div style="font-size: 12px; color: #949ba4; padding-top: 2px;">Op ID 12</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- bottom line -->
+  <div style="position: absolute; bottom: 44px; left: 96px; right: 96px; display: flex; justify-content: space-between; align-items: center; font-family: 'Noto Sans', 'Segoe UI', sans-serif; font-size: 14px; color: #6b7280;">
+    <div>Open source &#183; Python &#183; discord.py</div>
+    <div>github.com/Pilot-572/Jarcord</div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

@@ -6,6 +6,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from db import conn
+from ui import embed
 
 
 # ── DB helpers (shared by slash + prefix) ──
@@ -18,6 +19,14 @@ def create_op(title: str, when: str, author_id: int) -> int:
     return cur.lastrowid
 
 
+def create_embed(op_id: int, title: str, when: str) -> discord.Embed:
+    e = embed(title=title)
+    e.add_field(name="When", value=when, inline=True)
+    e.add_field(name="Join", value=f"`/op-join {op_id}`", inline=True)
+    e.set_footer(text=f"Op ID {op_id}")
+    return e
+
+
 def join_op(op_id: int, user_id: int) -> str:
     op = conn.execute("SELECT * FROM ops WHERE id = ?", (op_id,)).fetchone()
     if op is None:
@@ -26,35 +35,43 @@ def join_op(op_id: int, user_id: int) -> str:
         conn.execute("INSERT INTO signups (op_id, user_id) VALUES (?, ?)", (op_id, user_id))
         conn.commit()
     except sqlite3.IntegrityError:
-        return f"You're already signed up for **{op['title']}**."
-    return f"Signed up for **{op['title']}** ({op['when_text']})."
+        return f"You're already on the roster for **{op['title']}**."
+    return f"You're on the roster for **{op['title']}** — {op['when_text']}."
 
 
-def roster_text(op_id: int) -> str:
+def roster_embed(op_id: int) -> discord.Embed:
     op = conn.execute("SELECT * FROM ops WHERE id = ?", (op_id,)).fetchone()
     if op is None:
-        return f"No op with ID `{op_id}`."
+        return embed(description=f"No op with ID `{op_id}`.")
     rows = conn.execute(
         "SELECT user_id FROM signups WHERE op_id = ? ORDER BY signed_at", (op_id,)
     ).fetchall()
-    header = f"**{op['title']}** — {op['when_text']} (ID `{op_id}`)"
-    if not rows:
-        return f"{header}\nNobody signed up yet."
-    names = "\n".join(f"{i}. <@{r['user_id']}>" for i, r in enumerate(rows, 1))
-    return f"{header}\n{names}"
+    e = embed(title=op["title"])
+    e.add_field(name="When", value=op["when_text"], inline=True)
+    e.add_field(name="Signed up", value=str(len(rows)), inline=True)
+    roster = (
+        "\n".join(f"`{i:>2}` <@{r['user_id']}>" for i, r in enumerate(rows, 1))
+        if rows else "*Nobody yet — be the first.*"
+    )
+    e.add_field(name="Roster", value=roster, inline=False)
+    e.set_footer(text=f"Op ID {op_id} · /op-join {op_id}")
+    return e
 
 
-def list_text() -> str:
+def list_embed() -> discord.Embed:
     rows = conn.execute(
         """SELECT o.id, o.title, o.when_text, COUNT(s.user_id) AS n
            FROM ops o LEFT JOIN signups s ON s.op_id = o.id
            GROUP BY o.id ORDER BY o.id DESC LIMIT 10"""
     ).fetchall()
     if not rows:
-        return "No ops yet."
-    return "**Recent ops**\n" + "\n".join(
-        f"`{r['id']}` **{r['title']}** — {r['when_text']} ({r['n']} signed up)" for r in rows
+        return embed(title="Recent ops", description="No ops posted yet.")
+    lines = "\n".join(
+        f"`{r['id']:>3}` **{r['title']}** — {r['when_text']} · {r['n']} signed up" for r in rows
     )
+    e = embed(title="Recent ops", description=lines)
+    e.set_footer(text="Join with /op-join <id>")
+    return e
 
 
 class Ops(commands.Cog):
@@ -66,9 +83,7 @@ class Ops(commands.Cog):
     @app_commands.describe(title="Op name", when="When it happens (free text)")
     async def op_create(self, interaction: discord.Interaction, title: str, when: str):
         op_id = create_op(title, when, interaction.user.id)
-        await interaction.response.send_message(
-            f"Op **{title}** posted — **{when}**. ID `{op_id}`. Join with `/op-join {op_id}`."
-        )
+        await interaction.response.send_message(embed=create_embed(op_id, title, when))
 
     @app_commands.command(name="op-join", description="Sign up for an op")
     @app_commands.describe(op_id="The op ID")
@@ -86,11 +101,11 @@ class Ops(commands.Cog):
 
     @op.command(name="roster")
     async def op_roster(self, ctx: commands.Context, op_id: int):
-        await ctx.send(roster_text(op_id))
+        await ctx.send(embed=roster_embed(op_id))
 
     @op.command(name="list")
     async def op_list(self, ctx: commands.Context):
-        await ctx.send(list_text())
+        await ctx.send(embed=list_embed())
 
 
 async def setup(bot: commands.Bot):

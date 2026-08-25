@@ -28,7 +28,11 @@ class Jarcord(commands.Bot):
         print(f">> synced {len(synced)} slash commands to guild {GUILD_ID}")
 
 
-bot = Jarcord(command_prefix=PREFIX, intents=intents)
+bot = Jarcord(
+    command_prefix=PREFIX,
+    intents=intents,
+    activity=discord.Activity(type=discord.ActivityType.watching, name="the ops board"),
+)
 
 
 @bot.event

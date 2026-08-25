@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 
 from db import conn
+from ui import embed
 
 SQLITE_FMT = "%Y-%m-%d %H:%M:%S"  # matches sqlite datetime('now'), which is UTC
 
@@ -37,13 +38,16 @@ class Activity(commands.Cog):
         ops = conn.execute(
             "SELECT COUNT(*) AS n FROM signups WHERE user_id = ?", (member.id,)
         ).fetchone()["n"]
-        if row is None:
-            await ctx.send(f"**{member.display_name}** — no messages logged yet, {ops} op(s) attended.")
-            return
-        await ctx.send(
-            f"**{member.display_name}** — {row['message_count']} messages, "
-            f"{ops} op(s) attended, last seen `{row['last_seen']}` UTC."
+        e = embed(title=member.display_name)
+        e.set_thumbnail(url=member.display_avatar.url)
+        e.add_field(name="Messages", value=str(row["message_count"]) if row else "0", inline=True)
+        e.add_field(name="Ops attended", value=str(ops), inline=True)
+        e.add_field(
+            name="Last seen",
+            value=f"{row['last_seen']} UTC" if row else "Never",
+            inline=True,
         )
+        await ctx.send(embed=e)
 
     @commands.hybrid_command(name="inactive", description="List members inactive for N+ days")
     async def inactive(self, ctx: commands.Context, days: int = 14):
@@ -57,15 +61,22 @@ class Activity(commands.Cog):
             if not m.bot and seen.get(m.id, "") < cutoff
         ]
         if not stale:
-            await ctx.send(f"Nobody inactive for {days}+ days.")
+            await ctx.send(embed=embed(
+                title="Inactivity report", description=f"Nobody inactive for {days}+ days."
+            ))
             return
         lines = [
-            f"{m.display_name} — last seen `{seen[m.id]}`" if m.id in seen
-            else f"{m.display_name} — never seen"
+            f"<@{m.id}> — last seen {seen[m.id]} UTC" if m.id in seen
+            else f"<@{m.id}> — never seen"
             for m in stale[:30]
         ]
-        extra = f"\n…and {len(stale) - 30} more." if len(stale) > 30 else ""
-        await ctx.send(f"**Inactive {days}+ days ({len(stale)}):**\n" + "\n".join(lines) + extra)
+        extra = f"\n*…and {len(stale) - 30} more.*" if len(stale) > 30 else ""
+        e = embed(
+            title="Inactivity report",
+            description="\n".join(lines) + extra,
+        )
+        e.set_footer(text=f"{len(stale)} member(s) inactive {days}+ days")
+        await ctx.send(embed=e)
 
 
 async def setup(bot: commands.Bot):

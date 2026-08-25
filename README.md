@@ -1,6 +1,8 @@
 # Jarcord
 
-Custom Discord bot for the STF faction server. Op signups, member ratings, activity tracking. Single-server, lean by design — Discord's built-in AutoMod handles moderation, so Jarcord doesn't.
+Operations management for Discord teams — scheduled op signups, member performance ratings, and activity tracking, all inside your server. Built for faction/milsim communities; lean by design (Discord's built-in AutoMod handles moderation, so Jarcord doesn't).
+
+All informational output uses clean embeds with a consistent accent; confirmations stay short and inline.
 
 ## Features
 
@@ -33,6 +35,7 @@ Most commands are hybrid — they work as both slash and prefix versions.
 ```
 bot.py            entry point — loads cogs, syncs slash commands to GUILD_ID
 db.py             sqlite3 schema + shared connection (data/jarcord.db)
+ui.py             shared embed styling (accent colour)
 cogs/ops.py       op signups
 cogs/rating.py    ratings
 cogs/activity.py  activity tracking
