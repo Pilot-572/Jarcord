@@ -11,7 +11,10 @@ CREATE TABLE IF NOT EXISTS ops (
     title      TEXT NOT NULL,
     when_text  TEXT NOT NULL,
     created_by INTEGER NOT NULL,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    when_ts    INTEGER,           -- unix ts (UTC) when parseable, else NULL
+    channel_id INTEGER,           -- where the op was posted (reminder target)
+    reminded   INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS signups (
@@ -44,4 +47,15 @@ conn = sqlite3.connect(DB_PATH)
 conn.row_factory = sqlite3.Row
 conn.execute("PRAGMA foreign_keys = ON")
 conn.executescript(SCHEMA)
+
+# migrate pre-reminder databases
+for ddl in (
+    "ALTER TABLE ops ADD COLUMN when_ts INTEGER",
+    "ALTER TABLE ops ADD COLUMN channel_id INTEGER",
+    "ALTER TABLE ops ADD COLUMN reminded INTEGER NOT NULL DEFAULT 0",
+):
+    try:
+        conn.execute(ddl)
+    except sqlite3.OperationalError:
+        pass  # column already exists
 conn.commit()

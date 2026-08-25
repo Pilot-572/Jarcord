@@ -11,8 +11,12 @@ All informational output uses clean embeds with a consistent accent; confirmatio
 |---|---|
 | `/op-create <title> <when>` | Post an op, returns its ID |
 | `/op-join <id>` or `!op join <id>` | Sign up |
+| `/op-leave <id>` or `!op leave <id>` | Drop off the roster |
+| `/op-cancel <id>` or `!op cancel <id>` | Cancel an op (creator or Manage Server) |
 | `!op roster <id>` | Who's signed up |
 | `!op list` | Last 10 ops with signup counts |
+
+`when` is free text, but if it matches `YYYY-MM-DD HH:MM` or `DD.MM HH:MM` (UTC), the op gets a real timestamp — shown in each viewer's local timezone — and the bot pings the roster in the op's channel 30 minutes before start.
 
 ### Member ratings
 | Command | What it does |
