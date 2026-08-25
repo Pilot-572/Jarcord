@@ -3,3 +3,6 @@ data/*.db
 __pycache__/
 venv/
 banner/jarcord-banner.html
+banner/Option*.dc.html
+banner/Logos.dc.html
+banner/export/banner-render.html
