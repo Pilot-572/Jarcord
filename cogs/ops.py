@@ -21,6 +21,7 @@ def create_op(title: str, when: str, author_id: int) -> int:
 
 def create_embed(op_id: int, title: str, when: str) -> discord.Embed:
     e = embed(title=title)
+    e.set_author(name="New op posted")
     e.add_field(name="When", value=when, inline=True)
     e.add_field(name="Join", value=f"`/op-join {op_id}`", inline=True)
     e.set_footer(text=f"Op ID {op_id}")
