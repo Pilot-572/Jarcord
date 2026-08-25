@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 
 from db import conn
-from ui import embed
+from ui import RATING, embed
 
 STARS_FULL = "★"   # ★
 STARS_EMPTY = "☆"  # ☆
@@ -48,7 +48,9 @@ class Rating(commands.Cog):
             (member.id,),
         ).fetchone()
         if summary["n"] == 0:
-            await ctx.send(embed=embed(description=f"No ratings for **{member.display_name}** yet."))
+            await ctx.send(embed=embed(
+                description=f"No ratings for **{member.display_name}** yet.", colour=RATING,
+            ))
             return
         recent = conn.execute(
             """SELECT score, note, rater_id, rated_at FROM ratings
@@ -58,6 +60,7 @@ class Rating(commands.Cog):
         e = embed(
             title=member.display_name,
             description=f"{stars(summary['avg'])} **{summary['avg']:.2f} / 5** · {summary['n']} rating(s)",
+            colour=RATING,
         )
         e.set_thumbnail(url=member.display_avatar.url)
         lines = []

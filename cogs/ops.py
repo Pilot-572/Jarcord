@@ -19,9 +19,12 @@ def create_op(title: str, when: str, author_id: int) -> int:
     return cur.lastrowid
 
 
-def create_embed(op_id: int, title: str, when: str) -> discord.Embed:
+def create_embed(op_id: int, title: str, when: str, author: discord.Member = None) -> discord.Embed:
     e = embed(title=title)
-    e.set_author(name="New op posted")
+    if author is not None:
+        e.set_author(name=f"Op posted by {author.display_name}", icon_url=author.display_avatar.url)
+    else:
+        e.set_author(name="New op posted")
     e.add_field(name="When", value=when, inline=True)
     e.add_field(name="Join", value=f"`/op-join {op_id}`", inline=True)
     e.set_footer(text=f"Op ID {op_id}")
@@ -50,6 +53,7 @@ def roster_embed(op_id: int) -> discord.Embed:
     e = embed(title=op["title"])
     e.add_field(name="When", value=op["when_text"], inline=True)
     e.add_field(name="Signed up", value=str(len(rows)), inline=True)
+    e.add_field(name="Posted by", value=f"<@{op['created_by']}>", inline=True)
     roster = (
         "\n".join(f"`{i:>2}` <@{r['user_id']}>" for i, r in enumerate(rows, 1))
         if rows else "*Nobody yet — be the first.*"
@@ -84,7 +88,7 @@ class Ops(commands.Cog):
     @app_commands.describe(title="Op name", when="When it happens (free text)")
     async def op_create(self, interaction: discord.Interaction, title: str, when: str):
         op_id = create_op(title, when, interaction.user.id)
-        await interaction.response.send_message(embed=create_embed(op_id, title, when))
+        await interaction.response.send_message(embed=create_embed(op_id, title, when, interaction.user))
 
     @app_commands.command(name="op-join", description="Sign up for an op")
     @app_commands.describe(op_id="The op ID")

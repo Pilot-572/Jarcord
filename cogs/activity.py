@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from db import conn
-from ui import embed
+from ui import ACTIVITY, embed
 
 SQLITE_FMT = "%Y-%m-%d %H:%M:%S"  # matches sqlite datetime('now'), which is UTC
 
@@ -38,7 +38,7 @@ class Activity(commands.Cog):
         ops = conn.execute(
             "SELECT COUNT(*) AS n FROM signups WHERE user_id = ?", (member.id,)
         ).fetchone()["n"]
-        e = embed(title=member.display_name)
+        e = embed(title=member.display_name, colour=ACTIVITY)
         e.set_thumbnail(url=member.display_avatar.url)
         e.add_field(name="Messages", value=str(row["message_count"]) if row else "0", inline=True)
         e.add_field(name="Ops attended", value=str(ops), inline=True)
@@ -62,7 +62,8 @@ class Activity(commands.Cog):
         ]
         if not stale:
             await ctx.send(embed=embed(
-                title="Inactivity report", description=f"Nobody inactive for {days}+ days."
+                title="Inactivity report", description=f"Nobody inactive for {days}+ days.",
+                colour=ACTIVITY,
             ))
             return
         lines = [
@@ -74,6 +75,7 @@ class Activity(commands.Cog):
         e = embed(
             title="Inactivity report",
             description="\n".join(lines) + extra,
+            colour=ACTIVITY,
         )
         e.set_footer(text=f"{len(stale)} member(s) inactive {days}+ days")
         await ctx.send(embed=e)
