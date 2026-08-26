@@ -45,6 +45,25 @@ CREATE TABLE IF NOT EXISTS profiles (
     roblox_id   INTEGER,
     continent   TEXT
 );
+
+CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS applications (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      INTEGER NOT NULL,
+    roblox       TEXT NOT NULL,
+    age_group    TEXT,
+    pronouns     TEXT,
+    timezone     TEXT,
+    availability TEXT,
+    status       TEXT NOT NULL DEFAULT 'pending',
+    reviewer_id  INTEGER,
+    message_id   INTEGER,
+    created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
 """
 
 DATA_DIR.mkdir(exist_ok=True)
@@ -66,3 +85,18 @@ for ddl in (
     except sqlite3.OperationalError:
         pass  # column already exists
 conn.commit()
+
+
+# ── Settings helpers (guild config that shouldn't need a restart) ──
+def get_setting(key: str) -> str | None:
+    row = conn.execute("SELECT value FROM settings WHERE key = ?", (key,)).fetchone()
+    return row["value"] if row else None
+
+
+def set_setting(key: str, value: str) -> None:
+    conn.execute(
+        "INSERT INTO settings (key, value) VALUES (?, ?) "
+        "ON CONFLICT(key) DO UPDATE SET value = ?",
+        (key, value, value),
+    )
+    conn.commit()

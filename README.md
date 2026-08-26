@@ -34,6 +34,18 @@ All informational output uses clean embeds with a consistent accent; confirmatio
 
 Needs **Manage Nicknames** and **Manage Roles**, and Jarcord's role must sit above the members and continent roles it manages.
 
+### Registration
+A real application form instead of a copy-paste template: `/register` opens a modal (Roblox username, age group, pronouns, time zone, availability). The submission posts to a staff channel as a card with **Approve** / **Deny** buttons.
+
+Approving verifies the Roblox account, links it to their profile, sets their nickname, assigns the member role, and DMs them. Denying just marks the card. Review buttons survive bot restarts.
+
+| Command | What it does |
+|---|---|
+| `/register` | Open the registration form |
+| `/register-setup <channel> [role]` | Set the review channel and the role approved members get (needs Manage Server) |
+
+Reviewing requires Manage Roles. One pending application per member.
+
 ### Info panels
 Reference posts — banner image, section cards, link buttons — defined as JSON files in `panels/` and posted on demand.
 
@@ -65,6 +77,7 @@ cogs/rating.py    ratings
 cogs/activity.py  activity tracking
 cogs/profile.py   Roblox link + continent + profile card
 cogs/panels.py    info panels
+cogs/registration.py  registration form + staff review
 panels/*.json     panel definitions
 setup.sh          LXC provisioning script
 jarcord.service   systemd unit

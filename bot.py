@@ -12,7 +12,10 @@ TOKEN = os.environ["DISCORD_TOKEN"]
 PREFIX = os.getenv("COMMAND_PREFIX", "!")
 GUILD_ID = int(os.environ["GUILD_ID"])
 
-COGS = ("cogs.ops", "cogs.rating", "cogs.activity", "cogs.profile", "cogs.panels")
+COGS = (
+    "cogs.ops", "cogs.rating", "cogs.activity",
+    "cogs.profile", "cogs.panels", "cogs.registration",
+)
 
 intents = discord.Intents.default()
 intents.message_content = True  # prefix commands + activity tracking
