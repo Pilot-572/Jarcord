@@ -38,6 +38,13 @@ CREATE TABLE IF NOT EXISTS activity (
     message_count INTEGER NOT NULL DEFAULT 0,
     last_seen     TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS profiles (
+    user_id     INTEGER PRIMARY KEY,
+    roblox_name TEXT,
+    roblox_id   INTEGER,
+    continent   TEXT
+);
 """
 
 DATA_DIR.mkdir(exist_ok=True)

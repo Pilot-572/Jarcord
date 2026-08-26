@@ -24,6 +24,15 @@ All informational output uses clean embeds with a consistent accent; confirmatio
 | `/rate @member <1-5> [note]` or `!rate ...` | Rate someone's op performance |
 | `/rating-history @member` | Average score + last 5 notes |
 
+### Member profiles
+| Command | What it does |
+|---|---|
+| `/roblox <username>` | Link your Roblox account — verified against the Roblox API, then sets your server nickname to it |
+| `/continent <continent>` | Set your continent; assigns the matching role (created on first use) |
+| `/profile [@member]` | Full card: Roblox link, continent, ops attended, average rating, messages, last seen |
+
+Needs **Manage Nicknames** and **Manage Roles**, and Jarcord's role must sit above the members and continent roles it manages.
+
 ### Activity tracking
 Every non-bot guild message bumps a per-user counter and `last_seen` timestamp (UTC).
 
@@ -43,6 +52,7 @@ ui.py             shared embed styling (accent colour)
 cogs/ops.py       op signups
 cogs/rating.py    ratings
 cogs/activity.py  activity tracking
+cogs/profile.py   Roblox link + continent + profile card
 setup.sh          LXC provisioning script
 jarcord.service   systemd unit
 ```

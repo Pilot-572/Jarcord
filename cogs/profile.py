@@ -1,0 +1,122 @@
+# ── Jarcord — member profiles (Roblox link + continent) cog ──
+from typing import Literal, Optional
+
+import aiohttp
+import discord
+from discord.ext import commands
+
+from db import conn
+from ui import embed
+
+CONTINENTS = ("Europe", "North America", "South America", "Asia", "Africa", "Oceania")
+ROBLOX_LOOKUP = "https://users.roblox.com/v1/usernames/users"
+
+
+async def resolve_roblox(username: str):
+    """Return (id, canonical_name) or None if the username doesn't exist."""
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            ROBLOX_LOOKUP,
+            json={"usernames": [username], "excludeBannedUsers": True},
+        ) as resp:
+            if resp.status != 200:
+                return None
+            data = (await resp.json()).get("data", [])
+    if not data:
+        return None
+    return data[0]["id"], data[0]["name"]
+
+
+class Profile(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    async def cog_check(self, ctx: commands.Context) -> bool:
+        return ctx.guild is not None  # nicknames/roles only exist in a guild
+
+    @commands.hybrid_command(name="roblox", description="Link your Roblox account (sets your nickname)")
+    async def roblox(self, ctx: commands.Context, username: str):
+        found = await resolve_roblox(username)
+        if found is None:
+            await ctx.send(f"No Roblox account called **{username}** — check the spelling.")
+            return
+        rid, name = found
+        conn.execute(
+            """INSERT INTO profiles (user_id, roblox_name, roblox_id) VALUES (?, ?, ?)
+               ON CONFLICT(user_id) DO UPDATE SET roblox_name = ?, roblox_id = ?""",
+            (ctx.author.id, name, rid, name, rid),
+        )
+        conn.commit()
+        msg = f"Linked to Roblox account **{name}** (`{rid}`)."
+        try:
+            await ctx.author.edit(nick=name)
+            msg += f" Nickname set to **{name}**."
+        except discord.Forbidden:
+            msg += " Couldn't change your nickname (server owner, or I'm missing Manage Nicknames)."
+        await ctx.send(msg)
+
+    @commands.hybrid_command(name="continent", description="Set your continent (assigns the role)")
+    async def continent(
+        self,
+        ctx: commands.Context,
+        continent: Literal["Europe", "North America", "South America", "Asia", "Africa", "Oceania"],
+    ):
+        conn.execute(
+            """INSERT INTO profiles (user_id, continent) VALUES (?, ?)
+               ON CONFLICT(user_id) DO UPDATE SET continent = ?""",
+            (ctx.author.id, continent, continent),
+        )
+        conn.commit()
+        try:
+            role = discord.utils.get(ctx.guild.roles, name=continent)
+            if role is None:
+                role = await ctx.guild.create_role(name=continent, mentionable=True)
+            old = [r for r in ctx.author.roles if r.name in CONTINENTS and r != role]
+            if old:
+                await ctx.author.remove_roles(*old)
+            await ctx.author.add_roles(role)
+            await ctx.send(f"You're set to **{continent}** — role assigned.")
+        except discord.Forbidden:
+            await ctx.send(
+                f"Saved **{continent}**, but I couldn't manage roles — give me the Manage Roles permission."
+            )
+
+    @commands.hybrid_command(name="profile", description="Member profile: Roblox, continent, ops, rating, activity")
+    async def profile(self, ctx: commands.Context, member: Optional[discord.Member] = None):
+        member = member or ctx.author
+        p = conn.execute("SELECT * FROM profiles WHERE user_id = ?", (member.id,)).fetchone()
+        act = conn.execute(
+            "SELECT message_count, last_seen FROM activity WHERE user_id = ?", (member.id,)
+        ).fetchone()
+        n_ops = conn.execute(
+            "SELECT COUNT(*) AS n FROM signups WHERE user_id = ?", (member.id,)
+        ).fetchone()["n"]
+        rating = conn.execute(
+            "SELECT AVG(score) AS avg, COUNT(*) AS n FROM ratings WHERE user_id = ?", (member.id,)
+        ).fetchone()
+
+        e = embed(title=member.display_name)
+        e.set_thumbnail(url=member.display_avatar.url)
+        roblox = (
+            f"[{p['roblox_name']}](https://www.roblox.com/users/{p['roblox_id']}/profile)"
+            if p and p["roblox_name"] else "*Not linked — /roblox*"
+        )
+        e.add_field(name="Roblox", value=roblox, inline=True)
+        e.add_field(
+            name="Continent",
+            value=p["continent"] if p and p["continent"] else "*Not set — /continent*",
+            inline=True,
+        )
+        e.add_field(name="Ops attended", value=str(n_ops), inline=True)
+        e.add_field(
+            name="Rating",
+            value=f"{rating['avg']:.2f}/5 ({rating['n']})" if rating["n"] else "—",
+            inline=True,
+        )
+        e.add_field(name="Messages", value=str(act["message_count"]) if act else "0", inline=True)
+        e.add_field(name="Last seen", value=f"{act['last_seen']} UTC" if act else "Never", inline=True)
+        await ctx.send(embed=e)
+
+
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Profile(bot))
