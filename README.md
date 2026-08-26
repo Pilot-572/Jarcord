@@ -30,6 +30,7 @@ All informational output uses clean embeds with a consistent accent; confirmatio
 | `/roblox <username>` | Link your Roblox account — verified against the Roblox API, then sets your server nickname to it |
 | `/continent <continent>` | Set your continent; assigns the matching role (created on first use) |
 | `/profile [@member]` | Full card: Roblox link, continent, ops attended, average rating, messages, last seen |
+| `/nick @member [nickname]` | Rename a member (needs Manage Nicknames); omit the nickname to clear it |
 
 Needs **Manage Nicknames** and **Manage Roles**, and Jarcord's role must sit above the members and continent roles it manages.
 

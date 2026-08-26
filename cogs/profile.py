@@ -55,6 +55,23 @@ class Profile(commands.Cog):
             msg += " Couldn't change your nickname (server owner, or I'm missing Manage Nicknames)."
         await ctx.send(msg)
 
+    @commands.hybrid_command(name="nick", description="Set someone's nickname (needs Manage Nicknames)")
+    @commands.has_permissions(manage_nicknames=True)
+    @commands.bot_has_permissions(manage_nicknames=True)
+    async def nick(self, ctx: commands.Context, member: discord.Member, *, nickname: str = None):
+        try:
+            await member.edit(nick=nickname)
+        except discord.Forbidden:
+            await ctx.send(
+                f"Can't rename {member.mention} — they're the server owner, or their top role "
+                "sits above mine (Server Settings → Roles → drag Jarcord higher)."
+            )
+            return
+        if nickname:
+            await ctx.send(f"Renamed {member.mention} to **{nickname}**.")
+        else:
+            await ctx.send(f"Cleared {member.mention}'s nickname.")
+
     @commands.hybrid_command(name="continent", description="Set your continent (assigns the role)")
     async def continent(
         self,
