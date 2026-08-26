@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Noto+Sans:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #cbd5e1; } a:hover { color: #e2e8f0; }
+  </style>
+</helmet>
+<div style="position: relative; width: 1600px; height: 400px; overflow: hidden; background-color: #0b0d12; font-family: Sora, 'Segoe UI', sans-serif;">
+
+  <!-- subtle depth -->
+  <div style="position: absolute; top: -300px; right: 0px; width: 900px; height: 900px; background: radial-gradient(closest-side, rgba(148,163,184,0.12), transparent 70%);"></div>
+  <div style="position: absolute; bottom: -400px; left: -200px; width: 800px; height: 800px; background: radial-gradient(closest-side, rgba(148,163,184,0.05), transparent 70%);"></div>
+
+  <!-- single centered row; everything lives in the middle band so aggressive crops stay safe -->
+  <div style="position: absolute; top: 0; left: 0; width: 1600px; height: 400px; display: flex; align-items: center; justify-content: center; gap: 40px;">
+
+    <div style="width: 92px; height: 92px; border-radius: 22px; background: linear-gradient(135deg, #64748b, #1e293b); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+      <svg width="54" height="54" viewBox="0 0 84 84" fill="none">
+        <path d="M14 34 L42 16 L70 34" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M14 54 L42 36 L70 54" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"></path>
+        <path d="M14 74 L42 56 L70 74" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"></path>
+      </svg>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-size: 64px; font-weight: 700; line-height: 1; letter-spacing: -1.5px; color: #f4f5f7;">Jarcord</div>
+      <div style="font-size: 22px; font-weight: 400; color: #9aa1ad; font-family: 'Noto Sans', 'Segoe UI', sans-serif;">Run your team's operations inside Discord.</div>
+    </div>
+
+    <div style="width: 1px; height: 110px; background-color: #2a2f3a;"></div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px; font-family: 'Noto Sans', 'Segoe UI', sans-serif;">
+      <div style="display: flex; gap: 12px;">
+        <div style="padding: 8px 18px; border: 1px solid #2a2f3a; border-radius: 999px; font-size: 15px; font-weight: 500; color: #c6cbd4;">Op signups</div>
+        <div style="padding: 8px 18px; border: 1px solid #2a2f3a; border-radius: 999px; font-size: 15px; font-weight: 500; color: #c6cbd4;">Ratings</div>
+        <div style="padding: 8px 18px; border: 1px solid #2a2f3a; border-radius: 999px; font-size: 15px; font-weight: 500; color: #c6cbd4;">Activity</div>
+      </div>
+      <div style="font-size: 14px; color: #6b7280;">Open source &#183; Python &#183; discord.py &#183; github.com/Pilot-572/Jarcord</div>
+    </div>
+
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
