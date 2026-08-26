@@ -1,6 +1,6 @@
-﻿# Jarcord
+# Jarcord
 
-Operations management for Discord teams â€” scheduled op signups, member performance ratings, and activity tracking, all inside your server. Built for faction/milsim communities; lean by design (Discord's built-in AutoMod handles moderation, so Jarcord doesn't).
+Operations management for Discord teams — scheduled op signups, member performance ratings, and activity tracking, all inside your server. Built for faction/milsim communities; lean by design (Discord's built-in AutoMod handles moderation, so Jarcord doesn't).
 
 All informational output uses clean embeds with a consistent accent; confirmations stay short and inline.
 
@@ -16,7 +16,7 @@ All informational output uses clean embeds with a consistent accent; confirmatio
 | `!op roster <id>` | Who's signed up |
 | `!op list` | Last 10 ops with signup counts |
 
-`when` is free text, but if it matches `YYYY-MM-DD HH:MM` or `DD.MM HH:MM` (UTC), the op gets a real timestamp â€” shown in each viewer's local timezone â€” and the bot pings the roster in the op's channel 30 minutes before start.
+`when` is free text, but if it matches `YYYY-MM-DD HH:MM` or `DD.MM HH:MM` (UTC), the op gets a real timestamp — shown in each viewer's local timezone — and the bot pings the roster in the op's channel 30 minutes before start.
 
 ### Member ratings
 | Command | What it does |
@@ -27,7 +27,7 @@ All informational output uses clean embeds with a consistent accent; confirmatio
 ### Member profiles
 | Command | What it does |
 |---|---|
-| `/roblox <username>` | Link your Roblox account â€” verified against the Roblox API, then sets your server nickname to it |
+| `/roblox <username>` | Link your Roblox account — verified against the Roblox API, then sets your server nickname to it |
 | `/continent <continent>` | Set your continent; assigns the matching role (created on first use) |
 | `/profile [@member]` | Full card: Roblox link, continent, ops attended, average rating, messages, last seen |
 | `/nickname @member [nickname]` | Rename a member (needs Manage Nicknames); omit the nickname to clear it |
@@ -42,12 +42,12 @@ Every non-bot guild message bumps a per-user counter and `last_seen` timestamp (
 | `/activity @member` | Message count, ops attended, last seen |
 | `!inactive [days]` | Members inactive for N+ days (default 14, includes never-seen) |
 
-Most commands are hybrid â€” they work as both slash and prefix versions.
+Most commands are hybrid — they work as both slash and prefix versions.
 
 ## Project structure
 
 ```
-bot.py            entry point â€” loads cogs, syncs slash commands to GUILD_ID
+bot.py            entry point — loads cogs, syncs slash commands to GUILD_ID
 db.py             sqlite3 schema + shared connection (data/jarcord.db)
 ui.py             shared embed styling (accent colour)
 cogs/ops.py       op signups
@@ -90,7 +90,7 @@ systemctl start jarcord
 journalctl -u jarcord -f             # logs
 ```
 
-The systemd unit auto-restarts on failure (5s backoff). The database lives at `/opt/jarcord/data/jarcord.db` â€” back that one file up and you have everything.
+The systemd unit auto-restarts on failure (5s backoff). The database lives at `/opt/jarcord/data/jarcord.db` — back that one file up and you have everything.
 
 ## AI usage declaration
 
