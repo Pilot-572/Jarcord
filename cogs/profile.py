@@ -55,10 +55,13 @@ class Profile(commands.Cog):
             msg += " Couldn't change your nickname (server owner, or I'm missing Manage Nicknames)."
         await ctx.send(msg)
 
-    @commands.hybrid_command(name="nick", description="Set someone's nickname (needs Manage Nicknames)")
+    @commands.hybrid_command(
+        name="nickname", aliases=["nick"],
+        description="Set someone's nickname (needs Manage Nicknames)",
+    )
     @commands.has_permissions(manage_nicknames=True)
     @commands.bot_has_permissions(manage_nicknames=True)
-    async def nick(self, ctx: commands.Context, member: discord.Member, *, nickname: str = None):
+    async def nickname(self, ctx: commands.Context, member: discord.Member, *, nickname: str = None):
         try:
             await member.edit(nick=nickname)
         except discord.Forbidden:
