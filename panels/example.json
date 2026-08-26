@@ -1,0 +1,26 @@
+{
+  "_comment": "Template — copy this file, rename it, and the bot picks it up as /panel <filename>. Add \"banner\": \"https://...\" for a header image.",
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "📄  SECTION HEADER",
+      "body": "> Lines starting with '> ' render as a quote block, which is what gives\n> the sections that indented, bordered look.\n\nPlain lines outside the quote render normally. **Bold**, *italic* and `code` all work."
+    },
+    {
+      "title": "🎯  ANOTHER SECTION",
+      "body": "> Up to 9 sections per panel (Discord's limit is 10 embeds, the banner takes one).\n> Add \"thumbnail\": \"https://...\" to a section for a small image on its right."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Website",
+      "url": "https://example.com",
+      "emoji": "🌐"
+    },
+    {
+      "label": "Rules",
+      "url": "https://example.com/rules",
+      "emoji": "📜"
+    }
+  ]
+}

@@ -34,6 +34,16 @@ All informational output uses clean embeds with a consistent accent; confirmatio
 
 Needs **Manage Nicknames** and **Manage Roles**, and Jarcord's role must sit above the members and continent roles it manages.
 
+### Info panels
+Reference posts — banner image, section cards, link buttons — defined as JSON files in `panels/` and posted on demand.
+
+| Command | What it does |
+|---|---|
+| `/panel <name>` | Post the panel (needs Manage Messages) |
+| `/panel-list` | Show available panels |
+
+Copy `panels/example.json`, rename it, edit; the filename is the panel name. Ships with `jarcord` — a member-facing guide to every command.
+
 ### Activity tracking
 Every non-bot guild message bumps a per-user counter and `last_seen` timestamp (UTC).
 
@@ -54,6 +64,8 @@ cogs/ops.py       op signups
 cogs/rating.py    ratings
 cogs/activity.py  activity tracking
 cogs/profile.py   Roblox link + continent + profile card
+cogs/panels.py    info panels
+panels/*.json     panel definitions
 setup.sh          LXC provisioning script
 jarcord.service   systemd unit
 ```

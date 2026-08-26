@@ -1,0 +1,29 @@
+{
+  "colour": "94A3B8",
+  "banner": "https://raw.githubusercontent.com/Pilot-572/Jarcord/main/banner/export/jarcord-banner-wide.png",
+  "sections": [
+    {
+      "title": "📋  OP SIGNUPS",
+      "body": "> Officers post an op with `/op-create`, everyone else signs up with `/op-join <id>`.\n> \n> `/op-join <id>` — put yourself on the roster\n> `/op-leave <id>` — drop off it\n> `!op roster <id>` — see who's coming\n> `!op list` — recent ops and their IDs\n\nIf the op has a real date and time set, you'll get pinged **30 minutes before it starts**."
+    },
+    {
+      "title": "⭐  PERFORMANCE RATINGS",
+      "body": "> `/rate @member <1-5> [note]` — rate someone after an op\n> `/rating-history @member` — their average score and recent feedback\n\nRatings are how we track who's ready for more responsibility. Leave a note — a score with no reason helps nobody."
+    },
+    {
+      "title": "🪪  YOUR PROFILE",
+      "body": "> `/roblox <username>` — link your Roblox account; your nickname is set to match\n> `/continent` — pick your continent so op times can be planned around you\n> `/profile` — your full card: Roblox, continent, ops attended, rating, activity"
+    },
+    {
+      "title": "📈  ACTIVITY",
+      "body": "> `/activity @member` — messages, ops attended, last seen\n> `!inactive [days]` — who's gone quiet (default 14 days)\n\nActivity is tracked passively. No check-ins, no forms — just show up and talk."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Source code",
+      "url": "https://github.com/Pilot-572/Jarcord",
+      "emoji": "🛠️"
+    }
+  ]
+}
