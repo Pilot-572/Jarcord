@@ -59,7 +59,11 @@ Without setup Jarcord picks the first channel whose name contains `operator-id`,
 They're created with no permissions at the bottom of the list, so drag them into place.
 
 ### Command permissions
-Setup and officer commands ship with Discord `default_permissions`, so ordinary members never see them in the picker. Everything can be overridden per server in **Server Settings, Integrations, Jarcord**, including locking every command to a single person while you set things up.
+Two layers, and they work together.
+
+Discord decides who **sees** a command. Setup and officer commands ship with `default_permissions`, so ordinary members never get them in the picker, and any of it can be overridden per role or per member in **Server Settings, Integrations, Jarcord**, including locking everything to one person while you set up.
+
+Jarcord decides who may **run** it, which also covers the prefix versions Discord cannot gate. A staff command passes for admins, for anyone holding the listed permission, or for the role set with `/officer-role`. That last one is how a second in command gets a few commands without being handed Manage Server.
 
 | Command | Needs |
 |---|---|
@@ -67,6 +71,7 @@ Setup and officer commands ship with Discord `default_permissions`, so ordinary 
 | `/op-create` | Manage Events |
 | `/panel` | Manage Messages |
 | `/nickname` | Manage Nicknames |
+| `/officer-role <role>` | Manage Server. Sets the role that may run all of the above |
 
 Everything else is open to members.
 

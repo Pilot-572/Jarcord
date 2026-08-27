@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from db import conn
-from ui import embed
+from ui import embed, staff_check
 
 CONTINENTS = ("Europe", "North America", "South America", "Asia", "Africa", "Oceania")
 ROBLOX_LOOKUP = "https://users.roblox.com/v1/usernames/users"
@@ -91,7 +91,7 @@ class Profile(commands.Cog):
         description="Set someone's nickname (needs Manage Nicknames)",
     )
     @discord.app_commands.default_permissions(manage_nicknames=True)
-    @commands.has_permissions(manage_nicknames=True)
+    @staff_check(manage_nicknames=True)
     @commands.bot_has_permissions(manage_nicknames=True)
     async def nickname(self, ctx: commands.Context, member: discord.Member, *, nickname: str = None):
         try:

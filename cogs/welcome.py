@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 
 from db import get_setting, set_setting
-from ui import ACCENT, embed
+from ui import ACCENT, embed, staff_check
 
 DEFAULT_TEXT = "Good to have you, {user}. Three quick steps and you're in."
 
@@ -80,7 +80,7 @@ class Welcome(commands.Cog):
 
     @commands.hybrid_command(name="welcome-setup", description="Set the welcome channel and message")
     @discord.app_commands.default_permissions(manage_guild=True)
-    @commands.has_permissions(manage_guild=True)
+    @staff_check(manage_guild=True)
     async def welcome_setup(self, ctx: commands.Context, channel: discord.TextChannel,
                             message: str = None):
         set_setting("welcome_channel_id", str(channel.id))
@@ -93,7 +93,7 @@ class Welcome(commands.Cog):
 
     @commands.hybrid_command(name="welcome-preview", description="See the welcome card without waiting for a join")
     @discord.app_commands.default_permissions(manage_guild=True)
-    @commands.has_permissions(manage_guild=True)
+    @staff_check(manage_guild=True)
     async def welcome_preview(self, ctx: commands.Context):
         await ctx.send(embed=welcome_embed(ctx.author), ephemeral=True)
 
