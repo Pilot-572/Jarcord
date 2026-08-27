@@ -47,7 +47,7 @@ Approving verifies the Roblox account, links it to their profile, sets their nic
 Reviewing requires Manage Roles. One pending application per member.
 
 ### Verification
-New members land restricted. On join they get the **Unverified** role and a prompt in the arrival channel: set your server nickname to your exact Roblox username, then press **Confirm callsign**. That swaps **Unverified** for **Operator** and opens the server up.
+New members land restricted. On join they get the **Unverified** role and a prompt in the arrival channel. Pressing **Verify** opens a private form asking for their Roblox username and, optionally, what people should call them. The username is checked against the Roblox API and linked to their profile, their nickname is set for them, and **Unverified** is swapped for **Operator** — nothing is ever typed in chat.
 
 Roles are matched by exact name and created only if missing — existing ones are never modified. Channel visibility is yours to configure with category overwrites; Jarcord only manages the two roles, so it needs **Manage Roles** with its own role above both. Members who rejoin already holding **Operator** skip the flow. The confirm button is persistent and idempotent.
 

@@ -1,10 +1,11 @@
-# ── Jarcord — new-member verification (nickname → Operator) ──
+# ── Jarcord — new-member verification (Roblox callsign → Operator) ──
 from datetime import datetime, timezone
 
 import discord
 from discord.ext import commands
 
-from db import get_setting, set_setting
+from cogs.profile import resolve_roblox
+from db import conn, get_setting, set_setting
 from ui import ACCENT, embed
 
 UNVERIFIED = "Unverified"
@@ -12,17 +13,6 @@ OPERATOR = "Operator"
 # ponytail: channel names carry emoji and dividers ("📋｜register"), so an exact
 # match is useless — fall back to a normalized substring, in priority order.
 CHANNEL_WORDS = ("operator-id", "verify", "register")
-
-
-def looks_unset(member: discord.Member) -> bool:
-    """True if the nickname is empty or still just their Discord name."""
-    nick = (member.nick or "").strip()
-    if not nick:
-        return True
-    taken = {member.name.casefold()}
-    if member.global_name:
-        taken.add(member.global_name.casefold())
-    return nick.casefold() in taken
 
 
 async def find_role(guild: discord.Guild, name: str, create: bool = False):
@@ -58,22 +48,89 @@ def prompt_embed(guild: discord.Guild, member: discord.Member = None) -> discord
         ),
     )
     e.add_field(
-        name="1 · Set your nickname",
-        value="Right-click your name → **Edit Server Profile** → set your nickname "
-              "to your **exact Roblox username**.",
+        name="How it works",
+        value="Press **Verify** below and type your Roblox username. "
+              "Nothing goes in chat — only you see the form.",
         inline=False,
     )
     e.add_field(
-        name="2 · Confirm",
-        value="Press **Confirm callsign** below. The rest of the server opens up immediately.",
+        name="What happens next",
+        value="Your nickname is set for you and the rest of the server opens up immediately.",
         inline=False,
     )
     if member is not None:
         e.set_thumbnail(url=member.display_avatar.url)
         e.set_footer(text=f"{member} · {member.id}")
-    else:
-        e.set_thumbnail(url=guild.icon.url if guild.icon else discord.utils.MISSING)
+    elif guild.icon:
+        e.set_thumbnail(url=guild.icon.url)
     return e
+
+
+async def grant_operator(member: discord.Member) -> None:
+    """Swap Unverified for Operator. Raises discord.Forbidden if the bot can't."""
+    operator = await find_role(member.guild, OPERATOR, create=True)
+    await member.add_roles(operator, reason="verified callsign")
+    unverified = await find_role(member.guild, UNVERIFIED)
+    if unverified is not None and unverified in member.roles:
+        await member.remove_roles(unverified, reason="verified callsign")
+
+
+class CallsignModal(discord.ui.Modal, title="Operator ID"):
+    roblox = discord.ui.TextInput(
+        label="Roblox username",
+        placeholder="exactly as it appears on your profile",
+        max_length=20,
+    )
+    callsign = discord.ui.TextInput(
+        label="What should people call you?",
+        placeholder="leave blank to use your Roblox name",
+        required=False,
+        max_length=24,
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        member = interaction.user
+
+        found = await resolve_roblox(str(self.roblox))
+        if found is None:
+            await interaction.followup.send(
+                f"I couldn't find the Roblox user **{self.roblox}** — check the spelling and try again.",
+                ephemeral=True,
+            )
+            return
+        rid, name = found
+
+        conn.execute(
+            """INSERT INTO profiles (user_id, roblox_name, roblox_id) VALUES (?, ?, ?)
+               ON CONFLICT(user_id) DO UPDATE SET roblox_name = ?, roblox_id = ?""",
+            (member.id, name, rid, name, rid),
+        )
+        conn.commit()
+
+        nick = (str(self.callsign).strip() or name)[:32]
+        note = ""
+        try:
+            await member.edit(nick=nick, reason="verified callsign")
+        except discord.Forbidden:
+            note = "\nI couldn't set your nickname — set it yourself, or ask an admin."
+
+        try:
+            await grant_operator(member)
+        except discord.Forbidden:
+            print(f">> verify failed for {member.id}: missing Manage Roles or role hierarchy")
+            await interaction.followup.send(
+                f"Linked **{name}**, but I couldn't change your roles — I'm missing **Manage Roles**, "
+                f"or my role sits below **{OPERATOR}**. Ping an admin.", ephemeral=True
+            )
+            return
+
+        stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        print(f">> verified {member.id} as {nick!r} (roblox {name}/{rid}) at {stamp}")
+        await interaction.followup.send(
+            f"Verified as **{nick}** — Roblox account **{name}** linked. Welcome aboard, Operator.{note}",
+            ephemeral=True,
+        )
 
 
 class VerifyView(discord.ui.View):
@@ -82,45 +139,18 @@ class VerifyView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Confirm callsign", style=discord.ButtonStyle.success,
+    @discord.ui.button(label="Verify", style=discord.ButtonStyle.success,
                        custom_id="jarcord:verify:confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        member = interaction.user
-        # ponytail: no in-flight lock — add_roles/remove_roles are idempotent, so a
-        # double-click at worst repeats a no-op API call.
+        # ponytail: no in-flight lock — role writes are idempotent, so a double-click
+        # at worst repeats a no-op API call.
         operator = await find_role(interaction.guild, OPERATOR)
-        if operator is not None and operator in member.roles:
+        if operator is not None and operator in interaction.user.roles:
             await interaction.response.send_message(
                 "You're already verified — the rest of the server is open to you.", ephemeral=True
             )
             return
-        if looks_unset(member):
-            await interaction.response.send_message(
-                "Set your server nickname to your exact Roblox username first, then press this again.\n"
-                "Right-click your name → **Edit Server Profile** → Nickname.", ephemeral=True
-            )
-            return
-
-        await interaction.response.defer(ephemeral=True)
-        try:
-            operator = await find_role(interaction.guild, OPERATOR, create=True)
-            await member.add_roles(operator, reason="verified callsign")
-            unverified = await find_role(interaction.guild, UNVERIFIED)
-            if unverified is not None and unverified in member.roles:
-                await member.remove_roles(unverified, reason="verified callsign")
-        except discord.Forbidden:
-            print(f">> verify failed for {member.id}: missing Manage Roles or role hierarchy")
-            await interaction.followup.send(
-                f"I couldn't change your roles — I'm missing **Manage Roles**, or my role sits below "
-                f"**{OPERATOR}**. Ping an admin.", ephemeral=True
-            )
-            return
-
-        stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
-        print(f">> verified {member.id} as {member.nick!r} at {stamp}")
-        await interaction.followup.send(
-            f"Verified as **{member.nick}** — welcome aboard, Operator.", ephemeral=True
-        )
+        await interaction.response.send_modal(CallsignModal())
 
 
 class Verify(commands.Cog):
