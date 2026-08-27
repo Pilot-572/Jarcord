@@ -159,20 +159,37 @@ jarcord.service   systemd unit
 
 Slash commands sync to the guild in `GUILD_ID` on startup, so they appear instantly.
 
-## Deployment (Proxmox LXC)
+## Deployment
 
-On a fresh Debian/Ubuntu LXC:
+`setup.sh` handles both cases: run it as root and you get a system service, run it as a normal
+user (Hack Club Nest, any shared box) and you get a user service with lingering enabled. It
+takes its paths from wherever the repo actually sits, so nothing is hardcoded to `/opt`.
+
+**As root**, on a fresh Debian or Ubuntu box:
 
 ```bash
-git clone <repo-url> /opt/jarcord    # or scp the folder there
+git clone <repo-url> /opt/jarcord
 cd /opt/jarcord
 bash setup.sh
-nano .env                            # token + guild ID
+nano .env                     # token + guild ID
 systemctl start jarcord
-journalctl -u jarcord -f             # logs
+journalctl -u jarcord -f
 ```
 
-The systemd unit auto-restarts on failure (5s backoff). The database lives at `/opt/jarcord/data/jarcord.db`. Back that one file up and you have everything.
+**As a plain user**:
+
+```bash
+git clone <repo-url> ~/jarcord
+cd ~/jarcord
+bash setup.sh
+nano .env
+systemctl --user start jarcord
+journalctl --user -u jarcord -f
+```
+
+The unit auto-restarts on failure with a 5 second backoff, and runs unbuffered so the `>> `
+lines reach the journal live. The database is one file at `data/jarcord.db`; back that up and
+you have everything, including every guild setting.
 
 ## AI usage declaration
 
