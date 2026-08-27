@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 import discord
 from discord.ext import commands
 
-from cogs.profile import CONTINENTS, resolve_roblox, save_profile, set_continent
+from cogs.profile import (CONTINENTS, UNITS, resolve_roblox, save_profile,
+                          set_continent, set_unit)
 from db import conn, get_setting, set_setting
 from ui import ACCENT, embed, staff_check
 
@@ -147,7 +148,15 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
         )
 
 
-class LocationModal(discord.ui.Modal, title="Where and when you play"):
+class LocationModal(discord.ui.Modal, title="Your posting"):
+    unit = discord.ui.Label(
+        text="Which unit are you joining?",
+        description="Ground Unit or Sniper Unit. Command can move you later.",
+        component=discord.ui.Select(
+            placeholder="pick your unit",
+            options=[discord.SelectOption(label=u) for u in UNITS],
+        ),
+    )
     where = discord.ui.Label(
         text="Where are you based?",
         description="sets your continent role so ops can be timed around you",
@@ -173,9 +182,12 @@ class LocationModal(discord.ui.Modal, title="Where and when you play"):
         member = interaction.user
 
         note = ""
+        joined = self.unit.component.values
+        if joined and not await set_unit(member, joined[0]):
+            note += f"\nSaved **{joined[0]}**, but I couldn't assign the unit role."
         picked = self.where.component.values
         if picked and not await set_continent(member, picked[0]):
-            note = f"\nSaved **{picked[0]}**, but I couldn't assign the continent role."
+            note += f"\nSaved **{picked[0]}**, but I couldn't assign the continent role."
         if self.hours.component.values:
             save_profile(member.id, play_hours=", ".join(self.hours.component.values))
 
@@ -237,6 +249,7 @@ def record_embed(member: discord.Member) -> discord.Embed:
             value=f"[{p['roblox_name']}](https://www.roblox.com/users/{p['roblox_id']}/profile)",
             inline=True,
         )
+    e.add_field(name="Unit", value=(p["unit"] if p else None) or "not given", inline=True)
     e.add_field(name="Continent", value=(p["continent"] if p else None) or "not given", inline=True)
     for label, column in (("Usually online", "play_hours"), ("Age group", "age_group"),
                           ("Found us via", "heard_from"), ("Experience", "experience")):

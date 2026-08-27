@@ -9,6 +9,7 @@ from db import conn
 from ui import ago, embed, staff_check
 
 CONTINENTS = ("Europe", "North America", "South America", "Asia", "Africa", "Oceania")
+UNITS = ("Ground Unit", "Sniper Unit")
 ROBLOX_LOOKUP = "https://users.roblox.com/v1/usernames/users"
 
 
@@ -27,20 +28,32 @@ def save_profile(user_id: int, **fields) -> None:
     conn.commit()
 
 
-async def set_continent(member: discord.Member, continent: str) -> bool:
-    """Store the continent and swap the role. False if the bot can't manage roles."""
-    save_profile(member.id, continent=continent)
+async def set_exclusive_role(member: discord.Member, chosen: str, family, create: bool = True) -> bool:
+    """Give `chosen` and drop any other role from the same family. False if the bot
+    can't manage roles, or the role doesn't exist and we were told not to create it."""
     try:
-        role = discord.utils.get(member.guild.roles, name=continent)
+        role = discord.utils.get(member.guild.roles, name=chosen)
         if role is None:
-            role = await member.guild.create_role(name=continent, mentionable=True)
-        old = [r for r in member.roles if r.name in CONTINENTS and r != role]
+            if not create:
+                return False
+            role = await member.guild.create_role(name=chosen, mentionable=True)
+        old = [r for r in member.roles if r.name in family and r != role]
         if old:
             await member.remove_roles(*old)
         await member.add_roles(role)
         return True
     except discord.Forbidden:
         return False
+
+
+async def set_continent(member: discord.Member, continent: str) -> bool:
+    save_profile(member.id, continent=continent)
+    return await set_exclusive_role(member, continent, CONTINENTS)
+
+
+async def set_unit(member: discord.Member, unit: str) -> bool:
+    save_profile(member.id, unit=unit)
+    return await set_exclusive_role(member, unit, UNITS)
 
 
 async def resolve_roblox(username: str):
@@ -146,6 +159,11 @@ class Profile(commands.Cog):
             if p and p["roblox_name"] else "*Not linked. Use /roblox*"
         )
         e.add_field(name="Roblox", value=roblox, inline=True)
+        e.add_field(
+            name="Unit",
+            value=p["unit"] if p and p["unit"] else "*Not set*",
+            inline=True,
+        )
         e.add_field(
             name="Continent",
             value=p["continent"] if p and p["continent"] else "*Not set. Use /continent*",
