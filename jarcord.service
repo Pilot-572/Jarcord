@@ -1,9 +1,11 @@
 [Unit]
-Description=Jarcord — STF faction Discord bot
+Description=Jarcord: ROC faction Discord bot
 After=network-online.target
 Wants=network-online.target
 
 [Service]
+# unbuffered, otherwise the >> lines never reach journalctl
+Environment=PYTHONUNBUFFERED=1
 WorkingDirectory=/opt/jarcord
 ExecStart=/opt/jarcord/venv/bin/python bot.py
 Restart=on-failure
