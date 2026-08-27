@@ -46,6 +46,11 @@ Approving verifies the Roblox account, links it to their profile, sets their nic
 
 Reviewing requires Manage Roles. One pending application per member.
 
+### Verification
+New members land restricted. On join they get the **Unverified** role and a prompt in `#operator-id`: set your server nickname to your exact Roblox username, then press **Confirm callsign**. That swaps **Unverified** for **Operator** and opens the server up.
+
+Roles and the channel are matched by exact name and created only if missing — existing ones are never modified. Channel visibility is yours to configure with category overwrites; Jarcord only manages the two roles, so it needs **Manage Roles** with its own role above both. Members who rejoin already holding **Operator** skip the flow. The confirm button is persistent and idempotent.
+
 ### Info panels
 Reference posts — banner image, section cards, link buttons — defined as JSON files in `panels/` and posted on demand.
 
@@ -78,6 +83,7 @@ cogs/activity.py  activity tracking
 cogs/profile.py   Roblox link + continent + profile card
 cogs/panels.py    info panels
 cogs/registration.py  registration form + staff review
+cogs/verify.py    new-member nickname verification
 panels/*.json     panel definitions
 setup.sh          LXC provisioning script
 jarcord.service   systemd unit
