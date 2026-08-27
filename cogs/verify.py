@@ -13,9 +13,9 @@ OPERATOR = "Operator"
 # ponytail: channel names carry emoji and dividers ("📋｜register"), so an exact
 # match is useless. Fall back to a normalized substring, in priority order.
 CHANNEL_WORDS = ("operator-id", "verify", "register")
-# ponytail: absolute UTC blocks, not "evenings". One person's evening is another's night.
-PLAY_BLOCKS = ("00:00 to 04:00 UTC", "04:00 to 08:00 UTC", "08:00 to 12:00 UTC",
-               "12:00 to 16:00 UTC", "16:00 to 20:00 UTC", "20:00 to 00:00 UTC")
+# ponytail: fixed clock blocks, not "evenings". One person's evening is another's night.
+PLAY_BLOCKS = ("00:00 to 04:00", "04:00 to 08:00", "08:00 to 12:00",
+               "12:00 to 16:00", "16:00 to 20:00", "20:00 to 00:00")
 HEARD_FROM = ("A friend", "Roblox group", "Server listing", "Advert", "Somewhere else")
 AGE_GROUPS = ("13-15", "16-17", "18-20", "21 or older", "Rather not say")
 STEP_TIMEOUT = 600  # ponytail: ten minutes to finish. Abandon it and just press Verify again.
@@ -158,7 +158,7 @@ class LocationModal(discord.ui.Modal, title="Where and when you play"):
     )
     hours = discord.ui.Label(
         text="When are you usually online?",
-        description="in UTC, so it means the same thing to everyone. Pick up to three.",
+        description="pick up to three",
         component=discord.ui.Select(
             placeholder="optional",
             required=False,
@@ -238,7 +238,7 @@ def record_embed(member: discord.Member) -> discord.Embed:
             inline=True,
         )
     e.add_field(name="Continent", value=(p["continent"] if p else None) or "not given", inline=True)
-    for label, column in (("Online (UTC)", "play_hours"), ("Age group", "age_group"),
+    for label, column in (("Usually online", "play_hours"), ("Age group", "age_group"),
                           ("Found us via", "heard_from"), ("Experience", "experience")):
         if p and p[column]:
             e.add_field(name=label, value=p[column], inline=False)

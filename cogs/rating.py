@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 
 from db import conn
-from ui import RATING, embed
+from ui import RATING, ago, embed
 
 STARS_FULL = "★"   # ★
 STARS_EMPTY = "☆"  # ☆
@@ -65,7 +65,7 @@ class Rating(commands.Cog):
         e.set_thumbnail(url=member.display_avatar.url)
         lines = []
         for r in recent:
-            line = f"**{r['score']}/5** by <@{r['rater_id']}> · {r['rated_at']} UTC"
+            line = f"**{r['score']}/5** by <@{r['rater_id']}> · {ago(r['rated_at'])}"
             if r["note"]:
                 line += f"\n> {r['note']}"
             lines.append(line)

@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from db import conn
-from ui import ACTIVITY, embed
+from ui import ACTIVITY, ago, embed
 
 SQLITE_FMT = "%Y-%m-%d %H:%M:%S"  # matches sqlite datetime('now'), which is UTC
 
@@ -44,7 +44,7 @@ class Activity(commands.Cog):
         e.add_field(name="Ops attended", value=str(ops), inline=True)
         e.add_field(
             name="Last seen",
-            value=f"{row['last_seen']} UTC" if row else "Never",
+            value=ago(row["last_seen"]) if row else "Never",
             inline=True,
         )
         await ctx.send(embed=e)
@@ -67,7 +67,7 @@ class Activity(commands.Cog):
             ))
             return
         lines = [
-            f"<@{m.id}> · last seen {seen[m.id]} UTC" if m.id in seen
+            f"<@{m.id}> · last seen {ago(seen[m.id])}" if m.id in seen
             else f"<@{m.id}> · never seen"
             for m in stale[:30]
         ]

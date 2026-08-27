@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 
 from db import conn, get_setting
-from ui import ACCENT, embed, staff_check
+from ui import ACCENT, ago, embed, staff_check
 
 WARNED = discord.Colour(0xF59E0B)
 
@@ -37,8 +37,8 @@ def warning_embed(member: discord.Member, rows, latest=None) -> discord.Embed:
     e.set_thumbnail(url=member.display_avatar.url)
     for r in rows[-10:]:  # ponytail: last ten is plenty, the rest stay in the database
         e.add_field(
-            name=f"#{r['id']}  ·  {r['created_at']} UTC",
-            value=f"{r['reason']}\nby <@{r['officer_id']}>",
+            name=f"#{r['id']}",
+            value=f"{r['reason']}\nby <@{r['officer_id']}> {ago(r['created_at'])}",
             inline=False,
         )
     if not rows:

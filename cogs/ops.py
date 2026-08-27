@@ -367,7 +367,7 @@ class Ops(commands.Cog):
     @op.command(name="create", description="Post an op with RSVP buttons")
     @app_commands.describe(
         what="Op name",
-        when="Free text, or 'YYYY-MM-DD HH:MM' / 'DD.MM HH:MM' in UTC to enable the 30-min reminder",
+        when="Free text, or '29.08 21:00' / '2026-08-29 21:00' for a real time and a reminder",
         who="Role to ping. Defaults to whatever /op-setup configured",
         notes="Loadout, meeting point, anything else",
     )

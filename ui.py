@@ -1,4 +1,6 @@
 # ── Jarcord: shared embed styling + user-facing error text ──
+from datetime import datetime, timezone
+
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -8,6 +10,16 @@ from db import get_setting
 ACCENT = discord.Colour(0x94A3B8)    # ops / default, steel
 RATING = discord.Colour(0xE2E8F0)    # ratings, light steel
 ACTIVITY = discord.Colour(0x64748B)  # activity, dark steel
+
+
+def ago(text: str) -> str:
+    """Stored timestamps are UTC. Render them as Discord markup so every reader sees
+    their own local time instead of having to do the conversion."""
+    try:
+        dt = datetime.strptime(text, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return text
+    return f"<t:{int(dt.timestamp())}:R>"
 
 
 def embed(title: str = None, description: str = None,

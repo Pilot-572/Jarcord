@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from db import conn
-from ui import embed, staff_check
+from ui import ago, embed, staff_check
 
 CONTINENTS = ("Europe", "North America", "South America", "Asia", "Africa", "Oceania")
 ROBLOX_LOOKUP = "https://users.roblox.com/v1/usernames/users"
@@ -165,8 +165,8 @@ class Profile(commands.Cog):
             inline=True,
         )
         e.add_field(name="Messages", value=str(act["message_count"]) if act else "0", inline=True)
-        e.add_field(name="Last seen", value=f"{act['last_seen']} UTC" if act else "Never", inline=True)
-        for label, column in (("Usually plays", "play_hours"), ("Age group", "age_group"),
+        e.add_field(name="Last seen", value=ago(act["last_seen"]) if act else "Never", inline=True)
+        for label, column in (("Usually online", "play_hours"), ("Age group", "age_group"),
                               ("Found us via", "heard_from"), ("Experience", "experience")):
             if p and p[column]:
                 e.add_field(name=label, value=p[column], inline=False)
