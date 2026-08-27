@@ -48,12 +48,12 @@ def find_channel(guild: discord.Guild):
     return None
 
 
-def prompt_embed(member: discord.Member) -> discord.Embed:
+def prompt_embed(guild: discord.Guild, member: discord.Member = None) -> discord.Embed:
     e = embed(
         title="Operator ID required",
         colour=ACCENT,
         description=(
-            f"Welcome to **{member.guild.name}**.\n"
+            f"Welcome to **{guild.name}**.\n"
             "Your access is restricted until you identify yourself."
         ),
     )
@@ -68,8 +68,11 @@ def prompt_embed(member: discord.Member) -> discord.Embed:
         value="Press **Confirm callsign** below. The rest of the server opens up immediately.",
         inline=False,
     )
-    e.set_thumbnail(url=member.display_avatar.url)
-    e.set_footer(text=f"{member} · {member.id}")
+    if member is not None:
+        e.set_thumbnail(url=member.display_avatar.url)
+        e.set_footer(text=f"{member} · {member.id}")
+    else:
+        e.set_thumbnail(url=guild.icon.url if guild.icon else discord.utils.MISSING)
     return e
 
 
@@ -147,7 +150,8 @@ class Verify(commands.Cog):
             print(f">> no arrival channel found — run /verify-setup; no prompt sent for {member.id}")
             return
         try:
-            await channel.send(content=member.mention, embed=prompt_embed(member), view=VerifyView())
+            await channel.send(content=member.mention,
+                               embed=prompt_embed(member.guild, member), view=VerifyView())
         except discord.Forbidden:
             print(f">> can't post in #{channel.name} — no verification prompt sent for {member.id}")
 
@@ -161,6 +165,19 @@ class Verify(commands.Cog):
             msg += ("\n⚠️ " + f"**{OPERATOR}** sits above my role — I won't be able to "
                     "assign it. Move Jarcord higher.")
         await ctx.send(msg)
+
+    @commands.hybrid_command(name="verify-panel", description="Post a standing verification panel")
+    @commands.has_permissions(manage_guild=True)
+    async def verify_panel(self, ctx: commands.Context, channel: discord.TextChannel = None):
+        # ponytail: on_member_join only fires for new joins — this covers everyone already here.
+        target = channel or find_channel(ctx.guild) or ctx.channel
+        try:
+            await target.send(embed=prompt_embed(ctx.guild), view=VerifyView())
+        except discord.Forbidden:
+            await ctx.send(f"I can't post in {target.mention} — give me Send Messages there.")
+            return
+        if ctx.interaction:
+            await ctx.send(f"Panel posted in {target.mention}.", ephemeral=True)
 
 
 async def setup(bot: commands.Bot):

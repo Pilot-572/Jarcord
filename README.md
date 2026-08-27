@@ -54,6 +54,7 @@ Roles are matched by exact name and created only if missing — existing ones ar
 | Command | What it does |
 |---|---|
 | `/verify-setup <channel>` | Set the channel new members are greeted in (needs Manage Server) |
+| `/verify-panel [channel]` | Post a standing panel anyone can verify from — for members who joined before this existed |
 
 Without setup Jarcord picks the first channel whose name contains `operator-id`, `verify`, or `register` — emoji and dividers in the name don't matter.
 
