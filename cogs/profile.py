@@ -12,14 +12,24 @@ CONTINENTS = ("Europe", "North America", "South America", "Asia", "Africa", "Oce
 ROBLOX_LOOKUP = "https://users.roblox.com/v1/usernames/users"
 
 
-async def set_continent(member: discord.Member, continent: str) -> bool:
-    """Store the continent and swap the role. False if the bot can't manage roles."""
+def save_profile(user_id: int, **fields) -> None:
+    """Upsert whichever profile columns were passed. Column names are code literals,
+    never user input, so building the statement from them is safe."""
+    cols = ", ".join(fields)
+    marks = ", ".join("?" * len(fields))
+    sets = ", ".join(f"{c} = ?" for c in fields)
+    values = list(fields.values())
     conn.execute(
-        """INSERT INTO profiles (user_id, continent) VALUES (?, ?)
-           ON CONFLICT(user_id) DO UPDATE SET continent = ?""",
-        (member.id, continent, continent),
+        f"INSERT INTO profiles (user_id, {cols}) VALUES (?, {marks}) "
+        f"ON CONFLICT(user_id) DO UPDATE SET {sets}",
+        [user_id] + values + values,
     )
     conn.commit()
+
+
+async def set_continent(member: discord.Member, continent: str) -> bool:
+    """Store the continent and swap the role. False if the bot can't manage roles."""
+    save_profile(member.id, continent=continent)
     try:
         role = discord.utils.get(member.guild.roles, name=continent)
         if role is None:
@@ -143,6 +153,10 @@ class Profile(commands.Cog):
         )
         e.add_field(name="Messages", value=str(act["message_count"]) if act else "0", inline=True)
         e.add_field(name="Last seen", value=f"{act['last_seen']} UTC" if act else "Never", inline=True)
+        for label, column in (("Usually plays", "play_hours"), ("Age group", "age_group"),
+                              ("Found us via", "heard_from"), ("Experience", "experience")):
+            if p and p[column]:
+                e.add_field(name=label, value=p[column], inline=False)
         await ctx.send(embed=e)
 
 

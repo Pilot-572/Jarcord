@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import discord
 from discord.ext import commands
 
-from cogs.profile import CONTINENTS, resolve_roblox, set_continent
+from cogs.profile import CONTINENTS, resolve_roblox, save_profile, set_continent
 from db import conn, get_setting, set_setting
 from ui import ACCENT, embed
 
@@ -13,6 +13,9 @@ OPERATOR = "Operator"
 # ponytail: channel names carry emoji and dividers ("📋｜register"), so an exact
 # match is useless. Fall back to a normalized substring, in priority order.
 CHANNEL_WORDS = ("operator-id", "verify", "register")
+HEARD_FROM = ("A friend", "Roblox group", "Server listing", "Advert", "Somewhere else")
+AGE_GROUPS = ("13-15", "16-17", "18-20", "21 or older", "Rather not say")
+STEP_TIMEOUT = 600  # ponytail: ten minutes to finish. Abandon it and just press Verify again.
 
 
 async def find_role(guild: discord.Guild, name: str, create: bool = False):
@@ -113,14 +116,6 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
         required=False,
         max_length=24,
     )
-    where = discord.ui.Label(
-        text="Where are you based?",
-        description="sets your continent role so ops can be timed around you",
-        component=discord.ui.Select(
-            placeholder="pick your continent",
-            options=[discord.SelectOption(label=c) for c in CONTINENTS],
-        ),
-    )
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -134,43 +129,143 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
             )
             return
         rid, name = found
-
-        conn.execute(
-            """INSERT INTO profiles (user_id, roblox_name, roblox_id) VALUES (?, ?, ?)
-               ON CONFLICT(user_id) DO UPDATE SET roblox_name = ?, roblox_id = ?""",
-            (member.id, name, rid, name, rid),
-        )
-        conn.commit()
+        save_profile(member.id, roblox_name=name, roblox_id=rid)
 
         nick = (str(self.callsign).strip() or name)[:32]
         note = ""
         try:
             await member.edit(nick=nick, reason="verified callsign")
         except discord.Forbidden:
-            note = "\nI couldn't set your nickname. Set it yourself, or ask an admin."
+            note = "\nI couldn't set your nickname, so set it yourself or ask an admin."
 
-        try:
-            await grant_operator(member)
-        except discord.Forbidden:
-            print(f">> verify failed for {member.id}: missing Manage Roles or role hierarchy")
-            await interaction.followup.send(
-                f"Linked **{name}**, but I couldn't change your roles. I'm missing **Manage Roles**, "
-                f"or my role sits below **{OPERATOR}**. Ping an admin.", ephemeral=True
-            )
-            return
-
-        where = self.where.component.values
-        if where and not await set_continent(member, where[0]):
-            note += f"\nSaved **{where[0]}**, but I couldn't assign the continent role."
-
-        await clear_prompts(interaction.guild, member)
-
-        stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
-        print(f">> verified {member.id} as {nick!r} (roblox {name}/{rid}, {where}) at {stamp}")
         await interaction.followup.send(
-            f"Verified as **{nick}**. Roblox account **{name}** linked. Welcome aboard, Operator.{note}",
-            ephemeral=True,
+            f"**{name}** linked and your nickname is now **{nick}**.{note}\nOne more step.",
+            view=LocationStep(), ephemeral=True,
         )
+
+
+class LocationModal(discord.ui.Modal, title="Where and when you play"):
+    where = discord.ui.Label(
+        text="Where are you based?",
+        description="sets your continent role so ops can be timed around you",
+        component=discord.ui.Select(
+            placeholder="pick your continent",
+            options=[discord.SelectOption(label=c) for c in CONTINENTS],
+        ),
+    )
+    hours = discord.ui.TextInput(
+        label="Usual play hours (optional)",
+        placeholder="e.g. 19:00-23:00 weekdays, all day weekends",
+        required=False,
+        max_length=100,
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        member = interaction.user
+
+        note = ""
+        picked = self.where.component.values
+        if picked and not await set_continent(member, picked[0]):
+            note = f"\nSaved **{picked[0]}**, but I couldn't assign the continent role."
+        hours = str(self.hours).strip()
+        if hours:
+            save_profile(member.id, play_hours=hours)
+
+        await interaction.followup.send(
+            f"Got it.{note}\nVerify now, or answer three optional questions first.",
+            view=FinishStep(), ephemeral=True,
+        )
+
+
+class ExtrasModal(discord.ui.Modal, title="A few more questions"):
+    heard = discord.ui.Label(
+        text="How did you hear about us?",
+        component=discord.ui.Select(
+            placeholder="pick one",
+            required=False,
+            options=[discord.SelectOption(label=h) for h in HEARD_FROM],
+        ),
+    )
+    age = discord.ui.Label(
+        text="Age group",
+        component=discord.ui.Select(
+            placeholder="pick one",
+            required=False,
+            options=[discord.SelectOption(label=a) for a in AGE_GROUPS],
+        ),
+    )
+    experience = discord.ui.TextInput(
+        label="Previous experience",
+        placeholder="other factions, roles you've held, how long you've played",
+        style=discord.TextStyle.paragraph,
+        required=False,
+        max_length=300,
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        answers = {}
+        if self.heard.component.values:
+            answers["heard_from"] = self.heard.component.values[0]
+        if self.age.component.values:
+            answers["age_group"] = self.age.component.values[0]
+        if str(self.experience).strip():
+            answers["experience"] = str(self.experience).strip()
+        if answers:
+            save_profile(interaction.user.id, **answers)
+        await finish(interaction)
+
+
+async def finish(interaction: discord.Interaction) -> None:
+    """Last step of every path: grant the role, tidy up, confirm."""
+    member = interaction.user
+    row = conn.execute(
+        "SELECT roblox_name FROM profiles WHERE user_id = ?", (member.id,)
+    ).fetchone()
+    name = row["roblox_name"] if row else "your account"
+
+    try:
+        await grant_operator(member)
+    except discord.Forbidden:
+        print(f">> verify failed for {member.id}: missing Manage Roles or role hierarchy")
+        await interaction.followup.send(
+            f"Linked **{name}**, but I couldn't change your roles. I'm missing **Manage Roles**, "
+            f"or my role sits below **{OPERATOR}**. Ping an admin.", ephemeral=True
+        )
+        return
+
+    await clear_prompts(interaction.guild, member)
+    stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    print(f">> verified {member.id} as {member.display_name!r} (roblox {name}) at {stamp}")
+    await interaction.followup.send(
+        f"Verified as **{member.display_name}**. Welcome aboard, Operator.", ephemeral=True
+    )
+
+
+class LocationStep(discord.ui.View):
+    """Modals can't chain, so a button carries them from step one to step two."""
+
+    def __init__(self):
+        super().__init__(timeout=STEP_TIMEOUT)
+
+    @discord.ui.button(label="Where and when you play", style=discord.ButtonStyle.primary)
+    async def go(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(LocationModal())
+
+
+class FinishStep(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=STEP_TIMEOUT)
+
+    @discord.ui.button(label="Verify", style=discord.ButtonStyle.success)
+    async def verify(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True)
+        await finish(interaction)
+
+    @discord.ui.button(label="A few more questions", style=discord.ButtonStyle.secondary)
+    async def extras(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(ExtrasModal())
 
 
 class VerifyView(discord.ui.View):

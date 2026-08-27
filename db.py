@@ -43,7 +43,11 @@ CREATE TABLE IF NOT EXISTS profiles (
     user_id     INTEGER PRIMARY KEY,
     roblox_name TEXT,
     roblox_id   INTEGER,
-    continent   TEXT
+    continent   TEXT,
+    play_hours  TEXT,
+    heard_from  TEXT,
+    experience  TEXT,
+    age_group   TEXT
 );
 
 CREATE TABLE IF NOT EXISTS settings (
@@ -79,6 +83,10 @@ for ddl in (
     "ALTER TABLE ops ADD COLUMN when_ts INTEGER",
     "ALTER TABLE ops ADD COLUMN channel_id INTEGER",
     "ALTER TABLE ops ADD COLUMN reminded INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE profiles ADD COLUMN play_hours TEXT",
+    "ALTER TABLE profiles ADD COLUMN heard_from TEXT",
+    "ALTER TABLE profiles ADD COLUMN experience TEXT",
+    "ALTER TABLE profiles ADD COLUMN age_group TEXT",
 ):
     try:
         conn.execute(ddl)

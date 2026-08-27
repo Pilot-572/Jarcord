@@ -47,7 +47,7 @@ Approving verifies the Roblox account, links it to their profile, sets their nic
 Reviewing requires Manage Roles. One pending application per member.
 
 ### Verification
-New members land restricted. On join they get the **Unverified** role and a prompt in the arrival channel. Pressing **Verify** opens a private form asking for their Roblox username, what people call them in-game, and their continent. The username is checked against the Roblox API and linked to their profile, their nickname and continent role are set for them, and **Unverified** is swapped for **Operator**. Nothing is ever typed in chat.
+New members land restricted. On join they get the **Unverified** role and a prompt in the arrival channel. Pressing **Verify** walks them through a short private flow. Step one asks for their Roblox username, checked against the Roblox API, and what people call them in-game, which becomes their nickname. Step two is a continent dropdown and optional play hours, which assigns the continent role. Then they either finish or answer three optional questions (how they found the server, age group, previous experience). Verifying swaps **Unverified** for **Operator**. Nothing is ever typed in chat.
 
 Roles are matched by exact name and created only if missing, and existing ones are never modified. Channel visibility is yours to configure with category overwrites; Jarcord only manages the two roles, so it needs **Manage Roles** with its own role above both. Members who rejoin already holding **Operator** skip the flow. The confirm button is persistent and idempotent.
 
