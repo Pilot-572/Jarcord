@@ -177,6 +177,33 @@ def leave_op(op_id: int, user_id: int) -> str:
     return f"Removed you from **{op['title']}**."
 
 
+def edit_op(op_id: int, user_id: int, is_officer: bool, what: str = None,
+            when: str = None, notes: str = None) -> str:
+    op = get_op(op_id)
+    if op is None:
+        return f"No op with ID `{op_id}`."
+    if user_id != op["created_by"] and not is_officer:
+        return "Only the op creator (or an officer) can edit it."
+
+    changes = {}
+    if what:
+        changes["title"] = what
+    if notes is not None:
+        changes["notes"] = notes or None      # empty string clears them
+    if when:
+        changes["when_text"] = when
+        changes["when_ts"] = parse_when(when)
+        # ponytail: moving an op re-arms the reminder, otherwise a rescheduled op stays silent
+        changes["reminded"] = 0
+    if not changes:
+        return "Nothing to change. Pass at least one of what, when or notes."
+
+    sets = ", ".join(f"{c} = ?" for c in changes)   # column names are code literals
+    conn.execute(f"UPDATE ops SET {sets} WHERE id = ?", [*changes.values(), op_id])
+    conn.commit()
+    return f"Updated **{changes.get('title', op['title'])}** (ID `{op_id}`)."
+
+
 def cancel_op(op_id: int, user_id: int, is_officer: bool) -> str:
     op = get_op(op_id)
     if op is None:
@@ -339,6 +366,20 @@ class Ops(commands.Cog):
     @app_commands.describe(op_id="The op ID")
     async def op_leave(self, interaction: discord.Interaction, op_id: int):
         await interaction.response.send_message(leave_op(op_id, interaction.user.id), ephemeral=True)
+        await sync_card(self.bot, op_id)
+
+    @op.command(name="edit", description="Change an op's name, time or notes")
+    @app_commands.describe(
+        op_id="The op ID",
+        what="New name",
+        when="New time. Rescheduling re-arms the 30 minute reminder",
+        notes="New notes. Pass a single space to clear them",
+    )
+    async def op_edit(self, interaction: discord.Interaction, op_id: int, what: str = None,
+                      when: str = None, notes: str = None):
+        msg = edit_op(op_id, interaction.user.id, is_officer(interaction.user),
+                      what, when, notes.strip() if notes is not None else None)
+        await interaction.response.send_message(msg, ephemeral=True)
         await sync_card(self.bot, op_id)
 
     @op.command(name="cancel", description="Cancel an op (creator or an officer)")
