@@ -272,15 +272,16 @@ class Ops(commands.Cog):
     async def before_reminders(self):
         await self.bot.wait_until_ready()
 
-    # ── Slash commands ──
-    @app_commands.command(name="op-create", description="Post an op with RSVP buttons")
+    # ── Slash commands: everything lives under /op ──
+    op = app_commands.Group(name="op", description="Post ops and manage who's coming")
+
+    @op.command(name="create", description="Post an op with RSVP buttons")
     @app_commands.describe(
         what="Op name",
         when="Free text, or 'YYYY-MM-DD HH:MM' / 'DD.MM HH:MM' in UTC to enable the 30-min reminder",
         who="Role to ping. Defaults to whatever /op-setup configured",
         notes="Loadout, meeting point, anything else",
     )
-    @app_commands.default_permissions(manage_events=True)
     @app_staff_check(officer=True, manage_events=True)
     async def op_create(self, interaction: discord.Interaction, what: str, when: str,
                         who: discord.Role = None, notes: str = None):
@@ -328,19 +329,19 @@ class Ops(commands.Cog):
             msg += f" Every op pings **{ping_role.name}**."
         await interaction.response.send_message(msg, ephemeral=True)
 
-    @app_commands.command(name="op-join", description="Sign up for an op")
+    @op.command(name="join", description="Sign up for an op")
     @app_commands.describe(op_id="The op ID")
     async def op_join(self, interaction: discord.Interaction, op_id: int):
         await interaction.response.send_message(join_op(op_id, interaction.user.id), ephemeral=True)
         await sync_card(self.bot, op_id)
 
-    @app_commands.command(name="op-leave", description="Take yourself off an op's roster")
+    @op.command(name="leave", description="Take yourself off an op's roster")
     @app_commands.describe(op_id="The op ID")
     async def op_leave(self, interaction: discord.Interaction, op_id: int):
         await interaction.response.send_message(leave_op(op_id, interaction.user.id), ephemeral=True)
         await sync_card(self.bot, op_id)
 
-    @app_commands.command(name="op-cancel", description="Cancel an op (creator or Manage Server only)")
+    @op.command(name="cancel", description="Cancel an op (creator or an officer)")
     @app_commands.describe(op_id="The op ID")
     async def op_cancel(self, interaction: discord.Interaction, op_id: int):
         officer = is_officer(interaction.user)
@@ -349,22 +350,31 @@ class Ops(commands.Cog):
         await interaction.response.send_message(cancel_op(op_id, interaction.user.id, officer))
         await sync_card(self.bot, op_id, ref)
 
+    @op.command(name="roster", description="Who is attending an op")
+    @app_commands.describe(op_id="The op ID")
+    async def op_roster_slash(self, interaction: discord.Interaction, op_id: int):
+        await interaction.response.send_message(embed=roster_embed(op_id), ephemeral=True)
+
+    @op.command(name="list", description="The last 10 ops and their IDs")
+    async def op_list_slash(self, interaction: discord.Interaction):
+        await interaction.response.send_message(embed=list_embed(), ephemeral=True)
+
     # ── Prefix commands: !op join / leave / cancel / roster / list ──
     @commands.group(name="op", invoke_without_command=True)
-    async def op(self, ctx: commands.Context):
+    async def op_prefix(self, ctx: commands.Context):
         await ctx.send("Usage: `op join <id>` | `op leave <id>` | `op cancel <id>` | `op roster <id>` | `op list`")
 
-    @op.command(name="join")
+    @op_prefix.command(name="join")
     async def op_join_prefix(self, ctx: commands.Context, op_id: int):
         await ctx.send(join_op(op_id, ctx.author.id))
         await sync_card(self.bot, op_id)
 
-    @op.command(name="leave")
+    @op_prefix.command(name="leave")
     async def op_leave_prefix(self, ctx: commands.Context, op_id: int):
         await ctx.send(leave_op(op_id, ctx.author.id))
         await sync_card(self.bot, op_id)
 
-    @op.command(name="cancel")
+    @op_prefix.command(name="cancel")
     async def op_cancel_prefix(self, ctx: commands.Context, op_id: int):
         officer = is_officer(ctx.author)
         op = get_op(op_id)
@@ -372,11 +382,11 @@ class Ops(commands.Cog):
         await ctx.send(cancel_op(op_id, ctx.author.id, officer))
         await sync_card(self.bot, op_id, ref)
 
-    @op.command(name="roster")
+    @op_prefix.command(name="roster")
     async def op_roster(self, ctx: commands.Context, op_id: int):
         await ctx.send(embed=roster_embed(op_id))
 
-    @op.command(name="list")
+    @op_prefix.command(name="list")
     async def op_list(self, ctx: commands.Context):
         await ctx.send(embed=list_embed())
 

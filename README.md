@@ -9,13 +9,13 @@ All informational output uses clean embeds with a consistent accent; confirmatio
 ### Op signups (RSVP)
 | Command | What it does |
 |---|---|
+| `/op create <what> <when> [who] [notes]` | Post an op card with RSVP buttons |
+| `/op join <id>` or `!op join <id>` | Sign up without the buttons |
+| `/op leave <id>` or `!op leave <id>` | Drop off the roster |
+| `/op cancel <id>` or `!op cancel <id>` | Cancel an op and remove its card (creator or officer) |
+| `/op roster <id>` or `!op roster <id>` | Who's attending |
+| `/op list` or `!op list` | Last 10 ops with attendance counts |
 | `/op-setup <channel> [ping_role]` | Where ops get posted and who gets pinged (needs Manage Server) |
-| `/op-create <what> <when> [who] [notes]` | Post an op card with RSVP buttons |
-| `/op-join <id>` or `!op join <id>` | Sign up without the buttons |
-| `/op-leave <id>` or `!op leave <id>` | Drop off the roster |
-| `/op-cancel <id>` or `!op cancel <id>` | Cancel an op and remove its card (creator or Manage Server) |
-| `!op roster <id>` | Who's attending |
-| `!op list` | Last 10 ops with attendance counts |
 
 The card carries **Attending**, **Maybe** and **Can't make it**. Pressing one rewrites the card in place, so the three lists are always current, and changing your mind moves you rather than adding you twice. The buttons survive restarts.
 
@@ -69,9 +69,9 @@ Setting `/officer-role` grants that role a fixed, curated set. It is not per com
 
 | Tier | Commands | Who |
 |---|---|---|
-| Officer | `/op-create`, `/op-cancel`, `/nickname`, `/panel`, `/record`, `/verify-panel` | The officer role, plus anyone with the underlying permission |
+| Officer | `/op create`, `/op cancel`, `/nickname`, `/panel`, `/record`, `/verify-panel` | The officer role, plus anyone with the underlying permission |
 | Admin | `/op-setup`, `/verify-setup`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/officer-role`, `/dividers` | Manage Server only |
-| Member | `/profile`, `/op-join`, `/op-leave`, `/rate`, `/rating-history`, `/continent`, `/roblox`, `/activity`, `/panel-list` | Everyone |
+| Member | `/profile`, `/op join`, `/op leave`, `/op roster`, `/op list`, `/rate`, `/rating-history`, `/continent`, `/roblox`, `/activity`, `/panel-list` | Everyone |
 
 The split is running the faction versus configuring the server. An officer posts ops, renames people, files records and reposts panels. Wiring up which channel things land in stays with you.
 
