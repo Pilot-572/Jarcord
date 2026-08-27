@@ -1,11 +1,22 @@
-# ── Jarcord: server role utilities ──
+# ── Jarcord: server setup and role utilities ──
 import discord
 from discord.ext import commands
 
 from db import get_setting, set_setting
-from ui import staff_check
+from ui import ACCENT, embed, staff_check
 
 DIVIDER = "─" * 32  # ponytail: fixed width, Discord truncates the role list anyway
+
+# (label, settings key, what it points at, the command that sets it)
+SETTINGS = (
+    ("Welcome channel",      "welcome_channel_id", "channel", "/welcome-setup"),
+    ("Verification channel", "verify_channel_id",  "channel", "/verify-setup"),
+    ("Verification panel",   "verify_panel_id",    "message", "/verify-panel"),
+    ("Member records",       "records_channel_id", "channel", "/records-setup"),
+    ("Ops channel",          "op_channel_id",      "channel", "/op-setup"),
+    ("Ops ping role",        "op_ping_role_id",    "role",    "/op-setup"),
+    ("Officer role",         "officer_role_id",    "role",    "/officer-role"),
+)
 
 
 class Roles(commands.Cog):
@@ -14,6 +25,26 @@ class Roles(commands.Cog):
 
     async def cog_check(self, ctx) -> bool:
         return ctx.guild is not None
+
+    @commands.hybrid_command(name="setup", description="What Jarcord is configured for, and what it still needs")
+    @discord.app_commands.default_permissions(manage_guild=True)
+    @commands.has_permissions(manage_guild=True)
+    async def setup_status(self, ctx: commands.Context):
+        e = embed(title="Jarcord setup", colour=ACCENT)
+        ready, missing = [], []
+        for label, key, kind, how in SETTINGS:
+            value = get_setting(key)
+            if value:
+                shown = {"channel": f"<#{value}>", "role": f"<@&{value}>"}.get(kind, f"`{value}`")
+                ready.append(f"**{label}** {shown}")
+            else:
+                missing.append(f"**{label}** run `{how}`")
+        e.add_field(name=f"Configured ({len(ready)})",
+                    value="\n".join(ready) or "*nothing yet*", inline=False)
+        e.add_field(name=f"Not set ({len(missing)})",
+                    value="\n".join(missing) or "*all done*", inline=False)
+        e.set_footer(text="Anything unset means that feature stays silent")
+        await ctx.send(embed=e, ephemeral=True)
 
     @commands.hybrid_command(name="officer-role", description="Role that may run staff commands without Manage Server")
     @discord.app_commands.default_permissions(manage_guild=True)
