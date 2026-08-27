@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import discord
 from discord.ext import commands
 
-from cogs.profile import resolve_roblox
+from cogs.profile import CONTINENTS, resolve_roblox, set_continent
 from db import conn, get_setting, set_setting
 from ui import ACCENT, embed
 
@@ -113,6 +113,14 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
         required=False,
         max_length=24,
     )
+    where = discord.ui.Label(
+        text="Where are you based?",
+        description="sets your continent role so ops can be timed around you",
+        component=discord.ui.Select(
+            placeholder="pick your continent",
+            options=[discord.SelectOption(label=c) for c in CONTINENTS],
+        ),
+    )
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -151,10 +159,14 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
             )
             return
 
+        where = self.where.component.values
+        if where and not await set_continent(member, where[0]):
+            note += f"\nSaved **{where[0]}**, but I couldn't assign the continent role."
+
         await clear_prompts(interaction.guild, member)
 
         stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
-        print(f">> verified {member.id} as {nick!r} (roblox {name}/{rid}) at {stamp}")
+        print(f">> verified {member.id} as {nick!r} (roblox {name}/{rid}, {where}) at {stamp}")
         await interaction.followup.send(
             f"Verified as **{nick}**. Roblox account **{name}** linked. Welcome aboard, Operator.{note}",
             ephemeral=True,

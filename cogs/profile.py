@@ -12,6 +12,27 @@ CONTINENTS = ("Europe", "North America", "South America", "Asia", "Africa", "Oce
 ROBLOX_LOOKUP = "https://users.roblox.com/v1/usernames/users"
 
 
+async def set_continent(member: discord.Member, continent: str) -> bool:
+    """Store the continent and swap the role. False if the bot can't manage roles."""
+    conn.execute(
+        """INSERT INTO profiles (user_id, continent) VALUES (?, ?)
+           ON CONFLICT(user_id) DO UPDATE SET continent = ?""",
+        (member.id, continent, continent),
+    )
+    conn.commit()
+    try:
+        role = discord.utils.get(member.guild.roles, name=continent)
+        if role is None:
+            role = await member.guild.create_role(name=continent, mentionable=True)
+        old = [r for r in member.roles if r.name in CONTINENTS and r != role]
+        if old:
+            await member.remove_roles(*old)
+        await member.add_roles(role)
+        return True
+    except discord.Forbidden:
+        return False
+
+
 async def resolve_roblox(username: str):
     """Return (id, canonical_name) or None if the username doesn't exist."""
     async with aiohttp.ClientSession() as session:
@@ -81,22 +102,9 @@ class Profile(commands.Cog):
         ctx: commands.Context,
         continent: Literal["Europe", "North America", "South America", "Asia", "Africa", "Oceania"],
     ):
-        conn.execute(
-            """INSERT INTO profiles (user_id, continent) VALUES (?, ?)
-               ON CONFLICT(user_id) DO UPDATE SET continent = ?""",
-            (ctx.author.id, continent, continent),
-        )
-        conn.commit()
-        try:
-            role = discord.utils.get(ctx.guild.roles, name=continent)
-            if role is None:
-                role = await ctx.guild.create_role(name=continent, mentionable=True)
-            old = [r for r in ctx.author.roles if r.name in CONTINENTS and r != role]
-            if old:
-                await ctx.author.remove_roles(*old)
-            await ctx.author.add_roles(role)
+        if await set_continent(ctx.author, continent):
             await ctx.send(f"You're set to **{continent}**. Role assigned.")
-        except discord.Forbidden:
+        else:
             await ctx.send(
                 f"Saved **{continent}**, but I couldn't manage roles. Give me the Manage Roles permission."
             )
