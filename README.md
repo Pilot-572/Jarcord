@@ -57,6 +57,13 @@ Roles are matched by exact name and created only if missing — existing ones ar
 
 Without setup Jarcord picks the first channel whose name contains `operator-id`, `verify`, or `register` — emoji and dividers in the name don't matter.
 
+### Role utilities
+| Command | What it does |
+|---|---|
+| `/dividers [count]` | Create N blank divider roles (default 10, max 25) to separate groups in the role list |
+
+They're created with no permissions at the bottom of the list — drag them into place.
+
 ### Info panels
 Reference posts — banner image, section cards, link buttons — defined as JSON files in `panels/` and posted on demand.
 
@@ -90,6 +97,7 @@ cogs/profile.py   Roblox link + continent + profile card
 cogs/panels.py    info panels
 cogs/registration.py  registration form + staff review
 cogs/verify.py    new-member nickname verification
+cogs/roles.py     role-list utilities
 panels/*.json     panel definitions
 setup.sh          LXC provisioning script
 jarcord.service   systemd unit
