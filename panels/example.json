@@ -7,6 +7,14 @@
       "body": "> Lines starting with '> ' render as a quote block, which is what gives\n> the sections that indented, bordered look.\n\nPlain lines outside the quote render normally. **Bold**, *italic* and `code` all work."
     },
     {
+      "title": "📋  A SECTION OF FIELDS",
+      "body": "Use fields for list shaped content. They keep an even width instead of each item becoming its own ragged card.",
+      "fields": [
+        { "name": "First item", "value": "Field values take **bold**, `code` and links." },
+        { "name": "Second item", "value": "Add \"inline\": true to sit two or three side by side." }
+      ]
+    },
+    {
       "title": "🎯  ANOTHER SECTION",
       "body": "> Up to 9 sections per panel (Discord's limit is 10 embeds, the banner takes one).\n> Add \"thumbnail\": \"https://...\" to a section for a small image on its right."
     }

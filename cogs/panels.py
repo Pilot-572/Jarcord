@@ -33,8 +33,12 @@ def build(panel: dict) -> tuple[list[discord.Embed], discord.ui.View | None]:
     # Discord allows 10 embeds per message, and the banner eats one of them
     for section in panel.get("sections", [])[:10 - len(embeds)]:
         e = embed(title=section.get("title"), description=section.get("body"), colour=colour)
+        for f in section.get("fields", [])[:25]:
+            e.add_field(name=f["name"], value=f["value"], inline=f.get("inline", False))
         if section.get("thumbnail"):
             e.set_thumbnail(url=section["thumbnail"])
+        if section.get("image"):
+            e.set_image(url=section["image"])  # also forces the card to full width
         e.timestamp = None  # panels are reference posts, not events
         embeds.append(e)
 

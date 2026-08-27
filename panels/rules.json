@@ -3,43 +3,56 @@
   "sections": [
     {
       "title": "RAPID OPS COMPANY",
-      "body": "**Semper Primus**\n\nThis handbook covers what's expected in ROC. If something isn't in here, ask Command.\n\nROC runs on trust, not paperwork. There's no application to join and no long list of regulations to memorize. Just a few rules that keep this fair and enjoyable for everyone.\n\nYou're expected to hold up your end: respect the people you're playing with, respect the mission, and don't make Command chase you to enforce basic decency."
+      "body": "*Semper Primus*\n\nThis handbook covers what's expected in ROC. If something isn't in here, ask Command.\n\nROC runs on trust, not paperwork. There's no application to join and no long list of regulations to memorize. Just a few rules that keep this fair and enjoyable for everyone.\n\nYou're expected to hold up your end: respect the people you're playing with, respect the mission, and don't make Command chase you to enforce basic decency."
     },
     {
-      "title": "01  ·  RESPECT EVERYONE",
-      "body": "> No harassment, no personal attacks, no targeting people outside the server.\n> Banter's fine. Don't make it personal.\n\n**Warning, then removal if it continues.**"
-    },
-    {
-      "title": "02  ·  ZERO TOLERANCE ON SLURS",
-      "body": "> No exceptions for jokes, context, or bypassing filters with spaces or symbols.\n\n**Immediate removal. No warning.**"
-    },
-    {
-      "title": "03  ·  13+ ONLY",
-      "body": "> This is Discord's own rule. We enforce it too."
-    },
-    {
-      "title": "04  ·  NO MALICIOUS LINKS OR DOXXING",
-      "body": "> Sharing someone's personal info without consent, or posting harmful links.\n\n**Immediate ban. Non-negotiable.**"
-    },
-    {
-      "title": "05  ·  RESPECT THE MISSION",
-      "body": "> Don't sabotage ops, teamkill for fun, or grief teammates in-game.\n> Bad calls happen. Malicious ones get you removed."
-    },
-    {
-      "title": "06  ·  MIC ON, MIC RESPECTFUL",
-      "body": "> No music blasting, no screaming over comms, no talking over whoever's running the op.\n\n**Warning, then mute if it continues.**"
-    },
-    {
-      "title": "07 to 09  ·  KEEP IT CLEAN",
-      "body": "**Keep drama in DMs.** Beef between two people stays between two people. Don't drag it into general or into an op.\n\n**No DM advertising.** No unsolicited server ads, here or in DMs to our members.\n\n**Command has final say.** If Command or 2iC makes a call mid-op, it stands. Disagree after, in DMs, not during."
-    },
-    {
-      "title": "10  ·  NO APPLICATION, NO FREE PASS",
-      "body": "> You joined easy. That's the deal.\n> Repeated no-shows, disruption, or breaking rule 01 or 02 gets you removed."
+      "title": "THE RULES",
+      "fields": [
+        {
+          "name": "01  ·  Respect everyone",
+          "value": "No harassment, no personal attacks, no targeting people outside the server. Banter's fine. Don't make it personal.\n`Warning, then removal if it continues.`"
+        },
+        {
+          "name": "02  ·  Zero tolerance on slurs",
+          "value": "No exceptions for jokes, context, or bypassing filters with spaces or symbols.\n`Immediate removal. No warning.`"
+        },
+        {
+          "name": "03  ·  13+ only",
+          "value": "This is Discord's own rule. We enforce it too."
+        },
+        {
+          "name": "04  ·  No malicious links or doxxing",
+          "value": "Sharing someone's personal info without consent, or posting harmful links.\n`Immediate ban. Non-negotiable.`"
+        },
+        {
+          "name": "05  ·  Respect the mission",
+          "value": "Don't sabotage ops, teamkill for fun, or grief teammates in-game. Bad calls happen. Malicious ones get you removed."
+        },
+        {
+          "name": "06  ·  Mic on, mic respectful",
+          "value": "No music blasting, no screaming over comms, no talking over whoever's running the op.\n`Warning, then mute if it continues.`"
+        },
+        {
+          "name": "07  ·  Keep drama in DMs",
+          "value": "Beef between two people stays between two people. Don't drag it into general or into an op."
+        },
+        {
+          "name": "08  ·  No DM advertising",
+          "value": "No unsolicited server ads, here or in DMs to our members."
+        },
+        {
+          "name": "09  ·  Command has final say",
+          "value": "If Command or 2iC makes a call mid-op, it stands. Disagree after, in DMs, not during."
+        },
+        {
+          "name": "10  ·  No application, no free pass",
+          "value": "You joined easy. That's the deal. Repeated no-shows, disruption, or breaking rule 01 or 02 gets you removed."
+        }
+      ]
     },
     {
       "title": "ENFORCEMENT",
-      "body": "Command and 2iC handle enforcement directly, case by case. At our size there's no formal appeals board and no infraction point system.\n\nSmall stuff gets a warning first. Serious stuff doesn't.\n\nIf you think a call was wrong, bring it up in DMs, not in the moment."
+      "body": "Command and 2iC handle enforcement directly, case by case. At our size there's no formal appeals board and no infraction point system.\n\n**Small stuff gets a warning first. Serious stuff doesn't.**\n\nIf you think a call was wrong, bring it up in DMs, not in the moment."
     }
   ]
 }

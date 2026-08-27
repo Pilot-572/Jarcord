@@ -93,7 +93,7 @@ Reference posts (banner image, section cards, link buttons) defined as JSON file
 | `/panel <name>` | Post the panel (needs Manage Messages) |
 | `/panel-list` | Show available panels |
 
-Copy `panels/example.json`, rename it, edit; the filename is the panel name. Ships with `jarcord`, a member-facing guide to every command.
+A section is either a block of `body` text or a list of `fields`, which render as evenly sized rows inside one card. Use fields for anything list shaped, like rules, so you get one tidy card instead of a dozen ragged ones. Copy `panels/example.json`, rename it, edit; the filename is the panel name. Ships with `jarcord`, a member-facing guide to every command.
 
 ### Activity tracking
 Every non-bot guild message bumps a per-user counter and `last_seen` timestamp (UTC).
