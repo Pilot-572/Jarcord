@@ -65,6 +65,16 @@ Without setup Jarcord picks the first channel whose name contains `operator-id`,
 
 They're created with no permissions at the bottom of the list, so drag them into place.
 
+### Welcome
+A card in the welcome channel when someone joins: their avatar, the member number, and links to the rules and verification channels.
+
+| Command | What it does |
+|---|---|
+| `/welcome-setup <channel> [message]` | Set the channel, and optionally the greeting line (needs Manage Server) |
+| `/welcome-preview` | See the card without waiting for a join |
+
+The message accepts `{user}`, `{name}`, `{server}` and `{count}`. Nothing is posted until the channel is set.
+
 ### Info panels
 Reference posts (banner image, section cards, link buttons) defined as JSON files in `panels/` and posted on demand.
 
@@ -99,6 +109,7 @@ cogs/panels.py    info panels
 cogs/registration.py  registration form + staff review
 cogs/verify.py    new-member nickname verification
 cogs/roles.py     role-list utilities
+cogs/welcome.py   join welcome card
 panels/*.json     panel definitions
 setup.sh          LXC provisioning script
 jarcord.service   systemd unit
