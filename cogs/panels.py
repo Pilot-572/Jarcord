@@ -30,7 +30,8 @@ def build(panel: dict) -> tuple[list[discord.Embed], discord.ui.View | None]:
         head.set_image(url=panel["banner"])
         embeds.append(head)
 
-    for section in panel.get("sections", [])[:9]:  # Discord allows 10 embeds/message
+    # Discord allows 10 embeds per message, and the banner eats one of them
+    for section in panel.get("sections", [])[:10 - len(embeds)]:
         e = embed(title=section.get("title"), description=section.get("body"), colour=colour)
         if section.get("thumbnail"):
             e.set_thumbnail(url=section["thumbnail"])
