@@ -54,6 +54,7 @@ class Panels(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(name="panel", description="Post an info panel (needs Manage Messages)")
+    @discord.app_commands.default_permissions(manage_messages=True)
     @commands.has_permissions(manage_messages=True)
     async def panel(self, ctx: commands.Context, name: str):
         panel = load_panel(name)

@@ -13,6 +13,9 @@ OPERATOR = "Operator"
 # ponytail: channel names carry emoji and dividers ("📋｜register"), so an exact
 # match is useless. Fall back to a normalized substring, in priority order.
 CHANNEL_WORDS = ("operator-id", "verify", "register")
+# ponytail: absolute UTC blocks, not "evenings". One person's evening is another's night.
+PLAY_BLOCKS = ("00:00 to 04:00 UTC", "04:00 to 08:00 UTC", "08:00 to 12:00 UTC",
+               "12:00 to 16:00 UTC", "16:00 to 20:00 UTC", "20:00 to 00:00 UTC")
 HEARD_FROM = ("A friend", "Roblox group", "Server listing", "Advert", "Somewhere else")
 AGE_GROUPS = ("13-15", "16-17", "18-20", "21 or older", "Rather not say")
 STEP_TIMEOUT = 600  # ponytail: ten minutes to finish. Abandon it and just press Verify again.
@@ -153,11 +156,16 @@ class LocationModal(discord.ui.Modal, title="Where and when you play"):
             options=[discord.SelectOption(label=c) for c in CONTINENTS],
         ),
     )
-    hours = discord.ui.TextInput(
-        label="Usual play hours (optional)",
-        placeholder="e.g. 19:00-23:00 weekdays, all day weekends",
-        required=False,
-        max_length=100,
+    hours = discord.ui.Label(
+        text="When are you usually online?",
+        description="in UTC, so it means the same thing to everyone. Pick up to three.",
+        component=discord.ui.Select(
+            placeholder="optional",
+            required=False,
+            min_values=0,
+            max_values=3,
+            options=[discord.SelectOption(label=b) for b in PLAY_BLOCKS],
+        ),
     )
 
     async def on_submit(self, interaction: discord.Interaction):
@@ -168,9 +176,8 @@ class LocationModal(discord.ui.Modal, title="Where and when you play"):
         picked = self.where.component.values
         if picked and not await set_continent(member, picked[0]):
             note = f"\nSaved **{picked[0]}**, but I couldn't assign the continent role."
-        hours = str(self.hours).strip()
-        if hours:
-            save_profile(member.id, play_hours=hours)
+        if self.hours.component.values:
+            save_profile(member.id, play_hours=", ".join(self.hours.component.values))
 
         await interaction.followup.send(
             f"Got it.{note}\nVerify now, or answer three optional questions first.",
@@ -217,6 +224,45 @@ class ExtrasModal(discord.ui.Modal, title="A few more questions"):
         await finish(interaction)
 
 
+def record_embed(member: discord.Member) -> discord.Embed:
+    """Everything a member told us, on one card for the records channel."""
+    p = conn.execute("SELECT * FROM profiles WHERE user_id = ?", (member.id,)).fetchone()
+    e = embed(title=member.display_name, colour=ACCENT)
+    e.set_author(name="Member record", icon_url=member.display_avatar.url)
+    e.set_thumbnail(url=member.display_avatar.url)
+    e.add_field(name="Discord", value=f"{member.mention}\n`{member}`", inline=True)
+    if p and p["roblox_name"]:
+        e.add_field(
+            name="Roblox",
+            value=f"[{p['roblox_name']}](https://www.roblox.com/users/{p['roblox_id']}/profile)",
+            inline=True,
+        )
+    e.add_field(name="Continent", value=(p["continent"] if p else None) or "not given", inline=True)
+    for label, column in (("Online (UTC)", "play_hours"), ("Age group", "age_group"),
+                          ("Found us via", "heard_from"), ("Experience", "experience")):
+        if p and p[column]:
+            e.add_field(name=label, value=p[column], inline=False)
+    e.add_field(name="Account created", value=f"<t:{int(member.created_at.timestamp())}:R>", inline=True)
+    if member.joined_at:
+        e.add_field(name="Joined server", value=f"<t:{int(member.joined_at.timestamp())}:R>", inline=True)
+    e.set_footer(text=f"ID {member.id}")
+    return e
+
+
+async def post_record(member: discord.Member) -> None:
+    channel_id = get_setting("records_channel_id")
+    if not channel_id:
+        return  # not configured, stay quiet
+    channel = member.guild.get_channel(int(channel_id))
+    if channel is None:
+        print(f">> records channel {channel_id} is gone, run /records-setup")
+        return
+    try:
+        await channel.send(embed=record_embed(member))
+    except discord.Forbidden:
+        print(f">> can't post in #{channel.name}, no record filed for {member.id}")
+
+
 async def finish(interaction: discord.Interaction) -> None:
     """Last step of every path: grant the role, tidy up, confirm."""
     member = interaction.user
@@ -236,6 +282,7 @@ async def finish(interaction: discord.Interaction) -> None:
         return
 
     await clear_prompts(interaction.guild, member)
+    await post_record(member)
     stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
     print(f">> verified {member.id} as {member.display_name!r} (roblox {name}) at {stamp}")
     await interaction.followup.send(
@@ -329,6 +376,7 @@ class Verify(commands.Cog):
             print(f">> can't post in #{channel.name}, no verification prompt sent for {member.id}")
 
     @commands.hybrid_command(name="verify-setup", description="Set the channel new members are greeted in")
+    @discord.app_commands.default_permissions(manage_guild=True)
     @commands.has_permissions(manage_guild=True)
     async def verify_setup(self, ctx: commands.Context, channel: discord.TextChannel):
         set_setting("verify_channel_id", str(channel.id))
@@ -339,7 +387,21 @@ class Verify(commands.Cog):
                     "assign it. Move Jarcord higher.")
         await ctx.send(msg)
 
+    @commands.hybrid_command(name="records-setup", description="Set the channel member records are filed in")
+    @discord.app_commands.default_permissions(manage_guild=True)
+    @commands.has_permissions(manage_guild=True)
+    async def records_setup(self, ctx: commands.Context, channel: discord.TextChannel):
+        set_setting("records_channel_id", str(channel.id))
+        await ctx.send(f"Member records will be filed in {channel.mention}.")
+
+    @commands.hybrid_command(name="record", description="Re-file a member's record")
+    @discord.app_commands.default_permissions(manage_guild=True)
+    @commands.has_permissions(manage_guild=True)
+    async def record(self, ctx: commands.Context, member: discord.Member):
+        await ctx.send(embed=record_embed(member))
+
     @commands.hybrid_command(name="verify-panel", description="Post a standing verification panel")
+    @discord.app_commands.default_permissions(manage_guild=True)
     @commands.has_permissions(manage_guild=True)
     async def verify_panel(self, ctx: commands.Context, channel: discord.TextChannel = None):
         # ponytail: on_member_join only fires for new joins, so this covers everyone already here.

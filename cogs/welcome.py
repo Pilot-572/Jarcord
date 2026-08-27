@@ -5,7 +5,7 @@ from discord.ext import commands
 from db import get_setting, set_setting
 from ui import ACCENT, embed
 
-DEFAULT_TEXT = "Good to have you, {user}. Get yourself squared away and you're in."
+DEFAULT_TEXT = "Good to have you, {user}. Three quick steps and you're in."
 
 
 def render(text: str, member: discord.Member) -> str:
@@ -23,28 +23,38 @@ def named(guild: discord.Guild, word: str):
     return discord.utils.find(lambda c: word in c.name.casefold(), guild.text_channels)
 
 
+def ordinal(n: int) -> str:
+    # 11th, 12th, 13th are the exceptions to the 1st/2nd/3rd rule
+    suffix = "th" if 11 <= n % 100 <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
 def welcome_embed(member: discord.Member) -> discord.Embed:
+    guild = member.guild
     e = embed(
-        title=member.display_name,
+        title=f"{member.display_name} joined",
         description=render(get_setting("welcome_text") or DEFAULT_TEXT, member),
         colour=ACCENT,
     )
-    e.set_author(name=member.guild.name,
-                 icon_url=member.guild.icon.url if member.guild.icon else discord.utils.MISSING)
+    e.set_author(name=guild.name, icon_url=guild.icon.url if guild.icon else discord.utils.MISSING)
     e.set_thumbnail(url=member.display_avatar.url)
+    if guild.banner:
+        e.set_image(url=guild.banner.url)
 
     steps = []
-    rules = named(member.guild, "rules")
+    rules = named(guild, "rules")
     if rules:
-        steps.append(f"Read {rules.mention}.")
-    verify = named(member.guild, "register") or named(member.guild, "verify")
+        steps.append(f"**1.** Read {rules.mention}.")
+    verify = named(guild, "register") or named(guild, "verify")
     if verify:
-        steps.append(f"Verify in {verify.mention} to unlock the rest of the server.")
-    if steps:
-        e.add_field(name="Get started", value="\n".join(steps), inline=False)
+        steps.append(f"**{len(steps) + 1}.** Hit **Verify** in {verify.mention}. It takes about a minute.")
+    steps.append(f"**{len(steps) + 1}.** The rest of the server opens up and you're an Operator.")
+    e.add_field(name="Start here", value="\n".join(steps), inline=False)
 
-    if member.guild.member_count:
-        e.set_footer(text=f"Member #{member.guild.member_count}")
+    if guild.member_count:
+        e.add_field(name="Headcount", value=f"{ordinal(guild.member_count)} member", inline=True)
+    e.add_field(name="Account age", value=f"<t:{int(member.created_at.timestamp())}:R>", inline=True)
+    e.set_footer(text=str(member), icon_url=member.display_avatar.url)
     return e
 
 
@@ -69,6 +79,7 @@ class Welcome(commands.Cog):
             print(f">> can't post in #{channel.name}, no welcome sent for {member.id}")
 
     @commands.hybrid_command(name="welcome-setup", description="Set the welcome channel and message")
+    @discord.app_commands.default_permissions(manage_guild=True)
     @commands.has_permissions(manage_guild=True)
     async def welcome_setup(self, ctx: commands.Context, channel: discord.TextChannel,
                             message: str = None):
@@ -81,6 +92,7 @@ class Welcome(commands.Cog):
         await ctx.send(msg)
 
     @commands.hybrid_command(name="welcome-preview", description="See the welcome card without waiting for a join")
+    @discord.app_commands.default_permissions(manage_guild=True)
     @commands.has_permissions(manage_guild=True)
     async def welcome_preview(self, ctx: commands.Context):
         await ctx.send(embed=welcome_embed(ctx.author), ephemeral=True)

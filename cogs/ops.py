@@ -280,6 +280,7 @@ class Ops(commands.Cog):
         who="Role to ping. Defaults to whatever /op-setup configured",
         notes="Loadout, meeting point, anything else",
     )
+    @app_commands.default_permissions(manage_events=True)
     async def op_create(self, interaction: discord.Interaction, what: str, when: str,
                         who: discord.Role = None, notes: str = None):
         channel = interaction.channel
@@ -315,6 +316,7 @@ class Ops(commands.Cog):
 
     @app_commands.command(name="op-setup", description="Set the ops channel and the role to ping")
     @app_commands.describe(channel="Where op cards get posted", ping_role="Role pinged on every op")
+    @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.has_permissions(manage_guild=True)
     async def op_setup(self, interaction: discord.Interaction, channel: discord.TextChannel,
                        ping_role: discord.Role = None):

@@ -38,7 +38,7 @@ The card carries **Attending**, **Maybe** and **Can't make it**. Pressing one re
 Needs **Manage Nicknames** and **Manage Roles**, and Jarcord's role must sit above the members and continent roles it manages.
 
 ### Verification
-New members land restricted. On join they get the **Unverified** role and a prompt in the arrival channel. Pressing **Verify** walks them through a short private flow. Step one asks for their Roblox username, checked against the Roblox API, and what people call them in-game, which becomes their nickname. Step two is a continent dropdown and optional play hours, which assigns the continent role. Then they either finish or answer three optional questions (how they found the server, age group, previous experience). Verifying swaps **Unverified** for **Operator**. Nothing is ever typed in chat.
+New members land restricted. On join they get the **Unverified** role and a prompt in the arrival channel. Pressing **Verify** walks them through a short private flow. Step one asks for their Roblox username, checked against the Roblox API, and what people call them in-game, which becomes their nickname. Step two is a continent dropdown, which assigns the continent role, plus optional UTC time blocks for when they play. Then they either finish or answer three optional questions (how they found the server, age group, previous experience). Verifying swaps **Unverified** for **Operator**. Nothing is ever typed in chat.
 
 Roles are matched by exact name and created only if missing, and existing ones are never modified. Channel visibility is yours to configure with category overwrites; Jarcord only manages the two roles, so it needs **Manage Roles** with its own role above both. Members who rejoin already holding **Operator** skip the flow. The confirm button is persistent and idempotent.
 
@@ -46,6 +46,8 @@ Roles are matched by exact name and created only if missing, and existing ones a
 |---|---|
 | `/verify-setup <channel>` | Set the channel new members are greeted in (needs Manage Server) |
 | `/verify-panel [channel]` | Post a standing panel anyone can verify from, for members who joined before this existed |
+| `/records-setup <channel>` | File a member record card in this channel every time somebody verifies |
+| `/record <member>` | Re-file one member's record on demand |
 
 Without setup Jarcord picks the first channel whose name contains `operator-id`, `verify`, or `register`. Emoji and dividers in the name don't matter.
 
@@ -55,6 +57,18 @@ Without setup Jarcord picks the first channel whose name contains `operator-id`,
 | `/dividers [count]` | Create N blank divider roles (default 10, max 25) to separate groups in the role list |
 
 They're created with no permissions at the bottom of the list, so drag them into place.
+
+### Command permissions
+Setup and officer commands ship with Discord `default_permissions`, so ordinary members never see them in the picker. Everything can be overridden per server in **Server Settings, Integrations, Jarcord**, including locking every command to a single person while you set things up.
+
+| Command | Needs |
+|---|---|
+| `/op-setup`, `/verify-setup`, `/verify-panel`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/record`, `/dividers` | Manage Server |
+| `/op-create` | Manage Events |
+| `/panel` | Manage Messages |
+| `/nickname` | Manage Nicknames |
+
+Everything else is open to members.
 
 ### Welcome
 A card in the welcome channel when someone joins: their avatar, the member number, and links to the rules and verification channels.

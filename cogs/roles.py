@@ -13,6 +13,7 @@ class Roles(commands.Cog):
         return ctx.guild is not None
 
     @commands.hybrid_command(name="dividers", description="Create blank divider roles for the role list")
+    @discord.app_commands.default_permissions(manage_guild=True)
     @commands.has_permissions(manage_guild=True)
     @commands.bot_has_permissions(manage_roles=True)
     async def dividers(self, ctx: commands.Context, count: commands.Range[int, 1, 25] = 10):
