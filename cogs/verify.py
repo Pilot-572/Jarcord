@@ -88,6 +88,10 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
         max_length=24,
     )
 
+    def __init__(self, source: discord.Message = None):
+        super().__init__()
+        self.source = source  # the join prompt that was pressed, cleaned up once they verify
+
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         member = interaction.user
@@ -125,6 +129,14 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
             )
             return
 
+        # ponytail: the standing panel has no content, only the join prompt mentions them,
+        # so this clears their own prompt and leaves the panel alone.
+        if self.source is not None and str(member.id) in (self.source.content or ""):
+            try:
+                await self.source.delete()
+            except discord.HTTPException:
+                pass  # already gone or no access, not worth reporting
+
         stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
         print(f">> verified {member.id} as {nick!r} (roblox {name}/{rid}) at {stamp}")
         await interaction.followup.send(
@@ -150,7 +162,7 @@ class VerifyView(discord.ui.View):
                 "You're already verified. The rest of the server is open to you.", ephemeral=True
             )
             return
-        await interaction.response.send_modal(CallsignModal())
+        await interaction.response.send_modal(CallsignModal(interaction.message))
 
 
 class Verify(commands.Cog):
