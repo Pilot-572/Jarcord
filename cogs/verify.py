@@ -66,6 +66,32 @@ def prompt_embed(guild: discord.Guild, member: discord.Member = None) -> discord
     return e
 
 
+async def panel_live(channel: discord.TextChannel) -> bool:
+    """True if a standing /verify-panel post still exists in this channel."""
+    panel_id = get_setting("verify_panel_id")
+    if not panel_id:
+        return False
+    try:
+        await channel.fetch_message(int(panel_id))
+        return True
+    except discord.HTTPException:
+        return False  # deleted, or posted somewhere else
+
+
+async def clear_prompts(guild: discord.Guild, member: discord.Member) -> None:
+    """Delete the bot's join prompts that ping this member. The standing panel has no
+    content, so it never matches and survives."""
+    channel = find_channel(guild)
+    if channel is None:
+        return
+    try:
+        async for msg in channel.history(limit=50):
+            if msg.author == guild.me and str(member.id) in msg.content:
+                await msg.delete()
+    except discord.HTTPException:
+        pass  # no history access, not worth failing the verification over
+
+
 async def grant_operator(member: discord.Member) -> None:
     """Swap Unverified for Operator. Raises discord.Forbidden if the bot can't."""
     operator = await find_role(member.guild, OPERATOR, create=True)
@@ -87,10 +113,6 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
         required=False,
         max_length=24,
     )
-
-    def __init__(self, source: discord.Message = None):
-        super().__init__()
-        self.source = source  # the join prompt that was pressed, cleaned up once they verify
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -129,13 +151,7 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
             )
             return
 
-        # ponytail: the standing panel has no content, only the join prompt mentions them,
-        # so this clears their own prompt and leaves the panel alone.
-        if self.source is not None and str(member.id) in (self.source.content or ""):
-            try:
-                await self.source.delete()
-            except discord.HTTPException:
-                pass  # already gone or no access, not worth reporting
+        await clear_prompts(interaction.guild, member)
 
         stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
         print(f">> verified {member.id} as {nick!r} (roblox {name}/{rid}) at {stamp}")
@@ -162,7 +178,7 @@ class VerifyView(discord.ui.View):
                 "You're already verified. The rest of the server is open to you.", ephemeral=True
             )
             return
-        await interaction.response.send_modal(CallsignModal(interaction.message))
+        await interaction.response.send_modal(CallsignModal())
 
 
 class Verify(commands.Cog):
@@ -192,8 +208,16 @@ class Verify(commands.Cog):
             print(f">> no arrival channel found, run /verify-setup; no prompt sent for {member.id}")
             return
         try:
-            await channel.send(content=member.mention,
-                               embed=prompt_embed(member.guild, member), view=VerifyView())
+            if await panel_live(channel):
+                # ponytail: the panel is already sitting there, so just point at it
+                # instead of posting a second copy of the same card.
+                await channel.send(
+                    f"{member.mention} welcome to **{member.guild.name}**. "
+                    "Press **Verify** on the panel above to unlock the server."
+                )
+            else:
+                await channel.send(content=member.mention,
+                                   embed=prompt_embed(member.guild, member), view=VerifyView())
         except discord.Forbidden:
             print(f">> can't post in #{channel.name}, no verification prompt sent for {member.id}")
 
@@ -214,10 +238,11 @@ class Verify(commands.Cog):
         # ponytail: on_member_join only fires for new joins, so this covers everyone already here.
         target = channel or find_channel(ctx.guild) or ctx.channel
         try:
-            await target.send(embed=prompt_embed(ctx.guild), view=VerifyView())
+            msg = await target.send(embed=prompt_embed(ctx.guild), view=VerifyView())
         except discord.Forbidden:
             await ctx.send(f"I can't post in {target.mention}. Give me Send Messages there.")
             return
+        set_setting("verify_panel_id", str(msg.id))
         if ctx.interaction:
             await ctx.send(f"Panel posted in {target.mention}.", ephemeral=True)
 
