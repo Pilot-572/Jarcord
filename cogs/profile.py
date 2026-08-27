@@ -91,7 +91,7 @@ class Profile(commands.Cog):
         description="Set someone's nickname (needs Manage Nicknames)",
     )
     @discord.app_commands.default_permissions(manage_nicknames=True)
-    @staff_check(manage_nicknames=True)
+    @staff_check(officer=True, manage_nicknames=True)
     @commands.bot_has_permissions(manage_nicknames=True)
     async def nickname(self, ctx: commands.Context, member: discord.Member, *, nickname: str = None):
         try:

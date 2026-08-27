@@ -65,15 +65,15 @@ Discord decides who **sees** a command. Setup and officer commands ship with `de
 
 Jarcord decides who may **run** it, which also covers the prefix versions Discord cannot gate. A staff command passes for admins, for anyone holding the listed permission, or for the role set with `/officer-role`. That last one is how a second in command gets a few commands without being handed Manage Server.
 
-| Command | Needs |
-|---|---|
-| `/op-setup`, `/verify-setup`, `/verify-panel`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/record`, `/dividers` | Manage Server |
-| `/op-create` | Manage Events |
-| `/panel` | Manage Messages |
-| `/nickname` | Manage Nicknames |
-| `/officer-role <role>` | Manage Server. Sets the role that may run all of the above |
+Setting `/officer-role` grants that role a fixed, curated set. It is not per command, and it is deliberately not everything.
 
-Everything else is open to members.
+| Tier | Commands | Who |
+|---|---|---|
+| Officer | `/op-create`, `/op-cancel`, `/nickname`, `/panel`, `/record`, `/verify-panel` | The officer role, plus anyone with the underlying permission |
+| Admin | `/op-setup`, `/verify-setup`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/officer-role`, `/dividers` | Manage Server only |
+| Member | `/profile`, `/op-join`, `/op-leave`, `/rate`, `/rating-history`, `/continent`, `/roblox`, `/activity`, `/panel-list` | Everyone |
+
+The split is running the faction versus configuring the server. An officer posts ops, renames people, files records and reposts panels. Wiring up which channel things land in stays with you.
 
 ### Welcome
 A card in the welcome channel when someone joins: their avatar, the member number, and links to the rules and verification channels.

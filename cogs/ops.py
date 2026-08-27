@@ -7,7 +7,7 @@ from discord import app_commands
 from discord.ext import commands, tasks
 
 from db import conn, get_setting, set_setting
-from ui import ACCENT, embed
+from ui import ACCENT, app_staff_check, embed, is_officer
 
 REMIND_BEFORE = 30 * 60  # ponytail: fixed 30-min reminder; make it per-op if anyone asks
 WHEN_FORMATS = ("%Y-%m-%d %H:%M", "%d.%m.%Y %H:%M", "%d.%m %H:%M")
@@ -281,6 +281,7 @@ class Ops(commands.Cog):
         notes="Loadout, meeting point, anything else",
     )
     @app_commands.default_permissions(manage_events=True)
+    @app_staff_check(officer=True, manage_events=True)
     async def op_create(self, interaction: discord.Interaction, what: str, when: str,
                         who: discord.Role = None, notes: str = None):
         channel = interaction.channel
@@ -342,7 +343,7 @@ class Ops(commands.Cog):
     @app_commands.command(name="op-cancel", description="Cancel an op (creator or Manage Server only)")
     @app_commands.describe(op_id="The op ID")
     async def op_cancel(self, interaction: discord.Interaction, op_id: int):
-        officer = interaction.user.guild_permissions.manage_guild
+        officer = is_officer(interaction.user)
         op = get_op(op_id)
         ref = (op["channel_id"], op["message_id"]) if op else None
         await interaction.response.send_message(cancel_op(op_id, interaction.user.id, officer))
@@ -365,7 +366,7 @@ class Ops(commands.Cog):
 
     @op.command(name="cancel")
     async def op_cancel_prefix(self, ctx: commands.Context, op_id: int):
-        officer = ctx.author.guild_permissions.manage_guild
+        officer = is_officer(ctx.author)
         op = get_op(op_id)
         ref = (op["channel_id"], op["message_id"]) if op else None
         await ctx.send(cancel_op(op_id, ctx.author.id, officer))

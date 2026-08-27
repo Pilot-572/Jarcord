@@ -18,20 +18,44 @@ def embed(title: str = None, description: str = None,
     )
 
 
-def staff_check(**perms):
-    """Passes for admins, for anyone holding the named Discord permissions, or for the
-    role set with /officer-role. Lets a 2iC run a command without Manage Server."""
+def _allowed(member, perms, officer: bool) -> bool:
+    """Admins always pass. So does anyone holding the named Discord permissions. The role
+    set with /officer-role passes only on commands marked officer=True."""
+    mine = member.guild_permissions
+    if mine.administrator or (perms and all(getattr(mine, p, False) for p in perms)):
+        return True
+    if officer:
+        role_id = get_setting("officer_role_id")
+        if role_id and any(r.id == int(role_id) for r in member.roles):
+            return True
+    return False
+
+
+def is_officer(member) -> bool:
+    """Manage Server, or the configured officer role. For runtime branching, not gating."""
+    return _allowed(member, {"manage_guild": True}, officer=True)
+
+
+def staff_check(*, officer: bool = False, **perms):
+    """Gate for prefix and hybrid commands."""
     async def predicate(ctx) -> bool:
         if ctx.guild is None:
             raise commands.NoPrivateMessage()
-        mine = ctx.author.guild_permissions
-        if mine.administrator or all(getattr(mine, p, False) for p in perms):
-            return True
-        role_id = get_setting("officer_role_id")
-        if role_id and any(r.id == int(role_id) for r in ctx.author.roles):
+        if _allowed(ctx.author, perms, officer):
             return True
         raise commands.MissingPermissions(list(perms))
     return commands.check(predicate)
+
+
+def app_staff_check(*, officer: bool = False, **perms):
+    """Same gate for slash-only commands."""
+    async def predicate(interaction: discord.Interaction) -> bool:
+        if interaction.guild is None:
+            raise app_commands.NoPrivateMessage()
+        if _allowed(interaction.user, perms, officer):
+            return True
+        raise app_commands.MissingPermissions(list(perms))
+    return app_commands.check(predicate)
 
 
 def check_message(error) -> str | None:

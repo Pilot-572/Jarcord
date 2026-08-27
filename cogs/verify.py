@@ -396,13 +396,13 @@ class Verify(commands.Cog):
 
     @commands.hybrid_command(name="record", description="Re-file a member's record")
     @discord.app_commands.default_permissions(manage_guild=True)
-    @staff_check(manage_guild=True)
+    @staff_check(officer=True, manage_guild=True)
     async def record(self, ctx: commands.Context, member: discord.Member):
         await ctx.send(embed=record_embed(member))
 
     @commands.hybrid_command(name="verify-panel", description="Post a standing verification panel")
     @discord.app_commands.default_permissions(manage_guild=True)
-    @staff_check(manage_guild=True)
+    @staff_check(officer=True, manage_guild=True)
     async def verify_panel(self, ctx: commands.Context, channel: discord.TextChannel = None):
         # ponytail: on_member_join only fires for new joins, so this covers everyone already here.
         target = channel or find_channel(ctx.guild) or ctx.channel
