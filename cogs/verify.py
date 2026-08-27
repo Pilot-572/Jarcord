@@ -242,6 +242,11 @@ def record_embed(member: discord.Member) -> discord.Embed:
                           ("Found us via", "heard_from"), ("Experience", "experience")):
         if p and p[column]:
             e.add_field(name=label, value=p[column], inline=False)
+    warned = conn.execute(
+        "SELECT COUNT(*) AS n FROM warnings WHERE user_id = ?", (member.id,)
+    ).fetchone()["n"]
+    if warned:
+        e.add_field(name="Warnings", value=str(warned), inline=True)
     e.add_field(name="Account created", value=f"<t:{int(member.created_at.timestamp())}:R>", inline=True)
     if member.joined_at:
         e.add_field(name="Joined server", value=f"<t:{int(member.joined_at.timestamp())}:R>", inline=True)

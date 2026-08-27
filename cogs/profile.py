@@ -127,8 +127,13 @@ class Profile(commands.Cog):
         act = conn.execute(
             "SELECT message_count, last_seen FROM activity WHERE user_id = ?", (member.id,)
         ).fetchone()
-        n_ops = conn.execute(
-            "SELECT COUNT(*) AS n FROM signups WHERE user_id = ?", (member.id,)
+        turnout = conn.execute(
+            """SELECT COUNT(*) AS signed, SUM(attended = 1) AS came, SUM(attended = 0) AS missed
+               FROM signups WHERE user_id = ?""",
+            (member.id,),
+        ).fetchone()
+        n_warnings = conn.execute(
+            "SELECT COUNT(*) AS n FROM warnings WHERE user_id = ?", (member.id,)
         ).fetchone()["n"]
         rating = conn.execute(
             "SELECT AVG(score) AS avg, COUNT(*) AS n FROM ratings WHERE user_id = ?", (member.id,)
@@ -146,7 +151,14 @@ class Profile(commands.Cog):
             value=p["continent"] if p and p["continent"] else "*Not set. Use /continent*",
             inline=True,
         )
-        e.add_field(name="Ops attended", value=str(n_ops), inline=True)
+        came, missed = turnout["came"] or 0, turnout["missed"] or 0
+        e.add_field(
+            name="Ops",
+            value=(f"{turnout['signed']} signed up\n{came} attended, {missed} no-showed"
+                   if turnout["signed"] else "none yet"),
+            inline=True,
+        )
+        e.add_field(name="Warnings", value=str(n_warnings) if n_warnings else "none", inline=True)
         e.add_field(
             name="Rating",
             value=f"{rating['avg']:.2f}/5 ({rating['n']})" if rating["n"] else "n/a",

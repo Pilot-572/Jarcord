@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS ops (
     channel_id INTEGER,           -- where the op was posted (reminder target)
     message_id INTEGER,           -- the posted card, edited as people RSVP
     notes      TEXT,
+    closed     INTEGER NOT NULL DEFAULT 0,
     reminded   INTEGER NOT NULL DEFAULT 0
 );
 
@@ -24,6 +25,7 @@ CREATE TABLE IF NOT EXISTS signups (
     user_id   INTEGER NOT NULL,
     signed_at TEXT NOT NULL DEFAULT (datetime('now')),
     status    TEXT NOT NULL DEFAULT 'in',   -- in | maybe | out
+    attended  INTEGER,                       -- NULL until the op is closed, then 1 or 0
     PRIMARY KEY (op_id, user_id)
 );
 
@@ -51,6 +53,14 @@ CREATE TABLE IF NOT EXISTS profiles (
     heard_from  TEXT,
     experience  TEXT,
     age_group   TEXT
+);
+
+CREATE TABLE IF NOT EXISTS warnings (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL,
+    officer_id INTEGER NOT NULL,
+    reason     TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS settings (
@@ -93,6 +103,8 @@ for ddl in (
     "ALTER TABLE ops ADD COLUMN message_id INTEGER",
     "ALTER TABLE ops ADD COLUMN notes TEXT",
     "ALTER TABLE signups ADD COLUMN status TEXT NOT NULL DEFAULT 'in'",
+    "ALTER TABLE signups ADD COLUMN attended INTEGER",
+    "ALTER TABLE ops ADD COLUMN closed INTEGER NOT NULL DEFAULT 0",
 ):
     try:
         conn.execute(ddl)

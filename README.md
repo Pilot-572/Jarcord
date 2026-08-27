@@ -13,10 +13,13 @@ All informational output uses clean embeds with a consistent accent; confirmatio
 | `/op join <id>` or `!op join <id>` | Sign up without the buttons |
 | `/op leave <id>` or `!op leave <id>` | Drop off the roster |
 | `/op edit <id> [what] [when] [notes]` | Change an op. Rescheduling re-arms the reminder (creator or officer) |
+| `/op close <id>` | Record who actually turned up, then close the op |
 | `/op cancel <id>` or `!op cancel <id>` | Cancel an op and remove its card (creator or officer) |
 | `/op roster <id>` or `!op roster <id>` | Who's attending |
 | `/op list` or `!op list` | Last 10 ops with attendance counts |
 | `/op-setup <channel> [ping_role]` | Where ops get posted and who gets pinged (needs Manage Server) |
+
+Closing an op is how attendance gets recorded. Pick everyone who turned up from a member picker; anyone who said they were coming and isn't picked is logged as a no-show, and anyone who walked in without replying still counts as attending. A closed card shows the turnout and loses its buttons. `/profile` then reports signed up, attended and no-showed instead of a signup count that means nothing.
 
 The card carries **Attending**, **Maybe** and **Can't make it**. Pressing one rewrites the card in place, so the three lists are always current, and changing your mind moves you rather than adding you twice. The buttons survive restarts.
 
@@ -70,7 +73,7 @@ Setting `/officer-role` grants that role a fixed, curated set. It is not per com
 
 | Tier | Commands | Who |
 |---|---|---|
-| Officer | `/op create`, `/op edit`, `/op cancel`, `/nickname`, `/panel`, `/record`, `/verify-panel` | The officer role, plus anyone with the underlying permission |
+| Officer | `/op create`, `/op edit`, `/op cancel`, `/op close`, `/warn`, `/warns`, `/unwarn`, `/nickname`, `/panel`, `/record`, `/verify-panel` | The officer role, plus anyone with the underlying permission |
 | Admin | `/op-setup`, `/verify-setup`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/officer-role`, `/dividers` | Manage Server only |
 | Member | `/profile`, `/op join`, `/op leave`, `/op roster`, `/op list`, `/rate`, `/rating-history`, `/continent`, `/roblox`, `/activity`, `/panel-list` | Everyone |
 
@@ -85,6 +88,17 @@ A card in the welcome channel when someone joins: their avatar, the member numbe
 | `/welcome-preview` | See the card without waiting for a join |
 
 The message accepts `{user}`, `{name}`, `{server}` and `{count}`. Nothing is posted until the channel is set.
+
+### Warnings
+Your enforcement rules say warning, then removal. This is the record that makes "repeated" mean something.
+
+| Command | What it does |
+|---|---|
+| `/warn @member <reason>` | Log a warning, DM the member, file a card in the records channel |
+| `/warns @member` | Their full history, last ten shown |
+| `/unwarn <id>` | Delete one by its number |
+
+The count shows on `/profile` and on their member record. Needs Moderate Members or the officer role.
 
 ### Info panels
 Reference posts (banner image, section cards, link buttons) defined as JSON files in `panels/` and posted on demand.
@@ -120,6 +134,7 @@ cogs/panels.py    info panels
 cogs/verify.py    new-member nickname verification
 cogs/roles.py     role-list utilities
 cogs/welcome.py   join welcome card
+cogs/warnings.py  warning log
 panels/*.json     panel definitions
 setup.sh          LXC provisioning script
 jarcord.service   systemd unit

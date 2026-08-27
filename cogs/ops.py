@@ -94,11 +94,36 @@ def create_embed(op_id: int, author: discord.Member = None) -> discord.Embed:
             value="\n".join(f"<@{u}>" for u in ids) if ids else "*nobody yet*",
             inline=True,
         )
-    if op["when_ts"]:
+    if op["closed"]:
+        came = conn.execute(
+            "SELECT COUNT(*) AS n FROM signups WHERE op_id = ? AND attended = 1", (op_id,)
+        ).fetchone()["n"]
+        missed = conn.execute(
+            "SELECT COUNT(*) AS n FROM signups WHERE op_id = ? AND attended = 0", (op_id,)
+        ).fetchone()["n"]
+        e.add_field(name="Turned out", value=f"{came} attended, {missed} no-showed", inline=False)
+        e.set_footer(text=f"Op ID {op_id} · closed")
+    elif op["when_ts"]:
         e.set_footer(text=f"Op ID {op_id} · attending get pinged 30 min before start")
     else:
         e.set_footer(text=f"Op ID {op_id}")
     return e
+
+
+class CloseView(discord.ui.View):
+    """Ephemeral, one use. Pick who actually turned up, everyone else on the list missed it."""
+
+    def __init__(self, bot, op_id: int):
+        super().__init__(timeout=300)
+        self.bot, self.op_id = bot, op_id
+
+    @discord.ui.select(cls=discord.ui.UserSelect, min_values=0, max_values=25,
+                       placeholder="who actually turned up")
+    async def picked(self, interaction: discord.Interaction, select: discord.ui.UserSelect):
+        msg = close_op(self.op_id, interaction.user.id, is_officer(interaction.user),
+                       [u.id for u in select.values])
+        await interaction.response.edit_message(content=msg, view=None)
+        await sync_card(self.bot, self.op_id)
 
 
 class OpView(discord.ui.View):
@@ -148,7 +173,8 @@ async def sync_card(bot, op_id: int, ref: tuple = None) -> None:
         if op is None:
             await msg.delete()
         else:
-            await msg.edit(embed=create_embed(op_id))
+            await msg.edit(embed=create_embed(op_id),
+                           view=None if op["closed"] else OpView())
     except discord.HTTPException:
         pass  # card deleted by hand, nothing to keep in sync
 
@@ -202,6 +228,42 @@ def edit_op(op_id: int, user_id: int, is_officer: bool, what: str = None,
     conn.execute(f"UPDATE ops SET {sets} WHERE id = ?", [*changes.values(), op_id])
     conn.commit()
     return f"Updated **{changes.get('title', op['title'])}** (ID `{op_id}`)."
+
+
+def close_op(op_id: int, user_id: int, is_officer: bool, attended_ids) -> str:
+    """Record who actually turned up. Anyone who said they were coming and isn't in the
+    list is a no-show. Anyone in the list who never replied still counts as attending."""
+    op = get_op(op_id)
+    if op is None:
+        return f"No op with ID `{op_id}`."
+    if user_id != op["created_by"] and not is_officer:
+        return "Only the op creator (or an officer) can close it."
+    if op["closed"]:
+        return f"**{op['title']}** is already closed."
+
+    conn.execute("UPDATE signups SET attended = 0 WHERE op_id = ? AND status = 'in'", (op_id,))
+    for uid in attended_ids:
+        conn.execute(
+            """INSERT INTO signups (op_id, user_id, status, attended) VALUES (?, ?, 'in', 1)
+               ON CONFLICT(op_id, user_id) DO UPDATE SET status = 'in', attended = 1""",
+            (op_id, uid),
+        )
+    conn.execute("UPDATE ops SET closed = 1 WHERE id = ?", (op_id,))
+    conn.commit()
+    missed = conn.execute(
+        "SELECT COUNT(*) AS n FROM signups WHERE op_id = ? AND attended = 0", (op_id,)
+    ).fetchone()["n"]
+    return f"Closed **{op['title']}**. {len(set(attended_ids))} attended, {missed} no-showed."
+
+
+def attendance(user_id: int) -> tuple[int, int]:
+    """(ops attended, ops missed after saying they were coming)."""
+    row = conn.execute(
+        """SELECT SUM(attended = 1) AS came, SUM(attended = 0) AS missed
+           FROM signups WHERE user_id = ?""",
+        (user_id,),
+    ).fetchone()
+    return (row["came"] or 0, row["missed"] or 0)
 
 
 def cancel_op(op_id: int, user_id: int, is_officer: bool) -> str:
@@ -381,6 +443,19 @@ class Ops(commands.Cog):
                       what, when, notes.strip() if notes is not None else None)
         await interaction.response.send_message(msg, ephemeral=True)
         await sync_card(self.bot, op_id)
+
+    @op.command(name="close", description="Record who turned up and close the op")
+    @app_commands.describe(op_id="The op ID")
+    async def op_close(self, interaction: discord.Interaction, op_id: int):
+        op = get_op(op_id)
+        if op is None:
+            await interaction.response.send_message(f"No op with ID `{op_id}`.", ephemeral=True)
+            return
+        await interaction.response.send_message(
+            f"**{op['title']}**: pick everyone who actually turned up. "
+            "Anyone who said they were coming and isn't picked counts as a no-show.",
+            view=CloseView(self.bot, op_id), ephemeral=True,
+        )
 
     @op.command(name="cancel", description="Cancel an op (creator or an officer)")
     @app_commands.describe(op_id="The op ID")
