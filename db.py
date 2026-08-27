@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS ops (
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     when_ts    INTEGER,           -- unix ts (UTC) when parseable, else NULL
     channel_id INTEGER,           -- where the op was posted (reminder target)
+    message_id INTEGER,           -- the posted card, edited as people RSVP
+    notes      TEXT,
     reminded   INTEGER NOT NULL DEFAULT 0
 );
 
@@ -21,6 +23,7 @@ CREATE TABLE IF NOT EXISTS signups (
     op_id     INTEGER NOT NULL REFERENCES ops(id),
     user_id   INTEGER NOT NULL,
     signed_at TEXT NOT NULL DEFAULT (datetime('now')),
+    status    TEXT NOT NULL DEFAULT 'in',   -- in | maybe | out
     PRIMARY KEY (op_id, user_id)
 );
 
@@ -87,6 +90,9 @@ for ddl in (
     "ALTER TABLE profiles ADD COLUMN heard_from TEXT",
     "ALTER TABLE profiles ADD COLUMN experience TEXT",
     "ALTER TABLE profiles ADD COLUMN age_group TEXT",
+    "ALTER TABLE ops ADD COLUMN message_id INTEGER",
+    "ALTER TABLE ops ADD COLUMN notes TEXT",
+    "ALTER TABLE signups ADD COLUMN status TEXT NOT NULL DEFAULT 'in'",
 ):
     try:
         conn.execute(ddl)

@@ -9,12 +9,15 @@ All informational output uses clean embeds with a consistent accent; confirmatio
 ### Op signups (RSVP)
 | Command | What it does |
 |---|---|
-| `/op-create <title> <when>` | Post an op, returns its ID |
-| `/op-join <id>` or `!op join <id>` | Sign up |
+| `/op-setup <channel> [ping_role]` | Where ops get posted and who gets pinged (needs Manage Server) |
+| `/op-create <what> <when> [who] [notes]` | Post an op card with RSVP buttons |
+| `/op-join <id>` or `!op join <id>` | Sign up without the buttons |
 | `/op-leave <id>` or `!op leave <id>` | Drop off the roster |
-| `/op-cancel <id>` or `!op cancel <id>` | Cancel an op (creator or Manage Server) |
-| `!op roster <id>` | Who's signed up |
-| `!op list` | Last 10 ops with signup counts |
+| `/op-cancel <id>` or `!op cancel <id>` | Cancel an op and remove its card (creator or Manage Server) |
+| `!op roster <id>` | Who's attending |
+| `!op list` | Last 10 ops with attendance counts |
+
+The card carries **Attending**, **Maybe** and **Can't make it**. Pressing one rewrites the card in place, so the three lists are always current, and changing your mind moves you rather than adding you twice. The buttons survive restarts.
 
 `when` is free text, but if it matches `YYYY-MM-DD HH:MM` or `DD.MM HH:MM` (UTC), the op gets a real timestamp, shown in each viewer's local timezone, and the bot pings the roster in the op's channel 30 minutes before start.
 
@@ -33,18 +36,6 @@ All informational output uses clean embeds with a consistent accent; confirmatio
 | `/nickname @member [nickname]` | Rename a member (needs Manage Nicknames); omit the nickname to clear it |
 
 Needs **Manage Nicknames** and **Manage Roles**, and Jarcord's role must sit above the members and continent roles it manages.
-
-### Registration
-A real application form instead of a copy-paste template: `/register` opens a modal (Roblox username, age group, pronouns, time zone, availability). The submission posts to a staff channel as a card with **Approve** / **Deny** buttons.
-
-Approving verifies the Roblox account, links it to their profile, sets their nickname, assigns the member role, and DMs them. Denying just marks the card. Review buttons survive bot restarts.
-
-| Command | What it does |
-|---|---|
-| `/register` | Open the registration form |
-| `/register-setup <channel> [role]` | Set the review channel and the role approved members get (needs Manage Server) |
-
-Reviewing requires Manage Roles. One pending application per member.
 
 ### Verification
 New members land restricted. On join they get the **Unverified** role and a prompt in the arrival channel. Pressing **Verify** walks them through a short private flow. Step one asks for their Roblox username, checked against the Roblox API, and what people call them in-game, which becomes their nickname. Step two is a continent dropdown and optional play hours, which assigns the continent role. Then they either finish or answer three optional questions (how they found the server, age group, previous experience). Verifying swaps **Unverified** for **Operator**. Nothing is ever typed in chat.
@@ -106,7 +97,6 @@ cogs/rating.py    ratings
 cogs/activity.py  activity tracking
 cogs/profile.py   Roblox link + continent + profile card
 cogs/panels.py    info panels
-cogs/registration.py  registration form + staff review
 cogs/verify.py    new-member nickname verification
 cogs/roles.py     role-list utilities
 cogs/welcome.py   join welcome card

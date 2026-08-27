@@ -14,7 +14,7 @@ GUILD_ID = int(os.environ["GUILD_ID"])
 
 COGS = (
     "cogs.ops", "cogs.rating", "cogs.activity",
-    "cogs.profile", "cogs.panels", "cogs.registration", "cogs.verify", "cogs.roles", "cogs.welcome",
+    "cogs.profile", "cogs.panels", "cogs.verify", "cogs.roles", "cogs.welcome",
 )
 
 intents = discord.Intents.default()

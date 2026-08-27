@@ -1,5 +1,4 @@
 # ── Jarcord: op signups (RSVP) cog ──
-import sqlite3
 import time
 from datetime import datetime, timezone
 
@@ -7,11 +6,15 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
-from db import conn
-from ui import embed
+from db import conn, get_setting, set_setting
+from ui import ACCENT, embed
 
 REMIND_BEFORE = 30 * 60  # ponytail: fixed 30-min reminder; make it per-op if anyone asks
 WHEN_FORMATS = ("%Y-%m-%d %H:%M", "%d.%m.%Y %H:%M", "%d.%m %H:%M")
+# RSVP status -> (button label, embed heading)
+STATUSES = {"in": ("Attending", "Attending"),
+            "maybe": ("Maybe", "Maybe"),
+            "out": ("Can't make it", "Not coming")}
 
 
 # ── Time parsing ──
@@ -38,13 +41,33 @@ def when_display(op) -> str:
 
 
 # ── DB helpers (shared by slash + prefix) ──
-def create_op(title: str, when: str, author_id: int, channel_id: int) -> int:
+def create_op(title: str, when: str, author_id: int, channel_id: int, notes: str = None) -> int:
     cur = conn.execute(
-        "INSERT INTO ops (title, when_text, created_by, when_ts, channel_id) VALUES (?, ?, ?, ?, ?)",
-        (title, when, author_id, parse_when(when), channel_id),
+        """INSERT INTO ops (title, when_text, created_by, when_ts, channel_id, notes)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (title, when, author_id, parse_when(when), channel_id, notes),
     )
     conn.commit()
     return cur.lastrowid
+
+
+def set_status(op_id: int, user_id: int, status: str) -> None:
+    conn.execute(
+        """INSERT INTO signups (op_id, user_id, status) VALUES (?, ?, ?)
+           ON CONFLICT(op_id, user_id) DO UPDATE SET status = ?""",
+        (op_id, user_id, status, status),
+    )
+    conn.commit()
+
+
+def roster(op_id: int) -> dict:
+    """{status: [user_id, ...]} in the order people replied."""
+    out = {k: [] for k in STATUSES}
+    for r in conn.execute(
+        "SELECT user_id, status FROM signups WHERE op_id = ? ORDER BY signed_at", (op_id,)
+    ):
+        out.setdefault(r["status"], []).append(r["user_id"])
+    return out
 
 
 def get_op(op_id: int):
@@ -52,29 +75,94 @@ def get_op(op_id: int):
 
 
 def create_embed(op_id: int, author: discord.Member = None) -> discord.Embed:
+    """The op card. Rebuilt from the database every time somebody replies."""
     op = get_op(op_id)
-    e = embed(title=op["title"])
+    e = embed(title=op["title"], colour=ACCENT)
     if author is not None:
         e.set_author(name=f"Op posted by {author.display_name}", icon_url=author.display_avatar.url)
     else:
         e.set_author(name="New op posted")
-    e.add_field(name="When", value=when_display(op), inline=True)
-    e.add_field(name="Join", value=f"`/op-join {op_id}`", inline=True)
+    e.add_field(name="When", value=when_display(op), inline=False)
+    if op["notes"]:
+        e.add_field(name="Notes", value=op["notes"], inline=False)
+
+    people = roster(op_id)
+    for key, (_, heading) in STATUSES.items():
+        ids = people.get(key, [])
+        e.add_field(
+            name=f"{heading} ({len(ids)})",
+            value="\n".join(f"<@{u}>" for u in ids) if ids else "*nobody yet*",
+            inline=True,
+        )
     if op["when_ts"]:
-        e.add_field(name="Reminder", value="Roster gets pinged 30 min before start.", inline=False)
-    e.set_footer(text=f"Op ID {op_id}")
+        e.set_footer(text=f"Op ID {op_id} · attending get pinged 30 min before start")
+    else:
+        e.set_footer(text=f"Op ID {op_id}")
     return e
+
+
+class OpView(discord.ui.View):
+    """Persistent RSVP buttons. The op is found by the message they sit on."""
+
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    async def _reply(self, interaction: discord.Interaction, status: str):
+        op = conn.execute(
+            "SELECT * FROM ops WHERE message_id = ?", (interaction.message.id,)
+        ).fetchone()
+        if op is None:
+            await interaction.response.send_message("This op is gone.", ephemeral=True)
+            return
+        set_status(op["id"], interaction.user.id, status)
+        await interaction.response.edit_message(embed=create_embed(op["id"]), view=self)
+
+    @discord.ui.button(label="Attending", style=discord.ButtonStyle.success,
+                       custom_id="jarcord:op:in")
+    async def rsvp_in(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._reply(interaction, "in")
+
+    @discord.ui.button(label="Maybe", style=discord.ButtonStyle.secondary,
+                       custom_id="jarcord:op:maybe")
+    async def rsvp_maybe(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._reply(interaction, "maybe")
+
+    @discord.ui.button(label="Can't make it", style=discord.ButtonStyle.danger,
+                       custom_id="jarcord:op:out")
+    async def rsvp_out(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._reply(interaction, "out")
+
+
+async def sync_card(bot, op_id: int, ref: tuple = None) -> None:
+    """Redraw the posted op card, or delete it once the op is gone. `ref` carries
+    (channel_id, message_id) for an op whose row has already been removed."""
+    op = get_op(op_id)
+    channel_id, message_id = (op["channel_id"], op["message_id"]) if op else (ref or (None, None))
+    if not channel_id or not message_id:
+        return
+    channel = bot.get_channel(channel_id)
+    if channel is None:
+        return
+    try:
+        msg = await channel.fetch_message(message_id)
+        if op is None:
+            await msg.delete()
+        else:
+            await msg.edit(embed=create_embed(op_id))
+    except discord.HTTPException:
+        pass  # card deleted by hand, nothing to keep in sync
 
 
 def join_op(op_id: int, user_id: int) -> str:
     op = get_op(op_id)
     if op is None:
         return f"No op with ID `{op_id}`."
-    try:
-        conn.execute("INSERT INTO signups (op_id, user_id) VALUES (?, ?)", (op_id, user_id))
-        conn.commit()
-    except sqlite3.IntegrityError:
+    already = conn.execute(
+        "SELECT status FROM signups WHERE op_id = ? AND user_id = ?", (op_id, user_id)
+    ).fetchone()
+    if already and already["status"] == "in":
         return f"You're already on the roster for **{op['title']}**."
+    set_status(op_id, user_id, "in")
     return f"You're on the roster for **{op['title']}**, {when_display(op)}."
 
 
@@ -106,7 +194,7 @@ def roster_embed(op_id: int) -> discord.Embed:
     if op is None:
         return embed(description=f"No op with ID `{op_id}`.")
     rows = conn.execute(
-        "SELECT user_id FROM signups WHERE op_id = ? ORDER BY signed_at", (op_id,)
+        "SELECT user_id FROM signups WHERE op_id = ? AND status = 'in' ORDER BY signed_at", (op_id,)
     ).fetchall()
     e = embed(title=op["title"])
     e.add_field(name="When", value=when_display(op), inline=True)
@@ -117,14 +205,14 @@ def roster_embed(op_id: int) -> discord.Embed:
         if rows else "*Nobody yet. Be the first.*"
     )
     e.add_field(name="Roster", value=roster, inline=False)
-    e.set_footer(text=f"Op ID {op_id} · /op-join {op_id}")
+    e.set_footer(text=f"Op ID {op_id}")
     return e
 
 
 def list_embed() -> discord.Embed:
     rows = conn.execute(
         """SELECT o.*, COUNT(s.user_id) AS n
-           FROM ops o LEFT JOIN signups s ON s.op_id = o.id
+           FROM ops o LEFT JOIN signups s ON s.op_id = o.id AND s.status = 'in'
            GROUP BY o.id ORDER BY o.id DESC LIMIT 10"""
     ).fetchall()
     if not rows:
@@ -133,7 +221,7 @@ def list_embed() -> discord.Embed:
         f"`{r['id']:>3}` **{r['title']}**, {when_display(r)} · {r['n']} signed up" for r in rows
     )
     e = embed(title="Recent ops", description=lines)
-    e.set_footer(text="Join with /op-join <id>")
+    e.set_footer(text="RSVP on the op card, or use /op-join <id>")
     return e
 
 
@@ -142,6 +230,7 @@ class Ops(commands.Cog):
         self.bot = bot
 
     async def cog_load(self):
+        self.bot.add_view(OpView())  # RSVP buttons survive restarts
         self.reminder_loop.start()
 
     def cog_unload(self):
@@ -163,10 +252,10 @@ class Ops(commands.Cog):
             channel = self.bot.get_channel(op["channel_id"])
             if channel is None:
                 continue
-            roster = conn.execute(
-                "SELECT user_id FROM signups WHERE op_id = ?", (op["id"],)
+            going = conn.execute(
+                "SELECT user_id FROM signups WHERE op_id = ? AND status = 'in'", (op["id"],)
             ).fetchall()
-            mentions = " ".join(f"<@{r['user_id']}>" for r in roster)
+            mentions = " ".join(f"<@{r['user_id']}>" for r in going)
             e = embed(
                 title=op["title"],
                 description=f"Starts <t:{op['when_ts']}:R> (<t:{op['when_ts']}:F>)",
@@ -184,30 +273,78 @@ class Ops(commands.Cog):
         await self.bot.wait_until_ready()
 
     # ── Slash commands ──
-    @app_commands.command(name="op-create", description="Post a new op and get its ID")
+    @app_commands.command(name="op-create", description="Post an op with RSVP buttons")
     @app_commands.describe(
-        title="Op name",
+        what="Op name",
         when="Free text, or 'YYYY-MM-DD HH:MM' / 'DD.MM HH:MM' in UTC to enable the 30-min reminder",
+        who="Role to ping. Defaults to whatever /op-setup configured",
+        notes="Loadout, meeting point, anything else",
     )
-    async def op_create(self, interaction: discord.Interaction, title: str, when: str):
-        op_id = create_op(title, when, interaction.user.id, interaction.channel_id)
-        await interaction.response.send_message(embed=create_embed(op_id, interaction.user))
+    async def op_create(self, interaction: discord.Interaction, what: str, when: str,
+                        who: discord.Role = None, notes: str = None):
+        channel = interaction.channel
+        configured = get_setting("op_channel_id")
+        if configured:
+            channel = interaction.guild.get_channel(int(configured)) or interaction.channel
+
+        ping = who
+        if ping is None:
+            role_id = get_setting("op_ping_role_id")
+            if role_id:
+                ping = interaction.guild.get_role(int(role_id))
+
+        op_id = create_op(what, when, interaction.user.id, channel.id, notes)
+        try:
+            msg = await channel.send(
+                content=ping.mention if ping else None,
+                embed=create_embed(op_id, interaction.user),
+                view=OpView(),
+                allowed_mentions=discord.AllowedMentions(roles=True),
+            )
+        except discord.Forbidden:
+            cancel_op(op_id, interaction.user.id, True)
+            await interaction.response.send_message(
+                f"I can't post in {channel.mention}. Give me Send Messages there.", ephemeral=True
+            )
+            return
+        conn.execute("UPDATE ops SET message_id = ? WHERE id = ?", (msg.id, op_id))
+        conn.commit()
+        await interaction.response.send_message(
+            f"Op `{op_id}` posted in {channel.mention}. {msg.jump_url}", ephemeral=True
+        )
+
+    @app_commands.command(name="op-setup", description="Set the ops channel and the role to ping")
+    @app_commands.describe(channel="Where op cards get posted", ping_role="Role pinged on every op")
+    @app_commands.checks.has_permissions(manage_guild=True)
+    async def op_setup(self, interaction: discord.Interaction, channel: discord.TextChannel,
+                       ping_role: discord.Role = None):
+        set_setting("op_channel_id", str(channel.id))
+        msg = f"Ops will be posted in {channel.mention}."
+        if ping_role:
+            set_setting("op_ping_role_id", str(ping_role.id))
+            msg += f" Every op pings **{ping_role.name}**."
+        await interaction.response.send_message(msg, ephemeral=True)
 
     @app_commands.command(name="op-join", description="Sign up for an op")
     @app_commands.describe(op_id="The op ID")
     async def op_join(self, interaction: discord.Interaction, op_id: int):
-        await interaction.response.send_message(join_op(op_id, interaction.user.id))
+        await interaction.response.send_message(join_op(op_id, interaction.user.id), ephemeral=True)
+        await sync_card(self.bot, op_id)
 
     @app_commands.command(name="op-leave", description="Take yourself off an op's roster")
     @app_commands.describe(op_id="The op ID")
     async def op_leave(self, interaction: discord.Interaction, op_id: int):
-        await interaction.response.send_message(leave_op(op_id, interaction.user.id))
+        await interaction.response.send_message(leave_op(op_id, interaction.user.id), ephemeral=True)
+        await sync_card(self.bot, op_id)
 
     @app_commands.command(name="op-cancel", description="Cancel an op (creator or Manage Server only)")
     @app_commands.describe(op_id="The op ID")
     async def op_cancel(self, interaction: discord.Interaction, op_id: int):
         officer = interaction.user.guild_permissions.manage_guild
+        op = get_op(op_id)
+        ref = (op["channel_id"], op["message_id"]) if op else None
         await interaction.response.send_message(cancel_op(op_id, interaction.user.id, officer))
+        await sync_card(self.bot, op_id, ref)
 
     # ── Prefix commands: !op join / leave / cancel / roster / list ──
     @commands.group(name="op", invoke_without_command=True)
@@ -217,15 +354,20 @@ class Ops(commands.Cog):
     @op.command(name="join")
     async def op_join_prefix(self, ctx: commands.Context, op_id: int):
         await ctx.send(join_op(op_id, ctx.author.id))
+        await sync_card(self.bot, op_id)
 
     @op.command(name="leave")
     async def op_leave_prefix(self, ctx: commands.Context, op_id: int):
         await ctx.send(leave_op(op_id, ctx.author.id))
+        await sync_card(self.bot, op_id)
 
     @op.command(name="cancel")
     async def op_cancel_prefix(self, ctx: commands.Context, op_id: int):
         officer = ctx.author.guild_permissions.manage_guild
+        op = get_op(op_id)
+        ref = (op["channel_id"], op["message_id"]) if op else None
         await ctx.send(cancel_op(op_id, ctx.author.id, officer))
+        await sync_card(self.bot, op_id, ref)
 
     @op.command(name="roster")
     async def op_roster(self, ctx: commands.Context, op_id: int):
