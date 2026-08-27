@@ -4,13 +4,14 @@ from datetime import datetime, timezone
 import discord
 from discord.ext import commands
 
+from db import get_setting, set_setting
 from ui import ACCENT, embed
 
 UNVERIFIED = "Unverified"
 OPERATOR = "Operator"
-CHANNEL = "operator-id"
-# ponytail: roles and channel matched by exact name — the server layout is fixed,
-# no /verify-setup command until someone actually renames them.
+# ponytail: channel names carry emoji and dividers ("📋｜register"), so an exact
+# match is useless — fall back to a normalized substring, in priority order.
+CHANNEL_WORDS = ("operator-id", "verify", "register")
 
 
 def looks_unset(member: discord.Member) -> bool:
@@ -31,6 +32,20 @@ async def find_role(guild: discord.Guild, name: str, create: bool = False):
         role = await guild.create_role(name=name, reason="Jarcord verification flow")
         print(f">> created role {name} in guild {guild.id}")
     return role
+
+
+def find_channel(guild: discord.Guild):
+    """Configured channel if /verify-setup ran, else the first arrival-ish channel."""
+    cid = get_setting("verify_channel_id")
+    if cid:
+        channel = guild.get_channel(int(cid))
+        if channel is not None:
+            return channel
+    for word in CHANNEL_WORDS:
+        for channel in guild.text_channels:
+            if word in channel.name.casefold():
+                return channel
+    return None
 
 
 def prompt_embed(member: discord.Member) -> discord.Embed:
@@ -127,14 +142,25 @@ class Verify(commands.Cog):
         except discord.Forbidden:
             print(f">> couldn't assign {UNVERIFIED} to {member.id}: missing Manage Roles or hierarchy")
 
-        channel = discord.utils.get(member.guild.text_channels, name=CHANNEL)
+        channel = find_channel(member.guild)
         if channel is None:
-            print(f">> no #{CHANNEL} channel — no verification prompt sent for {member.id}")
+            print(f">> no arrival channel found — run /verify-setup; no prompt sent for {member.id}")
             return
         try:
             await channel.send(content=member.mention, embed=prompt_embed(member), view=VerifyView())
         except discord.Forbidden:
-            print(f">> can't post in #{CHANNEL} — no verification prompt sent for {member.id}")
+            print(f">> can't post in #{channel.name} — no verification prompt sent for {member.id}")
+
+    @commands.hybrid_command(name="verify-setup", description="Set the channel new members are greeted in")
+    @commands.has_permissions(manage_guild=True)
+    async def verify_setup(self, ctx: commands.Context, channel: discord.TextChannel):
+        set_setting("verify_channel_id", str(channel.id))
+        msg = f"New members will be prompted to verify in {channel.mention}."
+        operator = await find_role(ctx.guild, OPERATOR)
+        if operator is not None and operator >= ctx.guild.me.top_role:
+            msg += ("\n⚠️ " + f"**{OPERATOR}** sits above my role — I won't be able to "
+                    "assign it. Move Jarcord higher.")
+        await ctx.send(msg)
 
 
 async def setup(bot: commands.Bot):

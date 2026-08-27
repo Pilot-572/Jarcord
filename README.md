@@ -47,9 +47,15 @@ Approving verifies the Roblox account, links it to their profile, sets their nic
 Reviewing requires Manage Roles. One pending application per member.
 
 ### Verification
-New members land restricted. On join they get the **Unverified** role and a prompt in `#operator-id`: set your server nickname to your exact Roblox username, then press **Confirm callsign**. That swaps **Unverified** for **Operator** and opens the server up.
+New members land restricted. On join they get the **Unverified** role and a prompt in the arrival channel: set your server nickname to your exact Roblox username, then press **Confirm callsign**. That swaps **Unverified** for **Operator** and opens the server up.
 
-Roles and the channel are matched by exact name and created only if missing — existing ones are never modified. Channel visibility is yours to configure with category overwrites; Jarcord only manages the two roles, so it needs **Manage Roles** with its own role above both. Members who rejoin already holding **Operator** skip the flow. The confirm button is persistent and idempotent.
+Roles are matched by exact name and created only if missing — existing ones are never modified. Channel visibility is yours to configure with category overwrites; Jarcord only manages the two roles, so it needs **Manage Roles** with its own role above both. Members who rejoin already holding **Operator** skip the flow. The confirm button is persistent and idempotent.
+
+| Command | What it does |
+|---|---|
+| `/verify-setup <channel>` | Set the channel new members are greeted in (needs Manage Server) |
+
+Without setup Jarcord picks the first channel whose name contains `operator-id`, `verify`, or `register` — emoji and dividers in the name don't matter.
 
 ### Info panels
 Reference posts — banner image, section cards, link buttons — defined as JSON files in `panels/` and posted on demand.
