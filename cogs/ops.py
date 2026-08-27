@@ -1,4 +1,4 @@
-# ── Jarcord — op signups (RSVP) cog ──
+# ── Jarcord: op signups (RSVP) cog ──
 import sqlite3
 import time
 from datetime import datetime, timezone
@@ -75,7 +75,7 @@ def join_op(op_id: int, user_id: int) -> str:
         conn.commit()
     except sqlite3.IntegrityError:
         return f"You're already on the roster for **{op['title']}**."
-    return f"You're on the roster for **{op['title']}** — {when_display(op)}."
+    return f"You're on the roster for **{op['title']}**, {when_display(op)}."
 
 
 def leave_op(op_id: int, user_id: int) -> str:
@@ -114,7 +114,7 @@ def roster_embed(op_id: int) -> discord.Embed:
     e.add_field(name="Posted by", value=f"<@{op['created_by']}>", inline=True)
     roster = (
         "\n".join(f"`{i:>2}` <@{r['user_id']}>" for i, r in enumerate(rows, 1))
-        if rows else "*Nobody yet — be the first.*"
+        if rows else "*Nobody yet. Be the first.*"
     )
     e.add_field(name="Roster", value=roster, inline=False)
     e.set_footer(text=f"Op ID {op_id} · /op-join {op_id}")
@@ -130,7 +130,7 @@ def list_embed() -> discord.Embed:
     if not rows:
         return embed(title="Recent ops", description="No ops posted yet.")
     lines = "\n".join(
-        f"`{r['id']:>3}` **{r['title']}** — {when_display(r)} · {r['n']} signed up" for r in rows
+        f"`{r['id']:>3}` **{r['title']}**, {when_display(r)} · {r['n']} signed up" for r in rows
     )
     e = embed(title="Recent ops", description=lines)
     e.set_footer(text="Join with /op-join <id>")
@@ -169,7 +169,7 @@ class Ops(commands.Cog):
             mentions = " ".join(f"<@{r['user_id']}>" for r in roster)
             e = embed(
                 title=op["title"],
-                description=f"Starts <t:{op['when_ts']}:R> — <t:{op['when_ts']}:F>",
+                description=f"Starts <t:{op['when_ts']}:R> (<t:{op['when_ts']}:F>)",
             )
             e.set_author(name="Op reminder")
             e.set_footer(text=f"Op ID {op['id']}")

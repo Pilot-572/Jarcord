@@ -1,4 +1,4 @@
-# ── Jarcord — activity tracking cog ──
+# ── Jarcord: activity tracking cog ──
 from datetime import datetime, timedelta, timezone
 
 import discord
@@ -67,8 +67,8 @@ class Activity(commands.Cog):
             ))
             return
         lines = [
-            f"<@{m.id}> — last seen {seen[m.id]} UTC" if m.id in seen
-            else f"<@{m.id}> — never seen"
+            f"<@{m.id}> · last seen {seen[m.id]} UTC" if m.id in seen
+            else f"<@{m.id}> · never seen"
             for m in stale[:30]
         ]
         extra = f"\n*…and {len(stale) - 30} more.*" if len(stale) > 30 else ""

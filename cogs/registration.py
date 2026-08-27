@@ -1,4 +1,4 @@
-# ── Jarcord — member registration (form modal + staff review) ──
+# ── Jarcord: member registration (form modal + staff review) ──
 import discord
 from discord.ext import commands
 
@@ -18,17 +18,17 @@ def application_embed(app, applicant: discord.User | discord.Member = None) -> d
         e.set_thumbnail(url=applicant.display_avatar.url)
     e.add_field(name="Member", value=f"<@{app['user_id']}>", inline=True)
     e.add_field(name="Roblox", value=app["roblox"], inline=True)
-    e.add_field(name="Age group", value=app["age_group"] or "—", inline=True)
-    e.add_field(name="Pronouns", value=app["pronouns"] or "—", inline=True)
-    e.add_field(name="Timezone", value=app["timezone"] or "—", inline=True)
-    e.add_field(name="Available", value=app["availability"] or "—", inline=False)
+    e.add_field(name="Age group", value=app["age_group"] or "n/a", inline=True)
+    e.add_field(name="Pronouns", value=app["pronouns"] or "n/a", inline=True)
+    e.add_field(name="Timezone", value=app["timezone"] or "n/a", inline=True)
+    e.add_field(name="Available", value=app["availability"] or "n/a", inline=False)
     state = "awaiting review" if app["status"] == "pending" else app["status"]
     e.set_footer(text=f"Application #{app['id']} · {state}")
     return e
 
 
 class ReviewView(discord.ui.View):
-    """Persistent — custom_ids are static, the application is found by message id."""
+    """Persistent view. custom_ids are static, the application is found by message id."""
 
     def __init__(self):
         super().__init__(timeout=None)
@@ -105,7 +105,7 @@ class ReviewView(discord.ui.View):
             try:
                 await member.send(f"Your registration in **{interaction.guild.name}** was approved. Welcome aboard.")
             except discord.HTTPException:
-                pass  # DMs closed — not worth reporting
+                pass  # DMs closed, not worth reporting
         else:
             notes.append("they've left the server")
 
@@ -137,13 +137,13 @@ class RegisterModal(discord.ui.Modal, title="Registration"):
         channel_id = get_setting("review_channel_id")
         if not channel_id:
             await interaction.response.send_message(
-                "Registration isn't set up yet — an admin needs to run `/register-setup`.", ephemeral=True
+                "Registration isn't set up yet. An admin needs to run `/register-setup`.", ephemeral=True
             )
             return
         channel = interaction.guild.get_channel(int(channel_id))
         if channel is None:
             await interaction.response.send_message(
-                "The review channel is missing — an admin needs to re-run `/register-setup`.", ephemeral=True
+                "The review channel is missing. An admin needs to re-run `/register-setup`.", ephemeral=True
             )
             return
 
@@ -160,13 +160,13 @@ class RegisterModal(discord.ui.Modal, title="Registration"):
             msg = await channel.send(embed=application_embed(app, interaction.user), view=ReviewView())
         except discord.Forbidden:
             await interaction.response.send_message(
-                "I can't post in the review channel — ask an admin to give me access there.", ephemeral=True
+                "I can't post in the review channel. Ask an admin to give me access there.", ephemeral=True
             )
             return
         conn.execute("UPDATE applications SET message_id = ? WHERE id = ?", (msg.id, app["id"]))
         conn.commit()
         await interaction.response.send_message(
-            "Registration submitted — staff will review it shortly.", ephemeral=True
+            "Registration submitted. Staff will review it shortly.", ephemeral=True
         )
 
 
@@ -204,7 +204,7 @@ class Registration(commands.Cog):
             set_setting("member_role_id", str(member_role.id))
             msg += f" Approved members get **{member_role.name}**."
             if member_role >= ctx.guild.me.top_role:
-                msg += "\n⚠️ That role sits above mine — I won't be able to assign it. Move Jarcord higher."
+                msg += "\nWarning: that role sits above mine, so I won't be able to assign it. Move Jarcord higher."
         await ctx.send(msg)
 
 

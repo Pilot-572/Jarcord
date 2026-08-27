@@ -1,4 +1,4 @@
-# ── Jarcord — member rating/feedback cog ──
+# ── Jarcord: member rating/feedback cog ──
 import discord
 from discord.ext import commands
 

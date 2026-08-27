@@ -1,4 +1,4 @@
-# ── Jarcord — new-member verification (Roblox callsign → Operator) ──
+# ── Jarcord: new-member verification (Roblox callsign to Operator) ──
 from datetime import datetime, timezone
 
 import discord
@@ -11,12 +11,12 @@ from ui import ACCENT, embed
 UNVERIFIED = "Unverified"
 OPERATOR = "Operator"
 # ponytail: channel names carry emoji and dividers ("📋｜register"), so an exact
-# match is useless — fall back to a normalized substring, in priority order.
+# match is useless. Fall back to a normalized substring, in priority order.
 CHANNEL_WORDS = ("operator-id", "verify", "register")
 
 
 async def find_role(guild: discord.Guild, name: str, create: bool = False):
-    """Existing role by exact name — never modified. Created only if asked and missing."""
+    """Existing role by exact name. Never modified. Created only if asked and missing."""
     role = discord.utils.get(guild.roles, name=name)
     if role is None and create:
         role = await guild.create_role(name=name, reason="Jarcord verification flow")
@@ -50,7 +50,7 @@ def prompt_embed(guild: discord.Guild, member: discord.Member = None) -> discord
     e.add_field(
         name="How it works",
         value="Press **Verify** below and type your Roblox username. "
-              "Nothing goes in chat — only you see the form.",
+              "Nothing goes in chat. Only you see the form.",
         inline=False,
     )
     e.add_field(
@@ -95,7 +95,7 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
         found = await resolve_roblox(str(self.roblox))
         if found is None:
             await interaction.followup.send(
-                f"I couldn't find the Roblox user **{self.roblox}** — check the spelling and try again.",
+                f"I couldn't find the Roblox user **{self.roblox}**. Check the spelling and try again.",
                 ephemeral=True,
             )
             return
@@ -113,14 +113,14 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
         try:
             await member.edit(nick=nick, reason="verified callsign")
         except discord.Forbidden:
-            note = "\nI couldn't set your nickname — set it yourself, or ask an admin."
+            note = "\nI couldn't set your nickname. Set it yourself, or ask an admin."
 
         try:
             await grant_operator(member)
         except discord.Forbidden:
             print(f">> verify failed for {member.id}: missing Manage Roles or role hierarchy")
             await interaction.followup.send(
-                f"Linked **{name}**, but I couldn't change your roles — I'm missing **Manage Roles**, "
+                f"Linked **{name}**, but I couldn't change your roles. I'm missing **Manage Roles**, "
                 f"or my role sits below **{OPERATOR}**. Ping an admin.", ephemeral=True
             )
             return
@@ -128,13 +128,13 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
         stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
         print(f">> verified {member.id} as {nick!r} (roblox {name}/{rid}) at {stamp}")
         await interaction.followup.send(
-            f"Verified as **{nick}** — Roblox account **{name}** linked. Welcome aboard, Operator.{note}",
+            f"Verified as **{nick}**. Roblox account **{name}** linked. Welcome aboard, Operator.{note}",
             ephemeral=True,
         )
 
 
 class VerifyView(discord.ui.View):
-    """Persistent — one static custom_id, the presser is the member being verified."""
+    """Persistent view. One static custom_id, the presser is the member being verified."""
 
     def __init__(self):
         super().__init__(timeout=None)
@@ -142,12 +142,12 @@ class VerifyView(discord.ui.View):
     @discord.ui.button(label="Verify", style=discord.ButtonStyle.success,
                        custom_id="jarcord:verify:confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # ponytail: no in-flight lock — role writes are idempotent, so a double-click
+        # ponytail: no in-flight lock, role writes are idempotent, so a double-click
         # at worst repeats a no-op API call.
         operator = await find_role(interaction.guild, OPERATOR)
         if operator is not None and operator in interaction.user.roles:
             await interaction.response.send_message(
-                "You're already verified — the rest of the server is open to you.", ephemeral=True
+                "You're already verified. The rest of the server is open to you.", ephemeral=True
             )
             return
         await interaction.response.send_modal(CallsignModal())
@@ -166,7 +166,7 @@ class Verify(commands.Cog):
             return
         operator = await find_role(member.guild, OPERATOR)
         if operator is not None and operator in member.roles:
-            print(f">> {member.id} joined already holding {OPERATOR} — skipping verification")
+            print(f">> {member.id} joined already holding {OPERATOR}, skipping verification")
             return
 
         try:
@@ -177,13 +177,13 @@ class Verify(commands.Cog):
 
         channel = find_channel(member.guild)
         if channel is None:
-            print(f">> no arrival channel found — run /verify-setup; no prompt sent for {member.id}")
+            print(f">> no arrival channel found, run /verify-setup; no prompt sent for {member.id}")
             return
         try:
             await channel.send(content=member.mention,
                                embed=prompt_embed(member.guild, member), view=VerifyView())
         except discord.Forbidden:
-            print(f">> can't post in #{channel.name} — no verification prompt sent for {member.id}")
+            print(f">> can't post in #{channel.name}, no verification prompt sent for {member.id}")
 
     @commands.hybrid_command(name="verify-setup", description="Set the channel new members are greeted in")
     @commands.has_permissions(manage_guild=True)
@@ -192,19 +192,19 @@ class Verify(commands.Cog):
         msg = f"New members will be prompted to verify in {channel.mention}."
         operator = await find_role(ctx.guild, OPERATOR)
         if operator is not None and operator >= ctx.guild.me.top_role:
-            msg += ("\n⚠️ " + f"**{OPERATOR}** sits above my role — I won't be able to "
+            msg += ("\nWarning: " + f"**{OPERATOR}** sits above my role, so I won't be able to "
                     "assign it. Move Jarcord higher.")
         await ctx.send(msg)
 
     @commands.hybrid_command(name="verify-panel", description="Post a standing verification panel")
     @commands.has_permissions(manage_guild=True)
     async def verify_panel(self, ctx: commands.Context, channel: discord.TextChannel = None):
-        # ponytail: on_member_join only fires for new joins — this covers everyone already here.
+        # ponytail: on_member_join only fires for new joins, so this covers everyone already here.
         target = channel or find_channel(ctx.guild) or ctx.channel
         try:
             await target.send(embed=prompt_embed(ctx.guild), view=VerifyView())
         except discord.Forbidden:
-            await ctx.send(f"I can't post in {target.mention} — give me Send Messages there.")
+            await ctx.send(f"I can't post in {target.mention}. Give me Send Messages there.")
             return
         if ctx.interaction:
             await ctx.send(f"Panel posted in {target.mention}.", ephemeral=True)

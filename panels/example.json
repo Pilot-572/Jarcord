@@ -1,5 +1,5 @@
 {
-  "_comment": "Template — copy this file, rename it, and the bot picks it up as /panel <filename>. Add \"banner\": \"https://...\" for a header image.",
+  "_comment": "Template. Copy this file, rename it, and the bot picks it up as /panel <filename>. Add \"banner\": \"https://...\" for a header image.",
   "colour": "94A3B8",
   "sections": [
     {

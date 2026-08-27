@@ -1,8 +1,8 @@
-# ── Jarcord — server role utilities ──
+# ── Jarcord: server role utilities ──
 import discord
 from discord.ext import commands
 
-DIVIDER = "─" * 32  # ponytail: fixed width — Discord truncates the role list anyway
+DIVIDER = "─" * 32  # ponytail: fixed width, Discord truncates the role list anyway
 
 
 class Roles(commands.Cog):
@@ -27,13 +27,13 @@ class Roles(commands.Cog):
                 )
             except discord.HTTPException as exc:
                 print(f">> divider creation stopped at {made} in guild {ctx.guild.id}: {exc}")
-                await ctx.send(f"Stopped after **{made}** — Discord refused the next one: {exc.text or exc}")
+                await ctx.send(f"Stopped after **{made}**. Discord refused the next one: {exc.text or exc}")
                 return
             made += 1
         print(f">> created {made} divider roles in guild {ctx.guild.id}")
         await ctx.send(
-            f"Created **{made}** divider roles at the bottom of the list — "
-            "drag them between your groups in Server Settings → Roles."
+            f"Created **{made}** divider roles at the bottom of the list. "
+            "Drag them between your groups in Server Settings → Roles."
         )
 
 

@@ -1,4 +1,4 @@
-# ── Jarcord — member profiles (Roblox link + continent) cog ──
+# ── Jarcord: member profiles (Roblox link + continent) cog ──
 from typing import Literal, Optional
 
 import aiohttp
@@ -38,7 +38,7 @@ class Profile(commands.Cog):
     async def roblox(self, ctx: commands.Context, username: str):
         found = await resolve_roblox(username)
         if found is None:
-            await ctx.send(f"No Roblox account called **{username}** — check the spelling.")
+            await ctx.send(f"No Roblox account called **{username}**. Check the spelling.")
             return
         rid, name = found
         conn.execute(
@@ -66,7 +66,7 @@ class Profile(commands.Cog):
             await member.edit(nick=nickname)
         except discord.Forbidden:
             await ctx.send(
-                f"Can't rename {member.mention} — they're the server owner, or their top role "
+                f"Can't rename {member.mention}. They're the server owner, or their top role "
                 "sits above mine (Server Settings → Roles → drag Jarcord higher)."
             )
             return
@@ -95,10 +95,10 @@ class Profile(commands.Cog):
             if old:
                 await ctx.author.remove_roles(*old)
             await ctx.author.add_roles(role)
-            await ctx.send(f"You're set to **{continent}** — role assigned.")
+            await ctx.send(f"You're set to **{continent}**. Role assigned.")
         except discord.Forbidden:
             await ctx.send(
-                f"Saved **{continent}**, but I couldn't manage roles — give me the Manage Roles permission."
+                f"Saved **{continent}**, but I couldn't manage roles. Give me the Manage Roles permission."
             )
 
     @commands.hybrid_command(name="profile", description="Member profile: Roblox, continent, ops, rating, activity")
@@ -119,18 +119,18 @@ class Profile(commands.Cog):
         e.set_thumbnail(url=member.display_avatar.url)
         roblox = (
             f"[{p['roblox_name']}](https://www.roblox.com/users/{p['roblox_id']}/profile)"
-            if p and p["roblox_name"] else "*Not linked — /roblox*"
+            if p and p["roblox_name"] else "*Not linked. Use /roblox*"
         )
         e.add_field(name="Roblox", value=roblox, inline=True)
         e.add_field(
             name="Continent",
-            value=p["continent"] if p and p["continent"] else "*Not set — /continent*",
+            value=p["continent"] if p and p["continent"] else "*Not set. Use /continent*",
             inline=True,
         )
         e.add_field(name="Ops attended", value=str(n_ops), inline=True)
         e.add_field(
             name="Rating",
-            value=f"{rating['avg']:.2f}/5 ({rating['n']})" if rating["n"] else "—",
+            value=f"{rating['avg']:.2f}/5 ({rating['n']})" if rating["n"] else "n/a",
             inline=True,
         )
         e.add_field(name="Messages", value=str(act["message_count"]) if act else "0", inline=True)

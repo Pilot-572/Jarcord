@@ -1,4 +1,4 @@
-# ── Jarcord DB — plain sqlite3, single shared connection ──
+# ── Jarcord DB: plain sqlite3, single shared connection ──
 import sqlite3
 from pathlib import Path
 
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS applications (
 """
 
 DATA_DIR.mkdir(exist_ok=True)
-# ponytail: one sync connection, no pool — single-server bot, writes are tiny.
+# ponytail: one sync connection, no pool, single-server bot, writes are tiny.
 # discord.py runs everything on one event-loop thread, so this is safe.
 conn = sqlite3.connect(DB_PATH)
 conn.row_factory = sqlite3.Row

@@ -1,4 +1,4 @@
-# ── Jarcord — info panels (banner + section cards + link buttons) ──
+# ── Jarcord: info panels (banner + section cards + link buttons) ──
 import json
 from pathlib import Path
 
@@ -15,7 +15,7 @@ def panel_names() -> list[str]:
 
 
 def load_panel(name: str) -> dict | None:
-    # whitelist by listing — never build a path from user input
+    # whitelist by listing, never build a path from user input
     if name not in panel_names():
         return None
     return json.loads((PANEL_DIR / f"{name}.json").read_text(encoding="utf-8"))
@@ -72,7 +72,7 @@ class Panels(commands.Cog):
         await ctx.send(embed=embed(
             title="Info panels",
             description="\n".join(f"`{n}`" for n in names) if names
-            else "None yet — drop a JSON file in `panels/`.",
+            else "None yet. Drop a JSON file in `panels/`.",
         ))
 
 

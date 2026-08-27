@@ -1,4 +1,4 @@
-# ── Jarcord — entry point ──
+# ── Jarcord: entry point ──
 import os
 
 import discord
