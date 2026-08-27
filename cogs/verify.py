@@ -108,7 +108,7 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
         max_length=20,
     )
     callsign = discord.ui.TextInput(
-        label="What should people call you?",
+        label="What do people call you in-game?",
         placeholder="leave blank to use your Roblox name",
         required=False,
         max_length=24,
