@@ -424,9 +424,18 @@ class Ops(commands.Cog):
             return
         conn.execute("UPDATE ops SET message_id = ? WHERE id = ?", (msg.id, op_id))
         conn.commit()
+
+        # ponytail: a thread off the card needs no new column, its id IS the message id
+        thread_note = ""
+        try:
+            await msg.create_thread(name=what[:100], auto_archive_duration=10080)
+        except discord.HTTPException as e:
+            print(f">> no thread for op {op_id}: {e}")
+            thread_note = " I couldn't open a thread, check I have Create Public Threads there."
+
         await interaction.response.send_message(
             f"Op `{op_id}` posted in {channel.mention}.{when_feedback(get_op(op_id)['when_ts'])} "
-            f"{msg.jump_url}", ephemeral=True
+            f"{msg.jump_url}{thread_note}", ephemeral=True
         )
 
     @app_commands.command(name="op-setup", description="Set the ops channel, the ping role and the timezone")

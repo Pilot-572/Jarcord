@@ -7,3 +7,5 @@ banner/Option*.dc.html
 banner/Logos.dc.html
 banner/export/banner-render.html
 banner/export/wide-render.html
+
+.claude/settings.local.json
