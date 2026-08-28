@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS ops (
     when_ts    INTEGER,           -- unix ts (UTC) when parseable, else NULL
     channel_id INTEGER,           -- where the op was posted (reminder target)
     message_id INTEGER,           -- the posted card, edited as people RSVP
+    thread_id  INTEGER,           -- discussion thread, deliberately not the card's own thread
     notes      TEXT,
     closed     INTEGER NOT NULL DEFAULT 0,
     reminded   INTEGER NOT NULL DEFAULT 0
@@ -103,6 +104,7 @@ for ddl in (
     "ALTER TABLE profiles ADD COLUMN age_group TEXT",
     "ALTER TABLE profiles ADD COLUMN unit TEXT",
     "ALTER TABLE ops ADD COLUMN message_id INTEGER",
+    "ALTER TABLE ops ADD COLUMN thread_id INTEGER",
     "ALTER TABLE ops ADD COLUMN notes TEXT",
     "ALTER TABLE signups ADD COLUMN status TEXT NOT NULL DEFAULT 'in'",
     "ALTER TABLE signups ADD COLUMN attended INTEGER",

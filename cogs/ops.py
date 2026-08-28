@@ -103,6 +103,8 @@ def create_embed(op_id: int, author: discord.Member = None) -> discord.Embed:
     else:
         e.set_author(name="New op posted")
     e.add_field(name="When", value=when_display(op), inline=False)
+    if op["thread_id"]:
+        e.add_field(name="Talk about it", value=f"<#{op['thread_id']}>", inline=False)
     if op["notes"]:
         e.add_field(name="Notes", value=op["notes"], inline=False)
 
@@ -425,10 +427,19 @@ class Ops(commands.Cog):
         conn.execute("UPDATE ops SET message_id = ? WHERE id = ?", (msg.id, op_id))
         conn.commit()
 
-        # ponytail: a thread off the card needs no new column, its id IS the message id
+        # A thread started FROM the card makes the card a starter message, and Discord
+        # renders those read-only inside the thread, so the RSVP buttons go dead there.
+        # ponytail: a standalone channel thread instead, linked from the card.
         thread_note = ""
         try:
-            await msg.create_thread(name=what[:100], auto_archive_duration=10080)
+            thread = await channel.create_thread(
+                name=what[:100], type=discord.ChannelType.public_thread,
+                auto_archive_duration=10080,
+            )
+            conn.execute("UPDATE ops SET thread_id = ? WHERE id = ?", (thread.id, op_id))
+            conn.commit()
+            await msg.edit(embed=create_embed(op_id, interaction.user), view=OpView())
+            thread_note = f" Talk about it in {thread.mention}."
         except discord.HTTPException as e:
             print(f">> no thread for op {op_id}: {e}")
             thread_note = " I couldn't open a thread, check I have Create Public Threads there."
