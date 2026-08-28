@@ -74,7 +74,7 @@ Setting `/officer-role` grants that role a fixed, curated set. It is not per com
 | Tier | Commands | Who |
 |---|---|---|
 | Officer | `/op create`, `/op edit`, `/op cancel`, `/op close`, `/promote`, `/demote`, `/warn`, `/warns`, `/unwarn`, `/nickname`, `/panel`, `/record`, `/verify-panel`, `/code-set` | The officer role, plus anyone with the underlying permission. `/code-set` also passes for the **Server Host** role |
-| Admin | `/op-setup`, `/verify-setup`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/officer-role`, `/ranks-setup`, `/dividers` | Manage Server only |
+| Admin | `/op-setup`, `/verify-setup`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/officer-role`, `/ranks-setup`, `/promotions-setup`, `/dividers` | Manage Server only |
 | Member | `/profile`, `/code`, `/op join`, `/op leave`, `/op roster`, `/op list`, `/rate`, `/rating-history`, `/continent`, `/unit`, `/roblox`, `/activity`, `/panel-list` | Everyone |
 
 The split is running the faction versus configuring the server. An officer posts ops, renames people, files records and reposts panels. Wiring up which channel things land in stays with you.
@@ -108,6 +108,7 @@ A nine step ladder from Private 1 to Staff Sergeant, separate from the Operator 
 | `/promote @member [reason]` | One step up: swaps the rank role, DMs them, files a card in the records channel |
 | `/demote @member [reason]` | One step down, same trail |
 | `/ranks-setup` | Create every rank, the `NCO` marker and the position roles that are missing, and start every verified member who has no rank on Private 1 (needs Manage Server) |
+| `/promotions-setup <channel>` | Announce every promotion and demotion there, member pinged, reason left off (needs Manage Server) |
 
 From Corporal 1 up a member also holds the `NCO` marker, so an NCO channel needs one permission line and never has to be touched when the ladder changes. Rank shows on `/profile`.
 

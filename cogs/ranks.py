@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 
 from cogs.profile import save_profile, set_exclusive_role
-from db import conn, get_setting
+from db import conn, get_setting, set_setting
 from ui import ACCENT, embed, staff_check
 
 # Lowest to highest. These are the Discord role names, so renaming here renames the ladder.
@@ -123,6 +123,20 @@ class Ranks(commands.Cog):
                 except discord.Forbidden:
                     notes.append(f"couldn't file it in #{channel.name}")
 
+        # the public one carries no reason, that stays on the record
+        channel_id = get_setting("promotions_channel_id")
+        if channel_id:
+            channel = ctx.guild.get_channel(int(channel_id))
+            if channel is not None:
+                try:
+                    await channel.send(
+                        content=member.mention,
+                        embed=rank_card(member, old, new, ctx.author, None, up),
+                        allowed_mentions=discord.AllowedMentions(users=True),
+                    )
+                except discord.Forbidden:
+                    notes.append(f"couldn't post it in #{channel.name}")
+
         print(f">> {member.id} {verb} {old} -> {new} by {ctx.author.id}")
         msg = f"{member.mention} is now **{new}**."
         if notes:
@@ -140,6 +154,13 @@ class Ranks(commands.Cog):
     @staff_check(officer=True, manage_roles=True)
     async def demote(self, ctx: commands.Context, member: discord.Member, *, reason: str = None):
         await self._move(ctx, member, reason, up=False)
+
+    @commands.hybrid_command(name="promotions-setup", description="Channel where every promotion and demotion is announced")
+    @discord.app_commands.default_permissions(manage_guild=True)
+    @commands.has_permissions(manage_guild=True)
+    async def promotions_setup(self, ctx: commands.Context, channel: discord.TextChannel):
+        set_setting("promotions_channel_id", str(channel.id))
+        await ctx.send(f"Promotions and demotions will be announced in {channel.mention}.", ephemeral=True)
 
     @commands.hybrid_command(name="ranks-setup", description="Create the rank roles and put every verified member with no rank on Private 1")
     @discord.app_commands.default_permissions(manage_guild=True)

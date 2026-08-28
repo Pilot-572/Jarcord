@@ -19,6 +19,7 @@ SETTINGS = (
     ("Ops ping role",        "op_ping_role_id",    "role",    "/op-setup"),
     ("Op timezone",          "op_timezone",        "text",    "/op-setup"),
     ("Officer role",         "officer_role_id",    "role",    "/officer-role"),
+    ("Promotions channel",   "promotions_channel_id", "channel", "/promotions-setup"),
     ("Server code",          "server_code",        "secret",  "/code-set"),
 )
 
