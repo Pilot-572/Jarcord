@@ -3,7 +3,7 @@
   "sections": [
     {
       "title": "UNITS",
-      "body": "Every operator belongs to one unit. You pick it during verification and can change it any time in <#1542515113347649606>."
+      "body": "Every operator belongs to one unit. You pick it during verification and can switch any time with `/unit`."
     },
     {
       "title": "⚔️  GROUND UNIT",

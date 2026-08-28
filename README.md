@@ -75,7 +75,7 @@ Setting `/officer-role` grants that role a fixed, curated set. It is not per com
 |---|---|---|
 | Officer | `/op create`, `/op edit`, `/op cancel`, `/op close`, `/promote`, `/demote`, `/warn`, `/warns`, `/unwarn`, `/nickname`, `/panel`, `/record`, `/verify-panel`, `/code-set` | The officer role, plus anyone with the underlying permission. `/code-set` also passes for the **Server Host** role |
 | Admin | `/op-setup`, `/verify-setup`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/officer-role`, `/ranks-setup`, `/dividers` | Manage Server only |
-| Member | `/profile`, `/code`, `/op join`, `/op leave`, `/op roster`, `/op list`, `/rate`, `/rating-history`, `/continent`, `/roblox`, `/activity`, `/panel-list` | Everyone |
+| Member | `/profile`, `/code`, `/op join`, `/op leave`, `/op roster`, `/op list`, `/rate`, `/rating-history`, `/continent`, `/unit`, `/roblox`, `/activity`, `/panel-list` | Everyone |
 
 The split is running the faction versus configuring the server. An officer posts ops, renames people, files records and reposts panels. Wiring up which channel things land in stays with you.
 

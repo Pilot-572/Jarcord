@@ -154,6 +154,15 @@ class Profile(commands.Cog):
                 f"Saved **{continent}**, but I couldn't manage roles. Give me the Manage Roles permission."
             )
 
+    @commands.hybrid_command(name="unit", description="Switch unit (swaps the role)")
+    async def unit(self, ctx: commands.Context, unit: Literal["Ground Unit", "Sniper Unit"]):
+        if await set_unit(ctx.author, unit):
+            await ctx.send(f"You're in **{unit}** now.", ephemeral=True)
+        else:
+            await ctx.send(
+                f"Saved **{unit}**, but I couldn't swap the role. Give me Manage Roles.", ephemeral=True
+            )
+
     @commands.hybrid_command(name="profile", description="Member profile: Roblox, continent, ops, rating, activity")
     async def profile(self, ctx: commands.Context, member: Optional[discord.Member] = None):
         member = member or ctx.author
