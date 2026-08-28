@@ -54,7 +54,8 @@ CREATE TABLE IF NOT EXISTS profiles (
     play_hours  TEXT,
     heard_from  TEXT,
     experience  TEXT,
-    age_group   TEXT
+    age_group   TEXT,
+    rank        TEXT              -- a name from cogs.ranks.RANKS, NULL until first promotion
 );
 
 CREATE TABLE IF NOT EXISTS warnings (
@@ -105,6 +106,7 @@ for ddl in (
     "ALTER TABLE profiles ADD COLUMN unit TEXT",
     "ALTER TABLE ops ADD COLUMN message_id INTEGER",
     "ALTER TABLE ops ADD COLUMN thread_id INTEGER",
+    "ALTER TABLE profiles ADD COLUMN rank TEXT",
     "ALTER TABLE ops ADD COLUMN notes TEXT",
     "ALTER TABLE signups ADD COLUMN status TEXT NOT NULL DEFAULT 'in'",
     "ALTER TABLE signups ADD COLUMN attended INTEGER",

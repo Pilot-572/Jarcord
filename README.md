@@ -42,9 +42,9 @@ The card carries **Attending**, **Maybe** and **Can't make it**. Pressing one re
 Needs **Manage Nicknames** and **Manage Roles**, and Jarcord's role must sit above the members and continent roles it manages.
 
 ### Verification
-New members land restricted. On join they get the **Unverified** role and a prompt in the arrival channel. Pressing **Verify** walks them through a short private flow. Step one asks for their Roblox username, checked against the Roblox API, and what people call them in-game, which becomes their nickname. Step two is their unit (Ground Unit or Sniper Unit) and continent, both of which assign the matching role, plus optional time blocks for when they play. Then they either finish or answer three optional questions (how they found the server, age group, previous experience). Verifying swaps **Unverified** for **Operator**. Nothing is ever typed in chat.
+New members land restricted. On join they get the **Unverified** role and a prompt in the arrival channel. Pressing **Verify** walks them through a short private flow. Step one asks for their Roblox username, checked against the Roblox API, and what people call them in-game, which becomes their nickname. Step two is their unit (Ground Unit or Sniper Unit) and continent, both of which assign the matching role, plus optional time blocks for when they play. Then they either finish or answer three optional questions (how they found the server, age group, previous experience). Verifying swaps **Unverified** for **Operator** and puts them on **Private 1**, the bottom of the rank ladder (a rejoin gets their old rank back). Nothing is ever typed in chat.
 
-Roles are matched by exact name and created only if missing, and existing ones are never modified. Channel visibility is yours to configure with category overwrites; Jarcord only manages the two roles, so it needs **Manage Roles** with its own role above both. Members who rejoin already holding **Operator** skip the flow. The confirm button is persistent and idempotent.
+Roles are matched by exact name and created only if missing, and existing ones are never modified. Channel visibility is yours to configure with category overwrites; Jarcord only manages the access roles and the rank ladder, so it needs **Manage Roles** with its own role above all of them. Members who rejoin already holding **Operator** skip the flow. The confirm button is persistent and idempotent.
 
 | Command | What it does |
 |---|---|
@@ -73,9 +73,9 @@ Setting `/officer-role` grants that role a fixed, curated set. It is not per com
 
 | Tier | Commands | Who |
 |---|---|---|
-| Officer | `/op create`, `/op edit`, `/op cancel`, `/op close`, `/warn`, `/warns`, `/unwarn`, `/nickname`, `/panel`, `/record`, `/verify-panel` | The officer role, plus anyone with the underlying permission |
-| Admin | `/op-setup`, `/verify-setup`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/officer-role`, `/dividers` | Manage Server only |
-| Member | `/profile`, `/op join`, `/op leave`, `/op roster`, `/op list`, `/rate`, `/rating-history`, `/continent`, `/roblox`, `/activity`, `/panel-list` | Everyone |
+| Officer | `/op create`, `/op edit`, `/op cancel`, `/op close`, `/promote`, `/demote`, `/warn`, `/warns`, `/unwarn`, `/nickname`, `/panel`, `/record`, `/verify-panel`, `/code-set` | The officer role, plus anyone with the underlying permission. `/code-set` also passes for the **Server Host** role |
+| Admin | `/op-setup`, `/verify-setup`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/officer-role`, `/ranks-setup`, `/dividers` | Manage Server only |
+| Member | `/profile`, `/code`, `/op join`, `/op leave`, `/op roster`, `/op list`, `/rate`, `/rating-history`, `/continent`, `/roblox`, `/activity`, `/panel-list` | Everyone |
 
 The split is running the faction versus configuring the server. An officer posts ops, renames people, files records and reposts panels. Wiring up which channel things land in stays with you.
 
@@ -100,15 +100,36 @@ Your enforcement rules say warning, then removal. This is the record that makes 
 
 The count shows on `/profile` and on their member record. Needs Moderate Members or the officer role.
 
-### Info panels
-Reference posts (banner image, section cards, link buttons) defined as JSON files in `panels/` and posted on demand.
+### Ranks
+A nine step ladder from Private 1 to Staff Sergeant, separate from the Operator access role and from Command, so promoting somebody never touches who can see what or who runs the faction. Verifying lands a member on Private 1.
+
+| Command | What it does |
+|---|---|
+| `/promote @member [reason]` | One step up: swaps the rank role, DMs them, files a card in the records channel |
+| `/demote @member [reason]` | One step down, same trail |
+| `/ranks-setup` | Create every rank, the `NCO` marker and the position roles that are missing, and start every verified member who has no rank on Private 1 (needs Manage Server) |
+
+From Corporal 1 up a member also holds the `NCO` marker, so an NCO channel needs one permission line and never has to be touched when the ladder changes. Rank shows on `/profile`.
+
+### Server code
+| Command | What it does |
+|---|---|
+| `/code` | The private server code, ephemeral, verified members only |
+| `/code-set <code>` | Change it. Command, or whoever holds the **Server Host** role |
+
+The information hub's key button reads the same setting live, so changing the code never means re-posting anything.
+
+### Info panels and the hub
+Reference posts (banner image, section cards, buttons) defined as JSON files in `panels/` and posted on demand.
 
 | Command | What it does |
 |---|---|
 | `/panel <name>` | Post the panel (needs Manage Messages) |
 | `/panel-list` | Show available panels |
 
-A section is either a block of `body` text or a list of `fields`, which render as evenly sized rows inside one card. Use fields for anything list shaped, like rules, so you get one tidy card instead of a dozen ragged ones. Copy `panels/example.json`, rename it, edit; the filename is the panel name. Ships with `jarcord`, a member-facing guide to every command.
+A section is either a block of `body` text or a list of `fields`, which render as evenly sized rows inside one card. Use fields for anything list shaped, like rules, so you get one tidy card instead of a dozen ragged ones. Copy `panels/example.json`, rename it, edit; the filename is the panel name.
+
+A banner can be a URL or `file:name.png` for an image shipped in `panels/assets/`, attached at post time so nothing needs hosting. A button with a `url` is a link. A button with a `panel` opens that panel as an ephemeral reply, only the presser sees it, which is how `hub` works: one message in the information channel, a banner, and a row of buttons for who we are, rules, units, chain of command, working with ROC, channels, operations, commands and the server code. Hub buttons survive restarts.
 
 ### Activity tracking
 Every non-bot guild message bumps a per-user counter and `last_seen` timestamp (UTC).
@@ -130,12 +151,14 @@ cogs/ops.py       op signups
 cogs/rating.py    ratings
 cogs/activity.py  activity tracking
 cogs/profile.py   Roblox link + continent + profile card
-cogs/panels.py    info panels
+cogs/panels.py    info panels and the hub
 cogs/verify.py    new-member nickname verification
-cogs/roles.py     role-list utilities
+cogs/roles.py     server setup, role utilities, server code
 cogs/welcome.py   join welcome card
 cogs/warnings.py  warning log
+cogs/ranks.py     rank ladder
 panels/*.json     panel definitions
+panels/assets/    images attached to panels
 setup.sh          LXC provisioning script
 jarcord.service   systemd unit
 ```

@@ -3,39 +3,89 @@
   "sections": [
     {
       "title": "CHAIN OF COMMAND",
-      "body": "Who holds what, and who to talk to when you need something.\n\nRank in ROC is a job, not a trophy. Every rank below is a lane somebody has to own. If a lane is empty, it is open."
+      "body": "Rank in ROC is a job, not a trophy. Every rank below is a lane somebody owns.\n\nCommand is appointed. Everything under it is earned by turning up, performing, and being trusted with other people. Promotions come from Command, one step at a time, and each one is filed on your record."
     },
     {
-      "title": "COMMAND",
+      "title": "🎖️  COMMAND",
+      "body": "*Appointed, not earned.*",
       "fields": [
         {
-          "name": "First in Command",
+          "name": "1iC  ·  First in Command",
           "value": "Runs ROC. Owns the brand, recruiting, partnerships with other factions, the server and the bot. Final say on standards and on who gets removed."
         },
         {
-          "name": "Second in Command",
+          "name": "2iC  ·  Second in Command",
           "value": "Deputises for the First in Command and can run everything Command can."
         },
         {
-          "name": "Command",
+          "name": "CMD  ·  Command",
           "value": "The wider leadership group. Anything you would ask in public, Command can answer."
         }
       ]
     },
     {
-      "title": "OPERATIONS",
+      "title": "🥇  NON-COMMISSIONED OFFICERS",
+      "body": "*Earned. Trusted with other people. From Corporal 1 up you hold the NCO marker and its channel.*",
       "fields": [
         {
-          "name": "Ops Officer",
-          "value": "Hosts operations and runs training. Sets the schedule, writes the briefing, records who actually turned up."
+          "name": "SSG  ·  Staff Sergeant",
+          "value": "Can run an op start to finish and deputises for Command."
         },
         {
-          "name": "Ground Unit Leader",
-          "value": "Runs the Ground Unit. Assigns fireteams and sets ground tactics during an op."
+          "name": "SGT  ·  Sergeant",
+          "value": "Leads a squad and runs training."
         },
         {
-          "name": "Sniper Unit Leader",
-          "value": "Runs the Sniper Unit. Assigns overwatch positions and recon tasks."
+          "name": "CPL2  ·  Corporal 2",
+          "value": "Leads a fireteam and checks new joins out."
+        },
+        {
+          "name": "CPL1  ·  Corporal 1",
+          "value": "Leads a fireteam."
+        }
+      ]
+    },
+    {
+      "title": "🥉  ENLISTED",
+      "body": "*Earned by turning up and performing.*",
+      "fields": [
+        {
+          "name": "SPC2  ·  Specialist 2",
+          "value": "Briefs new joins and knows every loadout."
+        },
+        {
+          "name": "SPC1  ·  Specialist 1",
+          "value": "Reliable, picks their own kit."
+        },
+        {
+          "name": "PVT3  ·  Private 3",
+          "value": "A regular, trusted in a fireteam."
+        },
+        {
+          "name": "PVT2  ·  Private 2",
+          "value": "Has ops on record."
+        },
+        {
+          "name": "PVT1  ·  Private 1",
+          "value": "Verified, no ops yet. Everyone starts here."
+        }
+      ]
+    },
+    {
+      "title": "POSITIONS",
+      "body": "*Jobs, not ranks. Command appoints them and they stack on any rank.*",
+      "fields": [
+        {
+          "name": "Op Planner",
+          "value": "Writes the briefings and builds the scenarios, so ops are planned and not improvised at kickoff. More than one is fine."
+        },
+        {
+          "name": "Liaison",
+          "value": "The one other factions talk to. Books joint ops, OPFOR and QRF requests, and answers fast."
+        },
+        {
+          "name": "Media",
+          "value": "Records ops, runs <#1541926692983930950>, and keeps the advert fed with real footage."
         }
       ]
     },
@@ -44,11 +94,15 @@
       "fields": [
         {
           "name": "Something about an operation",
-          "value": "The Ops Officer, or ask in <#1542215050108997684>."
+          "value": "Whoever is running it, or an Op Planner, in <#1542215050108997684>."
         },
         {
-          "name": "Your unit, or a support role",
-          "value": "Your unit leader."
+          "name": "Your unit, or a specialisation",
+          "value": "Any NCO."
+        },
+        {
+          "name": "Another faction wants us",
+          "value": "Liaison, or any Command member."
         },
         {
           "name": "Someone broke a rule",
@@ -59,10 +113,6 @@
           "value": "First in Command."
         }
       ]
-    },
-    {
-      "title": "OPEN LANES",
-      "body": "**Second operation host.** Operations should not stop because one person is offline. If you can run a session and keep people organised, say so in <#1540826188094644438> and Command will talk to you.\n\nUnit leader slots open as the units grow. The way to get one is to keep showing up and keep people alive."
     }
   ]
 }

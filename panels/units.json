@@ -1,0 +1,35 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "UNITS",
+      "body": "Every operator belongs to one unit. You pick it during verification and can change it any time in <#1542515113347649606>."
+    },
+    {
+      "title": "⚔️  GROUND UNIT",
+      "body": "The main assault force. Fireteams, breaching, holding ground. Most operators are here, and most new joins should start here."
+    },
+    {
+      "title": "🎯  SNIPER UNIT",
+      "body": "Overwatch, recon and long range support. Works in pairs, reports to the op lead, and opens the fight from where nobody is looking."
+    },
+    {
+      "title": "SPECIALISATIONS",
+      "body": "These stack on top of your unit and your rank. Ask an NCO or Command for one.",
+      "fields": [
+        {
+          "name": "Primary Pilot and Reserve Pilot",
+          "value": "Transport, insertion and air support. Reserve flies when Primary is not on."
+        },
+        {
+          "name": "Medic",
+          "value": "Keeps the unit in the fight. Patches people up, and calls the extraction when they cannot be."
+        },
+        {
+          "name": "JTAC",
+          "value": "The ground operator who talks to the pilots and calls the air in. This is what makes air support real."
+        }
+      ]
+    }
+  ]
+}

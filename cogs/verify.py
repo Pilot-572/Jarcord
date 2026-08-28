@@ -6,6 +6,7 @@ from discord.ext import commands
 
 from cogs.profile import (CONTINENTS, UNITS, RobloxDown, resolve_roblox,
                           save_profile, set_continent, set_unit)
+from cogs.ranks import RANKS, apply_rank, current_rank
 from db import conn, get_setting, set_setting
 from ui import ACCENT, embed, staff_check
 
@@ -106,6 +107,8 @@ async def grant_operator(member: discord.Member) -> None:
     unverified = await find_role(member.guild, UNVERIFIED)
     if unverified is not None and unverified in member.roles:
         await member.remove_roles(unverified, reason="verified callsign")
+    # everyone starts at the bottom of the ladder, and a rejoin gets their old rank role back
+    await apply_rank(member, current_rank(member) or RANKS[0])
 
 
 class CallsignModal(discord.ui.Modal, title="Operator ID"):

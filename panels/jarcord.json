@@ -4,7 +4,7 @@
   "sections": [
     {
       "title": "📋  OP SIGNUPS",
-      "body": "> Officers post an op with `/op-create`, everyone else signs up with `/op-join <id>`.\n> \n> `/op-join <id>` puts you on the roster\n> `/op-leave <id>` drops you off it\n> `!op roster <id>` shows who's coming\n> `!op list` lists recent ops and their IDs\n\nIf the op has a real date and time set, you'll get pinged **30 minutes before it starts**."
+      "body": "> Officers post an op with `/op create`, everyone else presses a button on the card.\n> \n> `/op join <id>` puts you on the roster without the button\n> `/op leave <id>` drops you off it\n> `/op roster <id>` shows who's coming\n> `/op list` lists recent ops and their IDs\n\nIf the op has a real date and time set, you'll get pinged **30 minutes before it starts**."
     },
     {
       "title": "⭐  PERFORMANCE RATINGS",
@@ -16,7 +16,7 @@
     },
     {
       "title": "📈  ACTIVITY",
-      "body": "> `/activity @member` shows messages, ops attended and last seen\n> `!inactive [days]` lists who's gone quiet (default 14 days)\n\nActivity is tracked passively. No check-ins and no forms. Just show up and talk."
+      "body": "> `/activity @member` shows messages, ops attended and last seen\n> `/inactive [days]` lists who's gone quiet (default 14 days)\n\nActivity is tracked passively. No check-ins and no forms. Just show up and talk."
     }
   ],
   "buttons": [

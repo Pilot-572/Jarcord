@@ -1,0 +1,21 @@
+{
+  "colour": "94A3B8",
+  "banner": "file:banner_moody.png",
+  "sections": [
+    {
+      "title": "SERVER INFORMATION",
+      "body": "**Rapid Ops Company, est. 2026**\n\nEverything about ROC is behind a button below. Only you see what you open, so press as many as you like.\n\n──────────────────────────────"
+    }
+  ],
+  "buttons": [
+    { "emoji": "❓", "label": "Who we are", "panel": "who-we-are" },
+    { "emoji": "📕", "label": "Rules", "panel": "rules" },
+    { "emoji": "⚔️", "label": "Units", "panel": "units" },
+    { "emoji": "🎖️", "label": "Chain of command", "panel": "chain-of-command" },
+    { "emoji": "🤝", "label": "Work with ROC", "panel": "work-with-roc" },
+    { "emoji": "🗺️", "label": "Channels", "panel": "channels" },
+    { "emoji": "🗓️", "label": "Operations", "panel": "operations" },
+    { "emoji": "🤖", "label": "Commands", "panel": "commands" },
+    { "emoji": "🔑", "label": "Server code", "panel": "code" }
+  ]
+}

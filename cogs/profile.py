@@ -180,6 +180,8 @@ class Profile(commands.Cog):
             if p and p["roblox_name"] else "*Not linked. Use /roblox*"
         )
         e.add_field(name="Roblox", value=roblox, inline=True)
+        from cogs.ranks import current_rank  # lazy, ranks imports this module
+        e.add_field(name="Rank", value=current_rank(member) or "*none yet*", inline=True)
         e.add_field(
             name="Unit",
             value=p["unit"] if p and p["unit"] else "*Not set*",

@@ -1,0 +1,17 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "OPERATIONS",
+      "body": "Ops are posted in <#1542215046820663346> with the time shown in your own timezone, so there's nothing to convert.\n\nEach card has three buttons. Press **Attending**, **Maybe** or **Can't make it**. You can change your answer any time before the op starts. Everyone attending gets pinged 30 minutes before kickoff.\n\nEvery op gets its own thread, linked from the card. Loadouts, questions and the after-action talk go there, not in general."
+    },
+    {
+      "title": "SHOWING UP",
+      "body": "After the op, whoever ran it records who actually turned up. Saying you're coming and not showing counts as a no-show, and it's visible on your `/profile`. Press **Can't make it** instead, nobody minds.\n\nTurning up is also how you move up the ladder. See **Chain of command**."
+    },
+    {
+      "title": "GETTING IN",
+      "body": "The private server code is behind the 🔑 button on the hub and on `/code`. It changes now and then, so check before an op rather than saving it."
+    }
+  ]
+}

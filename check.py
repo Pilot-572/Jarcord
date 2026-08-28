@@ -2,6 +2,7 @@
 # ponytail: one script, no framework. Catches the two things that actually bite:
 # AI-tell dashes in shipped text, and panel JSON that Discord will reject at post time.
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -35,6 +36,23 @@ def check_panels():
         sections = panel.get("sections", [])
         if len(sections) + bool(panel.get("banner")) > 10:
             errors.append(f"{f.name} has more than 10 embeds, Discord will reject the message")
+        banner = panel.get("banner") or ""
+        if banner.startswith("file:") and not (ROOT / "panels" / "assets" / banner[5:]).exists():
+            errors.append(f"{f.name} banner {banner[5:]} is not in panels/assets")
+        buttons = panel.get("buttons", [])
+        if len(buttons) > 25:
+            errors.append(f"{f.name} has more than 25 buttons")
+        for b in buttons:
+            if len(b.get("label") or "") > 80:
+                errors.append(f"{f.name} button '{b.get('label')}' label is over 80 chars")
+            target = b.get("panel")
+            if not b.get("url") and not target:
+                errors.append(f"{f.name} button '{b.get('label')}' has neither a url nor a panel")
+            elif target and not re.fullmatch(r"[a-z0-9-]+", target):
+                # the hub button id carries the name and only accepts these characters
+                errors.append(f"{f.name} button '{b.get('label')}' target '{target}' must be lowercase letters, digits and dashes")
+            elif target and target != "code" and not (ROOT / "panels" / f"{target}.json").exists():
+                errors.append(f"{f.name} button '{b.get('label')}' opens '{target}', which does not exist")
         for s in sections:
             title = s.get("title", "?")
             for key, cap in (("title", LIMITS["title"]), ("body", LIMITS["body"])):

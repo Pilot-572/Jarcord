@@ -1,0 +1,30 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "FINDING YOUR WAY AROUND",
+      "body": "If you've just verified: read <#1542514728297959457> once, grab your roles in <#1542515113347649606>, then say hello in <#1540826188094644438>."
+    },
+    {
+      "title": "WHERE THINGS LIVE",
+      "fields": [
+        {
+          "name": "Arrival",
+          "value": "<#1542215058099277884> the welcome card\n<#1542514728297959457> the rules, read them once\n<#1542256936161124412> verification, one button and two short forms\n<#1542515113347649606> pick your unit, continent and pings"
+        },
+        {
+          "name": "Public",
+          "value": "<#1540826188094644438> general chat\n<#1542215031410663524> this hub, everything about ROC behind a button\n<#1542531684023406674> run bot commands here so you don't spam general\n<#1541926692983930950> clips, screenshots and advert material"
+        },
+        {
+          "name": "Operations",
+          "value": "<#1542215046820663346> ops get posted here, RSVP on the card, talk in its thread\n<#1542215050108997684> the plan for a specific op\n<#1542215054022156389> talk during and after an op"
+        },
+        {
+          "name": "Voice",
+          "value": "<#1540826188535304223> hang out\n<#1542215062436184124> ground unit comms\n<#1542215066185769030> sniper unit comms"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "BOT COMMANDS",
+      "fields": [
+        {
+          "name": "Yours",
+          "value": "`/profile` your record: rank, unit, ops attended, no-shows, warnings, rating\n`/code` the private server code\n`/roblox` link or update your Roblox username\n`/continent` change where you're playing from\n`/op list` what's coming up\n`/op join` and `/op leave` RSVP without touching the buttons\n`/op roster` who's signed up for an op\n`/rate` and `/rating-history` rate someone after an op, see their feedback\n`/activity` and `/inactive` who's around and who's gone quiet"
+        },
+        {
+          "name": "Command only",
+          "value": "`/op create`, `/op edit`, `/op close`, `/op cancel`\n`/promote`, `/demote`\n`/warn`, `/warns`, `/unwarn`, `/nickname`\n`/record`, `/panel`, `/setup`, `/ranks-setup`\n`/code-set` also works for whoever holds **Server Host**"
+        },
+        {
+          "name": "Where",
+          "value": "Use them in <#1542531684023406674>. Most replies are only visible to you."
+        }
+      ]
+    }
+  ]
+}

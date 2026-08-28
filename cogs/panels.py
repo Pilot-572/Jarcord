@@ -1,13 +1,16 @@
-# ── Jarcord: info panels (banner + section cards + link buttons) ──
+# ── Jarcord: info panels (banner + section cards + buttons) and the information hub ──
 import json
 from pathlib import Path
 
 import discord
 from discord.ext import commands
 
+from cogs.roles import code_text
 from ui import ACCENT, embed, staff_check
 
 PANEL_DIR = Path(__file__).parent.parent / "panels"
+ASSET_DIR = PANEL_DIR / "assets"
+CODE_PAGE = "code"  # ponytail: the one hub button that is not a panel file
 
 
 def panel_names() -> list[str]:
@@ -21,13 +24,46 @@ def load_panel(name: str) -> dict | None:
     return json.loads((PANEL_DIR / f"{name}.json").read_text(encoding="utf-8"))
 
 
-def build(panel: dict) -> tuple[list[discord.Embed], discord.ui.View | None]:
+class HubButton(discord.ui.DynamicItem[discord.ui.Button],
+                template=r"jarcord:hub:(?P<name>[a-z0-9-]+)"):
+    """A hub button. The page it opens is in the custom_id, so restarts forget nothing and
+    any panel file is a page without registering anything. Replies are ephemeral."""
+
+    def __init__(self, name: str, label: str = None, emoji: str = None):
+        super().__init__(discord.ui.Button(
+            label=label, emoji=emoji, style=discord.ButtonStyle.secondary,
+            custom_id=f"jarcord:hub:{name}",
+        ))
+        self.name = name
+
+    @classmethod
+    async def from_custom_id(cls, interaction: discord.Interaction, item: discord.ui.Button, match, /):
+        return cls(match["name"])
+
+    async def callback(self, interaction: discord.Interaction):
+        if self.name == CODE_PAGE:
+            await interaction.response.send_message(code_text(interaction.user), ephemeral=True)
+            return
+        panel = load_panel(self.name)
+        if panel is None:
+            await interaction.response.send_message("That page is missing. Tell Command.", ephemeral=True)
+            return
+        await interaction.response.send_message(**send_kwargs(panel), ephemeral=True)
+
+
+def build(panel: dict) -> tuple[list[discord.Embed], discord.ui.View | None, list[discord.File]]:
     colour = discord.Colour(int(panel["colour"], 16)) if panel.get("colour") else ACCENT
-    embeds = []
+    embeds, files = [], []
 
     if panel.get("banner"):
         head = discord.Embed(colour=colour)
-        head.set_image(url=panel["banner"])
+        src = panel["banner"]
+        if src.startswith("file:"):  # shipped in panels/assets, attached, nothing to host
+            name = src[len("file:"):]
+            files.append(discord.File(ASSET_DIR / name, filename=name))
+            head.set_image(url=f"attachment://{name}")
+        else:
+            head.set_image(url=src)
         embeds.append(head)
 
     # Discord allows 10 embeds per message, and the banner eats one of them
@@ -42,21 +78,39 @@ def build(panel: dict) -> tuple[list[discord.Embed], discord.ui.View | None]:
         e.timestamp = None  # panels are reference posts, not events
         embeds.append(e)
 
-    buttons = panel.get("buttons", [])[:5]
+    buttons = panel.get("buttons", [])[:25]
     view = None
     if buttons:
-        view = discord.ui.View()
+        view = discord.ui.View(timeout=None)
         for b in buttons:
-            view.add_item(discord.ui.Button(
-                label=b["label"], url=b["url"], emoji=b.get("emoji"),
-                style=discord.ButtonStyle.link,
-            ))
-    return embeds, view
+            if b.get("url"):
+                view.add_item(discord.ui.Button(
+                    label=b["label"], url=b["url"], emoji=b.get("emoji"),
+                    style=discord.ButtonStyle.link,
+                ))
+            else:
+                view.add_item(HubButton(b["panel"], label=b["label"], emoji=b.get("emoji")))
+    return embeds, view, files
+
+
+def send_kwargs(panel: dict) -> dict:
+    """Keyword arguments for send(), only the ones that apply. Files are single use, so
+    this builds fresh ones every call."""
+    embeds, view, files = build(panel)
+    kw = {"embeds": embeds}
+    if view is not None:
+        kw["view"] = view
+    if files:
+        kw["files"] = files
+    return kw
 
 
 class Panels(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+
+    async def cog_load(self):
+        self.bot.add_dynamic_items(HubButton)  # hub buttons survive restarts
 
     @commands.hybrid_command(name="panel", description="Post an info panel (needs Manage Messages)")
     @discord.app_commands.default_permissions(manage_messages=True)
@@ -66,11 +120,11 @@ class Panels(commands.Cog):
         if panel is None:
             await ctx.send(f"No panel called `{name}`. Available: {', '.join(panel_names()) or 'none'}")
             return
-        embeds, view = build(panel)
-        if not embeds:
+        kw = send_kwargs(panel)
+        if not kw["embeds"]:
             await ctx.send(f"Panel `{name}` has no banner or sections.")
             return
-        await ctx.send(embeds=embeds, view=view)
+        await ctx.send(**kw)
 
     @commands.hybrid_command(name="panel-list", description="List available info panels")
     async def panel_list(self, ctx: commands.Context):

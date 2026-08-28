@@ -1,0 +1,34 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "WORKING WITH ROC",
+      "body": "Running an operation and need an enemy force? Need a reaction team on standby, or a rescue when it goes wrong? That is what ROC is for.\n\nWe take direction from your operation lead. Your rules apply in your op, ours apply in ours."
+    },
+    {
+      "title": "WHAT WE BRING",
+      "fields": [
+        {
+          "name": "OPFOR",
+          "value": "A real opposing force that plays it straight. No stalling, no ego, nobody wrecks your event."
+        },
+        {
+          "name": "QRF",
+          "value": "A reaction team on standby that moves the moment you call."
+        },
+        {
+          "name": "SAR",
+          "value": "Search and rescue. Your people are down or cut off, we get them out."
+        },
+        {
+          "name": "Joint operations",
+          "value": "Side by side on a shared objective, with our own pilots and medics."
+        }
+      ]
+    },
+    {
+      "title": "HOW TO BOOK",
+      "body": "Message anyone holding **Liaison** or **Command** on this server.\n\nSend us:\n• the date and start time, in your own timezone\n• how many bodies you want\n• what you want us to play\n• a briefing link or a short summary\n\nGive us 48 hours where you can. A confirmed booking gets an op card on our schedule and the people to fill it."
+    }
+  ]
+}

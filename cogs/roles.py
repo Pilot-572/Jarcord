@@ -2,10 +2,12 @@
 import discord
 from discord.ext import commands
 
+from cogs.verify import OPERATOR
 from db import get_setting, set_setting
-from ui import ACCENT, embed, staff_check
+from ui import ACCENT, embed, is_officer, staff_check
 
 DIVIDER = "─" * 32  # ponytail: fixed width, Discord truncates the role list anyway
+SERVER_HOST = "Server Host"  # whoever owns the private server, may change the code without being Command
 
 # (label, settings key, what it points at, the command that sets it)
 SETTINGS = (
@@ -17,7 +19,22 @@ SETTINGS = (
     ("Ops ping role",        "op_ping_role_id",    "role",    "/op-setup"),
     ("Op timezone",          "op_timezone",        "text",    "/op-setup"),
     ("Officer role",         "officer_role_id",    "role",    "/officer-role"),
+    ("Server code",          "server_code",        "secret",  "/code-set"),
 )
+
+
+def has_role(member: discord.Member, name: str) -> bool:
+    return any(r.name == name for r in member.roles)
+
+
+def code_text(member: discord.Member) -> str:
+    """What /code and the hub's key button say. Verified members only, visitors get told why."""
+    if not (has_role(member, OPERATOR) or is_officer(member)):
+        return "Verify first, then the code is yours."
+    code = get_setting("server_code")
+    if not code:
+        return "No server code set yet. Command sets it with `/code-set`."
+    return f"Private server code: `{code}`\nKeep it inside this server."
 
 
 class Roles(commands.Cog):
@@ -36,7 +53,9 @@ class Roles(commands.Cog):
         for label, key, kind, how in SETTINGS:
             value = get_setting(key)
             if value:
-                shown = {"channel": f"<#{value}>", "role": f"<@&{value}>"}.get(kind, f"`{value}`")
+                # secrets never render here, /setup can be run as a public prefix command
+                shown = {"channel": f"<#{value}>", "role": f"<@&{value}>",
+                         "secret": "`set`"}.get(kind, f"`{value}`")
                 ready.append(f"**{label}** {shown}")
             else:
                 missing.append(f"**{label}** run `{how}`")
@@ -60,6 +79,22 @@ class Roles(commands.Cog):
             f"**{role.name}** can now run Jarcord's staff commands. Pick which ones they actually "
             "see in Server Settings, Integrations, Jarcord."
         )
+
+    @commands.hybrid_command(name="code", description="The current private server code")
+    async def code(self, ctx: commands.Context):
+        if ctx.interaction is None:  # a prefix reply is public, and the whole point is that this is not
+            await ctx.send("Use `/code` so only you see it.")
+            return
+        await ctx.send(code_text(ctx.author), ephemeral=True)
+
+    @commands.hybrid_command(name="code-set", description="Change the private server code (Command or Server Host)")
+    async def code_set(self, ctx: commands.Context, *, code: str):
+        if not (is_officer(ctx.author) or has_role(ctx.author, SERVER_HOST)):
+            await ctx.send(f"Command or the **{SERVER_HOST}** role only.", ephemeral=True)
+            return
+        set_setting("server_code", code.strip())
+        print(f">> server code changed by {ctx.author.id}")
+        await ctx.send("Server code updated. `/code` and the information hub show it live.", ephemeral=True)
 
     @commands.hybrid_command(name="dividers", description="Create blank divider roles for the role list")
     @discord.app_commands.default_permissions(manage_guild=True)
