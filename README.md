@@ -108,7 +108,7 @@ A nine step ladder from Private 1 to Staff Sergeant, separate from the Operator 
 | `/promote @member [reason]` | One step up: swaps the rank role, DMs them, files a card in the records channel |
 | `/demote @member [reason]` | One step down, same trail |
 | `/ranks-setup` | Create every rank, the `NCO` marker and the position roles that are missing, and start every verified member who has no rank on Private 1 (needs Manage Server) |
-| `/promotions-setup <channel>` | Announce every promotion and demotion there, member pinged, reason left off (needs Manage Server) |
+| `/promotions-setup <channel>` | Announce every promotion and demotion there, member pinged, reason included (needs Manage Server) |
 
 From Corporal 1 up a member also holds the `NCO` marker, so an NCO channel needs one permission line and never has to be touched when the ladder changes. Rank shows on `/profile`.
 

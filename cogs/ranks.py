@@ -153,7 +153,6 @@ class Ranks(commands.Cog):
                 except discord.Forbidden:
                     notes.append(f"couldn't file it in #{channel.name}")
 
-        # the public one carries no reason, that stays on the record
         channel_id = get_setting("promotions_channel_id")
         if channel_id:
             channel = ctx.guild.get_channel(int(channel_id))
@@ -161,7 +160,7 @@ class Ranks(commands.Cog):
                 try:
                     await channel.send(
                         content=member.mention,
-                        embed=rank_card(member, old, new, ctx.author, None, up),
+                        embed=rank_card(member, old, new, ctx.author, reason, up),
                         allowed_mentions=discord.AllowedMentions(users=True),
                     )
                 except discord.Forbidden:
@@ -173,13 +172,16 @@ class Ranks(commands.Cog):
             msg += " Note: " + "; ".join(notes) + "."
         await ctx.send(msg, ephemeral=True)
 
+    # the reason is public, it shows on the announcement as well as the record
     @commands.hybrid_command(name="promote", description="Move a member one rank up the ladder")
+    @discord.app_commands.describe(member="Who to promote", reason="Shown on the announcement and on their record")
     @discord.app_commands.default_permissions(manage_roles=True)
     @staff_check(officer=True, manage_roles=True)
     async def promote(self, ctx: commands.Context, member: discord.Member, *, reason: str = None):
         await self._move(ctx, member, reason, up=True)
 
     @commands.hybrid_command(name="demote", description="Move a member one rank down the ladder")
+    @discord.app_commands.describe(member="Who to demote", reason="Shown on the announcement and on their record")
     @discord.app_commands.default_permissions(manage_roles=True)
     @staff_check(officer=True, manage_roles=True)
     async def demote(self, ctx: commands.Context, member: discord.Member, *, reason: str = None):
