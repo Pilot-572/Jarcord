@@ -1,4 +1,5 @@
 # ── Jarcord: member profiles (Roblox link + continent) cog ──
+import asyncio
 from typing import Literal, Optional
 
 import aiohttp
@@ -56,19 +57,35 @@ async def set_unit(member: discord.Member, unit: str) -> bool:
     return await set_exclusive_role(member, unit, UNITS)
 
 
+class RobloxDown(Exception):
+    """The lookup itself failed. Not the same as a username that doesn't exist, and
+    telling somebody to check their spelling during an outage sends them in circles."""
+
+
 async def resolve_roblox(username: str):
-    """Return (id, canonical_name) or None if the username doesn't exist."""
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            ROBLOX_LOOKUP,
-            json={"usernames": [username], "excludeBannedUsers": True},
-        ) as resp:
-            if resp.status != 200:
-                return None
-            data = (await resp.json()).get("data", [])
-    if not data:
-        return None
-    return data[0]["id"], data[0]["name"]
+    """Return (id, canonical_name), or None if the username doesn't exist.
+    Raises RobloxDown when Roblox never answered."""
+    timeout = aiohttp.ClientTimeout(total=8)  # ponytail: leaves room inside a modal defer
+    last = None
+    for attempt in (1, 2):  # one retry, Roblox blips for a second or two
+        try:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(
+                    ROBLOX_LOOKUP,
+                    json={"usernames": [username], "excludeBannedUsers": True},
+                ) as resp:
+                    if resp.status == 429 or resp.status >= 500:
+                        raise aiohttp.ClientError(f"roblox returned {resp.status}")
+                    if resp.status != 200:
+                        return None
+                    data = (await resp.json()).get("data", [])
+            return (data[0]["id"], data[0]["name"]) if data else None
+        except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+            last = e
+            print(f">> roblox lookup attempt {attempt} failed: {e}")
+            if attempt == 1:
+                await asyncio.sleep(1)
+    raise RobloxDown(str(last))
 
 
 class Profile(commands.Cog):
@@ -80,7 +97,11 @@ class Profile(commands.Cog):
 
     @commands.hybrid_command(name="roblox", description="Link your Roblox account (sets your nickname)")
     async def roblox(self, ctx: commands.Context, username: str):
-        found = await resolve_roblox(username)
+        try:
+            found = await resolve_roblox(username)
+        except RobloxDown:
+            await ctx.send("Roblox isn't answering right now. Try again in a minute.")
+            return
         if found is None:
             await ctx.send(f"No Roblox account called **{username}**. Check the spelling.")
             return

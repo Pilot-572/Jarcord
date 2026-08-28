@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 import discord
 from discord.ext import commands
 
-from cogs.profile import (CONTINENTS, UNITS, resolve_roblox, save_profile,
-                          set_continent, set_unit)
+from cogs.profile import (CONTINENTS, UNITS, RobloxDown, resolve_roblox,
+                          save_profile, set_continent, set_unit)
 from db import conn, get_setting, set_setting
 from ui import ACCENT, embed, staff_check
 
@@ -125,7 +125,15 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
         await interaction.response.defer(ephemeral=True)
         member = interaction.user
 
-        found = await resolve_roblox(str(self.roblox))
+        try:
+            found = await resolve_roblox(str(self.roblox))
+        except RobloxDown:
+            await interaction.followup.send(
+                "Roblox isn't answering right now, so I can't check that username. "
+                "Give it a minute and press Verify again, nothing else is needed.",
+                ephemeral=True,
+            )
+            return
         if found is None:
             await interaction.followup.send(
                 f"I couldn't find the Roblox user **{self.roblox}**. Check the spelling and try again.",
