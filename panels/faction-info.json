@@ -1,0 +1,55 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "RAPID OPS COMPANY",
+      "body": "*Semper Primus.* Always first.\n\nROC is a BRM5 faction built around one idea: be the faction other factions call.\n\nWhen a unit needs an enemy for their operation, we show up as the enemy. When they need a rescue, a reinforcement or an extraction, we get there first. In between we run our own operations, PvE and PvP.\n\n\"Company\" is the echelon, not a corporation. ROC is not a PMC."
+    },
+    {
+      "title": "WHAT WE DO",
+      "fields": [
+        {
+          "name": "OPFOR",
+          "value": "Another faction plans an operation and needs someone to fight. We field the opposition and play it straight. A real fight, no stalling, no ego, and nobody wrecks their event."
+        },
+        {
+          "name": "QRF and SAR",
+          "value": "Quick reaction and search and rescue. A team is pinned, downed or cut off and needs bodies on the ground fast. Speed is the whole product."
+        },
+        {
+          "name": "Our own operations",
+          "value": "PvE and PvP, posted in <#1542215046820663346> with RSVP buttons on the card. Anyone verified can sign up."
+        },
+        {
+          "name": "Academy",
+          "value": "Planned. A training wing for players new to BRM5, once there are enough of us to staff it."
+        }
+      ]
+    },
+    {
+      "title": "HOW WE RUN",
+      "body": "**Semi-milsim.** Structured enough that other factions trust us inside their operations, open enough that you do not need a resume to get in.\n\nIn practice that means: show up when you said you would, listen to whoever is running the op, use your mic, and take the mission seriously while it is running. Outside an operation this is a normal Discord server.\n\nNo application, no assessment, no attendance quota. Verification takes about a minute in <#1542256936161124412>."
+    },
+    {
+      "title": "UNITS",
+      "fields": [
+        {
+          "name": "Ground Unit",
+          "value": "The main assault force. Most operators are here."
+        },
+        {
+          "name": "Sniper Unit",
+          "value": "Overwatch, recon and long range support."
+        },
+        {
+          "name": "Air and support",
+          "value": "**Primary Pilot** and **Reserve Pilot** fly transport and air support. **Medic** patches people up in the field. Ask a unit leader if you want one."
+        }
+      ]
+    },
+    {
+      "title": "WORKING WITH ROC",
+      "body": "Running an operation and need an enemy force, or a QRF sitting on standby? Message Command.\n\nTell us the date, the time in your own timezone, how many bodies you want and what role you want us to play. We take direction from your operation lead and we bring the people."
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 # ── Jarcord: op signups (RSVP) cog ──
 import time
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import discord
 from discord import app_commands
@@ -11,6 +12,7 @@ from ui import ACCENT, app_staff_check, embed, is_officer
 
 REMIND_BEFORE = 30 * 60  # ponytail: fixed 30-min reminder; make it per-op if anyone asks
 WHEN_FORMATS = ("%Y-%m-%d %H:%M", "%d.%m.%Y %H:%M", "%d.%m %H:%M")
+DEFAULT_TZ = "UTC"  # what op times are read as until /op-setup says otherwise
 # RSVP status -> (button label, embed heading)
 STATUSES = {"in": ("Attending", "Attending"),
             "maybe": ("Maybe", "Maybe"),
@@ -18,20 +20,38 @@ STATUSES = {"in": ("Attending", "Attending"),
 
 
 # ── Time parsing ──
-def parse_when(text: str) -> int | None:
-    """Return a unix timestamp if `text` matches a known UTC format, else None."""
+def guild_tz() -> ZoneInfo:
+    """The timezone op times are typed in. Cards still render per reader."""
+    try:
+        return ZoneInfo(get_setting("op_timezone") or DEFAULT_TZ)
+    except (ZoneInfoNotFoundError, ValueError):
+        return ZoneInfo(DEFAULT_TZ)  # stale setting, don't take ops down over it
+
+
+def parse_when(text: str, tz: ZoneInfo = None) -> int | None:
+    """Unix timestamp for a wall clock time typed in the guild timezone, else None."""
+    tz = tz or guild_tz()
     for fmt in WHEN_FORMATS:
         try:
             dt = datetime.strptime(text.strip(), fmt)
         except ValueError:
             continue
-        if dt.year == 1900:  # DD.MM without a year
-            now = datetime.now(timezone.utc)
-            dt = dt.replace(year=now.year)
-            if dt.replace(tzinfo=timezone.utc) < now:
+        if dt.year == 1900:  # DD.MM with no year, take the next one to come round
+            now = datetime.now(tz)
+            dt = dt.replace(year=now.year, tzinfo=tz)
+            if dt < now:
                 dt = dt.replace(year=now.year + 1)
-        return int(dt.replace(tzinfo=timezone.utc).timestamp())
+        else:
+            dt = dt.replace(tzinfo=tz)
+        return int(dt.timestamp())
     return None
+
+
+def when_feedback(ts: int | None) -> str:
+    """Echo back what the typed time actually became, so a wrong timezone is obvious."""
+    if ts is None:
+        return " I couldn't read that as a time, so it shows as written and gets no reminder."
+    return f" Starts <t:{ts}:F>."
 
 
 def when_display(op) -> str:
@@ -227,7 +247,10 @@ def edit_op(op_id: int, user_id: int, is_officer: bool, what: str = None,
     sets = ", ".join(f"{c} = ?" for c in changes)   # column names are code literals
     conn.execute(f"UPDATE ops SET {sets} WHERE id = ?", [*changes.values(), op_id])
     conn.commit()
-    return f"Updated **{changes.get('title', op['title'])}** (ID `{op_id}`)."
+    line = f"Updated **{changes.get('title', op['title'])}** (ID `{op_id}`)."
+    if when:
+        line += when_feedback(changes["when_ts"])
+    return line
 
 
 def close_op(op_id: int, user_id: int, is_officer: bool, attended_ids) -> str:
@@ -367,7 +390,7 @@ class Ops(commands.Cog):
     @op.command(name="create", description="Post an op with RSVP buttons")
     @app_commands.describe(
         what="Op name",
-        when="Free text, or '29.08 21:00' / '2026-08-29 21:00' for a real time and a reminder",
+        when="Free text, or '29.08 21:00' / '2026-08-29 21:00', read in the server timezone",
         who="Role to ping. Defaults to whatever /op-setup configured",
         notes="Loadout, meeting point, anything else",
     )
@@ -402,21 +425,43 @@ class Ops(commands.Cog):
         conn.execute("UPDATE ops SET message_id = ? WHERE id = ?", (msg.id, op_id))
         conn.commit()
         await interaction.response.send_message(
-            f"Op `{op_id}` posted in {channel.mention}. {msg.jump_url}", ephemeral=True
+            f"Op `{op_id}` posted in {channel.mention}.{when_feedback(get_op(op_id)['when_ts'])} "
+            f"{msg.jump_url}", ephemeral=True
         )
 
-    @app_commands.command(name="op-setup", description="Set the ops channel and the role to ping")
-    @app_commands.describe(channel="Where op cards get posted", ping_role="Role pinged on every op")
+    @app_commands.command(name="op-setup", description="Set the ops channel, the ping role and the timezone")
+    @app_commands.describe(
+        channel="Where op cards get posted",
+        ping_role="Role pinged on every op",
+        timezone="Timezone op times are typed in, e.g. Europe/Bucharest or Europe/London",
+    )
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.has_permissions(manage_guild=True)
-    async def op_setup(self, interaction: discord.Interaction, channel: discord.TextChannel,
-                       ping_role: discord.Role = None):
-        set_setting("op_channel_id", str(channel.id))
-        msg = f"Ops will be posted in {channel.mention}."
+    async def op_setup(self, interaction: discord.Interaction,
+                       channel: discord.TextChannel = None,
+                       ping_role: discord.Role = None, timezone: str = None):
+        lines = []
+        if timezone:
+            try:
+                ZoneInfo(timezone)
+            except (ZoneInfoNotFoundError, ValueError):
+                await interaction.response.send_message(
+                    f"`{timezone}` isn't a timezone I know. Use an IANA name like "
+                    "`Europe/Bucharest`, `Europe/London` or `UTC`.", ephemeral=True)
+                return
+            set_setting("op_timezone", timezone)
+            lines.append(f"Op times are now read as **{timezone}**. "
+                         f"Right now that is <t:{int(time.time())}:t>.")
+        if channel:
+            set_setting("op_channel_id", str(channel.id))
+            lines.append(f"Ops will be posted in {channel.mention}.")
         if ping_role:
             set_setting("op_ping_role_id", str(ping_role.id))
-            msg += f" Every op pings **{ping_role.name}**."
-        await interaction.response.send_message(msg, ephemeral=True)
+            lines.append(f"Every op pings **{ping_role.name}**.")
+        if not lines:
+            lines.append("Nothing changed. Pass a channel, a ping role or a timezone. "
+                         "`/setup` shows what's already configured.")
+        await interaction.response.send_message("\n".join(lines), ephemeral=True)
 
     @op.command(name="join", description="Sign up for an op")
     @app_commands.describe(op_id="The op ID")
@@ -434,7 +479,7 @@ class Ops(commands.Cog):
     @app_commands.describe(
         op_id="The op ID",
         what="New name",
-        when="New time. Rescheduling re-arms the 30 minute reminder",
+        when="New time, read in the server timezone. Rescheduling re-arms the 30 minute reminder",
         notes="New notes. Pass a single space to clear them",
     )
     async def op_edit(self, interaction: discord.Interaction, op_id: int, what: str = None,

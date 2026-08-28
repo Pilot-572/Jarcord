@@ -1,0 +1,68 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "CHAIN OF COMMAND",
+      "body": "Who holds what, and who to talk to when you need something.\n\nRank in ROC is a job, not a trophy. Every rank below is a lane somebody has to own. If a lane is empty, it is open."
+    },
+    {
+      "title": "COMMAND",
+      "fields": [
+        {
+          "name": "First in Command",
+          "value": "Runs ROC. Owns the brand, recruiting, partnerships with other factions, the server and the bot. Final say on standards and on who gets removed."
+        },
+        {
+          "name": "Second in Command",
+          "value": "Deputises for the First in Command and can run everything Command can."
+        },
+        {
+          "name": "Command",
+          "value": "The wider leadership group. Anything you would ask in public, Command can answer."
+        }
+      ]
+    },
+    {
+      "title": "OPERATIONS",
+      "fields": [
+        {
+          "name": "Ops Officer",
+          "value": "Hosts operations and runs training. Sets the schedule, writes the briefing, records who actually turned up."
+        },
+        {
+          "name": "Ground Unit Leader",
+          "value": "Runs the Ground Unit. Assigns fireteams and sets ground tactics during an op."
+        },
+        {
+          "name": "Sniper Unit Leader",
+          "value": "Runs the Sniper Unit. Assigns overwatch positions and recon tasks."
+        }
+      ]
+    },
+    {
+      "title": "WHO TO ASK",
+      "fields": [
+        {
+          "name": "Something about an operation",
+          "value": "The Ops Officer, or ask in <#1542215050108997684>."
+        },
+        {
+          "name": "Your unit, or a support role",
+          "value": "Your unit leader."
+        },
+        {
+          "name": "Someone broke a rule",
+          "value": "Any Command member. Do not try to handle it yourself in <#1540826188094644438>."
+        },
+        {
+          "name": "The bot is broken",
+          "value": "First in Command."
+        }
+      ]
+    },
+    {
+      "title": "OPEN LANES",
+      "body": "**Second operation host.** Operations should not stop because one person is offline. If you can run a session and keep people organised, say so in <#1540826188094644438> and Command will talk to you.\n\nUnit leader slots open as the units grow. The way to get one is to keep showing up and keep people alive."
+    }
+  ]
+}

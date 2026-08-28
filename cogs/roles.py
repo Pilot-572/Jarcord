@@ -15,6 +15,7 @@ SETTINGS = (
     ("Member records",       "records_channel_id", "channel", "/records-setup"),
     ("Ops channel",          "op_channel_id",      "channel", "/op-setup"),
     ("Ops ping role",        "op_ping_role_id",    "role",    "/op-setup"),
+    ("Op timezone",          "op_timezone",        "text",    "/op-setup"),
     ("Officer role",         "officer_role_id",    "role",    "/officer-role"),
 )
 
