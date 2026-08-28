@@ -3,89 +3,23 @@
   "sections": [
     {
       "title": "CHAIN OF COMMAND",
-      "body": "Rank in ROC is a job, not a trophy. Every rank below is a lane somebody owns.\n\nCommand is appointed. Everything under it is earned by turning up, performing, and being trusted with other people. Promotions come from Command, one step at a time, and each one is filed on your record."
-    },
-    {
-      "title": "🎖️  COMMAND",
-      "body": "*Appointed, not earned.*",
+      "body": "Rank in ROC is a job, not a trophy. Every rank below is a lane somebody owns.\n\nCommand is appointed. Everything under it is earned by turning up, performing, and being trusted with other people. Promotions come from Command, one step at a time, and each one is filed on your record.\n\n──────────────────────────────",
       "fields": [
         {
-          "name": "1iC  ·  First in Command",
-          "value": "Runs ROC. Owns the brand, recruiting, partnerships with other factions, the server and the bot. Final say on standards and on who gets removed."
+          "name": "🎖️  COMMAND  ·  appointed, not earned",
+          "value": "**1iC** {role:First in Command}\nRuns ROC. Owns the brand, recruiting, partnerships with other factions, the server and the bot. Final say on standards and on who gets removed.\n**2iC** {role:Second in Command}\nDeputises for the First in Command and can run everything Command can.\n**CMD** {role:Command}\nThe wider leadership group. Anything you would ask in public, Command can answer.\n\n──────────────────────────────"
         },
         {
-          "name": "2iC  ·  Second in Command",
-          "value": "Deputises for the First in Command and can run everything Command can."
+          "name": "🥇  NON-COMMISSIONED OFFICERS  ·  earned, trusted with other people",
+          "value": "**SSG** {role:Staff Sergeant}\nCan run an op start to finish and deputises for Command.\n**SGT** {role:Sergeant}\nLeads a squad and runs training.\n**CPL2** {role:Corporal 2}\nLeads a fireteam and checks new joins out.\n**CPL1** {role:Corporal 1}\nLeads a fireteam. From here up you hold the NCO marker and its channel.\n\n──────────────────────────────"
         },
         {
-          "name": "CMD  ·  Command",
-          "value": "The wider leadership group. Anything you would ask in public, Command can answer."
-        }
-      ]
-    },
-    {
-      "title": "🥇  NON-COMMISSIONED OFFICERS",
-      "body": "*Earned. Trusted with other people. From Corporal 1 up you hold the NCO marker and its channel.*",
-      "fields": [
-        {
-          "name": "SSG  ·  Staff Sergeant",
-          "value": "Can run an op start to finish and deputises for Command."
+          "name": "🥉  ENLISTED  ·  earned by turning up and performing",
+          "value": "**SPC2** {role:Specialist 2}\nBriefs new joins and knows every loadout.\n**SPC1** {role:Specialist 1}\nReliable, picks their own kit.\n**PVT3** {role:Private 3}\nA regular, trusted in a fireteam.\n**PVT2** {role:Private 2}\nHas ops on record.\n**PVT1** {role:Private 1}\nVerified, no ops yet. Everyone starts here.\n\n──────────────────────────────"
         },
         {
-          "name": "SGT  ·  Sergeant",
-          "value": "Leads a squad and runs training."
-        },
-        {
-          "name": "CPL2  ·  Corporal 2",
-          "value": "Leads a fireteam and checks new joins out."
-        },
-        {
-          "name": "CPL1  ·  Corporal 1",
-          "value": "Leads a fireteam."
-        }
-      ]
-    },
-    {
-      "title": "🥉  ENLISTED",
-      "body": "*Earned by turning up and performing.*",
-      "fields": [
-        {
-          "name": "SPC2  ·  Specialist 2",
-          "value": "Briefs new joins and knows every loadout."
-        },
-        {
-          "name": "SPC1  ·  Specialist 1",
-          "value": "Reliable, picks their own kit."
-        },
-        {
-          "name": "PVT3  ·  Private 3",
-          "value": "A regular, trusted in a fireteam."
-        },
-        {
-          "name": "PVT2  ·  Private 2",
-          "value": "Has ops on record."
-        },
-        {
-          "name": "PVT1  ·  Private 1",
-          "value": "Verified, no ops yet. Everyone starts here."
-        }
-      ]
-    },
-    {
-      "title": "POSITIONS",
-      "body": "*Jobs, not ranks. Command appoints them and they stack on any rank.*",
-      "fields": [
-        {
-          "name": "Op Planner",
-          "value": "Writes the briefings and builds the scenarios, so ops are planned and not improvised at kickoff. More than one is fine."
-        },
-        {
-          "name": "Liaison",
-          "value": "The one other factions talk to. Books joint ops, OPFOR and QRF requests, and answers fast."
-        },
-        {
-          "name": "Media",
-          "value": "Records ops, runs <#1541926692983930950>, and keeps the advert fed with real footage."
+          "name": "POSITIONS  ·  jobs, not ranks, they stack on any rank",
+          "value": "{role:Op Planner} writes the briefings and builds the scenarios, so ops are planned and not improvised at kickoff. More than one is fine.\n{role:Media} records ops, runs <#1541926692983930950>, and keeps the advert fed with real footage.\n{role:JTAC} is the ground operator who talks to the pilots and calls the air in."
         }
       ]
     },
@@ -102,7 +36,7 @@
         },
         {
           "name": "Another faction wants us",
-          "value": "Liaison, or any Command member."
+          "value": "Any Command member."
         },
         {
           "name": "Someone broke a rule",

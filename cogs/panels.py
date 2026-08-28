@@ -1,5 +1,6 @@
 # ── Jarcord: info panels (banner + section cards + buttons) and the information hub ──
 import json
+import re
 from pathlib import Path
 
 import discord
@@ -11,6 +12,16 @@ from ui import ACCENT, embed, staff_check
 PANEL_DIR = Path(__file__).parent.parent / "panels"
 ASSET_DIR = PANEL_DIR / "assets"
 CODE_PAGE = "code"  # ponytail: the one hub button that is not a panel file
+ROLE_TOKEN = re.compile(r"\{role:([^}]+)\}")
+
+
+def resolve_roles(panel: dict, guild: discord.Guild | None) -> dict:
+    """{role:Name} becomes a clickable role pill when the guild has that role, bold text
+    otherwise. Done on the JSON text so it works anywhere in a panel, and embeds never ping."""
+    def sub(m):
+        role = discord.utils.get(guild.roles, name=m.group(1)) if guild else None
+        return f"<@&{role.id}>" if role else f"**{m.group(1)}**"
+    return json.loads(ROLE_TOKEN.sub(sub, json.dumps(panel)))
 
 
 def panel_names() -> list[str]:
@@ -48,10 +59,11 @@ class HubButton(discord.ui.DynamicItem[discord.ui.Button],
         if panel is None:
             await interaction.response.send_message("That page is missing. Tell Command.", ephemeral=True)
             return
-        await interaction.response.send_message(**send_kwargs(panel), ephemeral=True)
+        await interaction.response.send_message(**send_kwargs(panel, interaction.guild), ephemeral=True)
 
 
-def build(panel: dict) -> tuple[list[discord.Embed], discord.ui.View | None, list[discord.File]]:
+def build(panel: dict, guild: discord.Guild = None) -> tuple[list[discord.Embed], discord.ui.View | None, list[discord.File]]:
+    panel = resolve_roles(panel, guild)
     colour = discord.Colour(int(panel["colour"], 16)) if panel.get("colour") else ACCENT
     embeds, files = [], []
 
@@ -93,10 +105,10 @@ def build(panel: dict) -> tuple[list[discord.Embed], discord.ui.View | None, lis
     return embeds, view, files
 
 
-def send_kwargs(panel: dict) -> dict:
+def send_kwargs(panel: dict, guild: discord.Guild = None) -> dict:
     """Keyword arguments for send(), only the ones that apply. Files are single use, so
     this builds fresh ones every call."""
-    embeds, view, files = build(panel)
+    embeds, view, files = build(panel, guild)
     kw = {"embeds": embeds}
     if view is not None:
         kw["view"] = view
@@ -120,7 +132,7 @@ class Panels(commands.Cog):
         if panel is None:
             await ctx.send(f"No panel called `{name}`. Available: {', '.join(panel_names()) or 'none'}")
             return
-        kw = send_kwargs(panel)
+        kw = send_kwargs(panel, ctx.guild)
         if not kw["embeds"]:
             await ctx.send(f"Panel `{name}` has no banner or sections.")
             return

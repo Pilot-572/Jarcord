@@ -17,7 +17,7 @@ ABBREV = ("PVT1", "PVT2", "PVT3", "SPC1", "SPC2", "CPL1", "CPL2", "SGT", "SSG")
 NCO = "NCO"  # marker role, held from Corporal 1 up, so a channel needs one permission line
 NCO_FROM = RANKS.index("Corporal 1")
 # Jobs, not ranks. /ranks-setup creates them, Command hands them out by hand.
-POSITIONS = ("Media", "Op Planner", "JTAC", "Liaison", "Server Host")
+POSITIONS = ("Media", "Op Planner", "JTAC", "Server Host")
 
 PROMOTED = discord.Colour(0x22C55E)
 DEMOTED = discord.Colour(0xF59E0B)

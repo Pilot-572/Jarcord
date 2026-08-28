@@ -27,9 +27,10 @@ assert RANKS[NCO_FROM] == "Corporal 1"
 assert not is_nco(None) and not is_nco("Specialist 2")
 assert is_nco("Corporal 1") and is_nco("Staff Sergeant")
 
-# the chain of command page names every rank and abbreviation as the ladder spells them
+# the chain of command page names every rank and abbreviation as the ladder spells them,
+# as a role token so it renders as a clickable pill once the role exists
 text = (Path(__file__).parent / "panels" / "chain-of-command.json").read_text(encoding="utf-8")
 for name, short in zip(RANKS, ABBREV):
-    assert f"{short}  ·  {name}" in text, name
+    assert f"**{short}** {{role:{name}}}" in text, name
 
 print(">> ok")
