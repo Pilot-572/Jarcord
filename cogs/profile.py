@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 
 from db import conn
-from ui import ago, embed, staff_check
+from ui import ago, embed, is_officer, staff_check
 
 CONTINENTS = ("Europe", "North America", "South America", "Asia", "Africa", "Oceania")
 UNITS = ("Ground Unit", "Sniper Unit")
@@ -207,10 +207,12 @@ class Profile(commands.Cog):
         )
         e.add_field(name="Messages", value=str(act["message_count"]) if act else "0", inline=True)
         e.add_field(name="Last seen", value=ago(act["last_seen"]) if act else "Never", inline=True)
-        for label, column in (("Usually online", "play_hours"), ("Age group", "age_group"),
-                              ("Found us via", "heard_from"), ("Experience", "experience")):
-            if p and p[column]:
-                e.add_field(name=label, value=p[column], inline=False)
+        # the extras include an age group, and 13-15 is a real answer. Yours, or staff only.
+        if member == ctx.author or is_officer(ctx.author):
+            for label, column in (("Usually online", "play_hours"), ("Age group", "age_group"),
+                                  ("Found us via", "heard_from"), ("Experience", "experience")):
+                if p and p[column]:
+                    e.add_field(name=label, value=p[column], inline=False)
         await ctx.send(embed=e)
 
 

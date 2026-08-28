@@ -11,6 +11,9 @@ from db import conn, get_setting, set_setting
 from ui import ACCENT, app_staff_check, embed, is_officer
 
 REMIND_BEFORE = 30 * 60  # ponytail: fixed 30-min reminder; make it per-op if anyone asks
+CLOSE_NUDGE_AFTER = 60 * 60   # an hour after start, ask the host to close it
+NUDGE_WINDOW = 7 * 86400      # ponytail: older unclosed ops are history, not a to-do
+MILESTONES = (1, 5, 10, 25)   # ops attended worth a line in the thread
 WHEN_FORMATS = ("%Y-%m-%d %H:%M", "%d.%m.%Y %H:%M", "%d.%m %H:%M")
 DEFAULT_TZ = "UTC"  # what op times are read as until /op-setup says otherwise
 # RSVP status -> (button label, embed heading)
@@ -138,14 +141,22 @@ class CloseView(discord.ui.View):
     def __init__(self, bot, op_id: int):
         super().__init__(timeout=300)
         self.bot, self.op_id = bot, op_id
+        # everyone marked Attending is pre-ticked, the host unticks the no-shows
+        self.picked.default_values = [
+            discord.SelectDefaultValue(id=u, type=discord.SelectDefaultValueType.user)
+            for u in roster(op_id)["in"][:25]
+        ]
 
     @discord.ui.select(cls=discord.ui.UserSelect, min_values=0, max_values=25,
                        placeholder="who actually turned up")
     async def picked(self, interaction: discord.Interaction, select: discord.ui.UserSelect):
-        msg = close_op(self.op_id, interaction.user.id, is_officer(interaction.user),
-                       [u.id for u in select.values])
+        was_closed = (get_op(self.op_id) or {"closed": 1})["closed"]
+        ids = [u.id for u in select.values]
+        msg = close_op(self.op_id, interaction.user.id, is_officer(interaction.user), ids)
         await interaction.response.edit_message(content=msg, view=None)
         await sync_card(self.bot, self.op_id)
+        if not was_closed and get_op(self.op_id)["closed"]:
+            await post_turnout(self.bot, self.op_id, ids)
 
 
 class OpView(discord.ui.View):
@@ -163,6 +174,8 @@ class OpView(discord.ui.View):
             return
         set_status(op["id"], interaction.user.id, status)
         await interaction.response.edit_message(embed=create_embed(op["id"]), view=self)
+        if status == "in":
+            await add_to_thread(interaction.client, op, interaction.user)
 
     @discord.ui.button(label="Attending", style=discord.ButtonStyle.success,
                        custom_id="jarcord:op:in")
@@ -180,11 +193,74 @@ class OpView(discord.ui.View):
         await self._reply(interaction, "out")
 
 
+async def get_thread(bot, thread_id):
+    """The op thread, from cache or fetched. None if it is gone."""
+    if not thread_id:
+        return None
+    thread = bot.get_channel(thread_id)
+    if thread is None:
+        try:
+            thread = await bot.fetch_channel(thread_id)
+        except discord.HTTPException:
+            return None
+    return thread
+
+
+async def add_to_thread(bot, op, member) -> None:
+    """Attending puts you in the op thread, so a plan or time change actually reaches you."""
+    thread = await get_thread(bot, op["thread_id"])
+    if thread is not None:
+        try:
+            await thread.add_user(member)
+        except discord.HTTPException:
+            pass  # archived or no permission, not worth failing the RSVP over
+
+
+async def post_turnout(bot, op_id: int, attended_ids) -> None:
+    """After a close: who came, milestones, a nudge to rate, then the thread archives."""
+    op = get_op(op_id)
+    thread = await get_thread(bot, op["thread_id"]) if op else None
+    if thread is None:
+        return
+    ids = list(dict.fromkeys(attended_ids))
+    missed = conn.execute(
+        "SELECT COUNT(*) AS n FROM signups WHERE op_id = ? AND attended = 0", (op_id,)
+    ).fetchone()["n"]
+    lines = [f"**{op['title']}** is closed. {len(ids)} attended, {missed} no-showed."]
+    if ids:
+        lines.append("Turned up: " + " ".join(f"<@{u}>" for u in ids))
+    for u in ids:
+        came, _ = attendance(u)
+        if came == 1:
+            lines.append(f"🎖️ <@{u}>, first op with ROC.")
+        elif came in MILESTONES:
+            lines.append(f"🎖️ <@{u}> just hit op {came} with ROC.")
+    if ids:
+        lines.append("Rate who you played with: `/rate @name 1-5 note`")
+    try:
+        await thread.send("\n".join(lines), allowed_mentions=discord.AllowedMentions(users=True))
+        await thread.edit(archived=True)
+    except discord.HTTPException as exc:
+        print(f">> turnout post failed for op {op_id}: {exc!r}")
+
+
 async def sync_card(bot, op_id: int, ref: tuple = None) -> None:
     """Redraw the posted op card, or delete it once the op is gone. `ref` carries
-    (channel_id, message_id) for an op whose row has already been removed."""
+    (channel_id, message_id, thread_id) for an op whose row has already been removed."""
     op = get_op(op_id)
-    channel_id, message_id = (op["channel_id"], op["message_id"]) if op else (ref or (None, None))
+    if op:
+        channel_id, message_id, thread_id = op["channel_id"], op["message_id"], None
+    elif ref:
+        channel_id, message_id, thread_id = (tuple(ref) + (None,))[:3]
+    else:
+        return
+    if op is None and thread_id:  # cancelled, the thread goes with the card
+        thread = await get_thread(bot, thread_id)
+        if thread is not None:
+            try:
+                await thread.delete()
+            except discord.HTTPException:
+                pass
     if not channel_id or not message_id:
         return
     channel = bot.get_channel(channel_id)
@@ -335,7 +411,7 @@ def list_embed() -> discord.Embed:
         f"`{r['id']:>3}` **{r['title']}**, {when_display(r)} · {r['n']} signed up" for r in rows
     )
     e = embed(title="Recent ops", description=lines)
-    e.set_footer(text="RSVP on the op card, or use /op-join <id>")
+    e.set_footer(text="RSVP on the op card, or use /op join <id>")
     return e
 
 
@@ -367,9 +443,13 @@ class Ops(commands.Cog):
             if channel is None:
                 continue
             going = conn.execute(
-                "SELECT user_id FROM signups WHERE op_id = ? AND status = 'in'", (op["id"],)
+                "SELECT user_id, status FROM signups WHERE op_id = ? AND status IN ('in', 'maybe')",
+                (op["id"],),
             ).fetchall()
-            mentions = " ".join(f"<@{r['user_id']}>" for r in going)
+            mentions = " ".join(f"<@{r['user_id']}>" for r in going if r["status"] == "in")
+            maybe = " ".join(f"<@{r['user_id']}>" for r in going if r["status"] == "maybe")
+            if maybe:  # the undecided are one nudge from turning up
+                mentions += ("\n" if mentions else "") + f"Still on Maybe, last call: {maybe}"
             e = embed(
                 title=op["title"],
                 description=f"Starts <t:{op['when_ts']}:R> (<t:{op['when_ts']}:F>)",
@@ -381,6 +461,30 @@ class Ops(commands.Cog):
                 print(f">> reminder sent for op {op['id']} ({op['title']})")
             except discord.HTTPException as exc:
                 print(f">> reminder failed for op {op['id']}: {exc!r}")
+
+        # an hour after start, ask the host to close it. Once, and only for recent ops.
+        stale = conn.execute(
+            "SELECT * FROM ops WHERE closed = 0 AND reminded = 1 AND when_ts IS NOT NULL AND when_ts <= ?",
+            (now - CLOSE_NUDGE_AFTER,),
+        ).fetchall()
+        for op in stale:
+            conn.execute("UPDATE ops SET reminded = 2 WHERE id = ?", (op["id"],))
+            conn.commit()
+            if op["when_ts"] < now - NUDGE_WINDOW:
+                continue
+            target = await get_thread(self.bot, op["thread_id"]) or self.bot.get_channel(op["channel_id"] or 0)
+            if target is None:
+                continue
+            try:
+                await target.send(
+                    f"<@{op['created_by']}> **{op['title']}** started <t:{op['when_ts']}:R>. "
+                    f"Record who turned up: `/op close op_id:{op['id']}`. "
+                    "Anyone marked Attending who didn't show gets a no-show.",
+                    allowed_mentions=discord.AllowedMentions(users=True),
+                )
+                print(f">> close nudge sent for op {op['id']}")
+            except discord.HTTPException as exc:
+                print(f">> close nudge failed for op {op['id']}: {exc!r}")
 
     @reminder_loop.before_loop
     async def before_reminders(self):
@@ -488,6 +592,9 @@ class Ops(commands.Cog):
     async def op_join(self, interaction: discord.Interaction, op_id: int):
         await interaction.response.send_message(join_op(op_id, interaction.user.id), ephemeral=True)
         await sync_card(self.bot, op_id)
+        op = get_op(op_id)
+        if op:
+            await add_to_thread(self.bot, op, interaction.user)
 
     @op.command(name="leave", description="Take yourself off an op's roster")
     @app_commands.describe(op_id="The op ID")
@@ -527,7 +634,7 @@ class Ops(commands.Cog):
     async def op_cancel(self, interaction: discord.Interaction, op_id: int):
         officer = is_officer(interaction.user)
         op = get_op(op_id)
-        ref = (op["channel_id"], op["message_id"]) if op else None
+        ref = (op["channel_id"], op["message_id"], op["thread_id"]) if op else None
         await interaction.response.send_message(cancel_op(op_id, interaction.user.id, officer))
         await sync_card(self.bot, op_id, ref)
 
@@ -549,6 +656,9 @@ class Ops(commands.Cog):
     async def op_join_prefix(self, ctx: commands.Context, op_id: int):
         await ctx.send(join_op(op_id, ctx.author.id))
         await sync_card(self.bot, op_id)
+        op = get_op(op_id)
+        if op:
+            await add_to_thread(self.bot, op, ctx.author)
 
     @op_prefix.command(name="leave")
     async def op_leave_prefix(self, ctx: commands.Context, op_id: int):
@@ -559,7 +669,7 @@ class Ops(commands.Cog):
     async def op_cancel_prefix(self, ctx: commands.Context, op_id: int):
         officer = is_officer(ctx.author)
         op = get_op(op_id)
-        ref = (op["channel_id"], op["message_id"]) if op else None
+        ref = (op["channel_id"], op["message_id"], op["thread_id"]) if op else None
         await ctx.send(cancel_op(op_id, ctx.author.id, officer))
         await sync_card(self.bot, op_id, ref)
 

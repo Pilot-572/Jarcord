@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 import discord
 from discord.ext import commands
 
+from cogs.ops import attendance
 from db import conn
 from ui import ACTIVITY, ago, embed
 
@@ -35,13 +36,11 @@ class Activity(commands.Cog):
         row = conn.execute(
             "SELECT message_count, last_seen FROM activity WHERE user_id = ?", (member.id,)
         ).fetchone()
-        ops = conn.execute(
-            "SELECT COUNT(*) AS n FROM signups WHERE user_id = ?", (member.id,)
-        ).fetchone()["n"]
+        came, _ = attendance(member.id)  # attended, not every RSVP ever pressed
         e = embed(title=member.display_name, colour=ACTIVITY)
         e.set_thumbnail(url=member.display_avatar.url)
         e.add_field(name="Messages", value=str(row["message_count"]) if row else "0", inline=True)
-        e.add_field(name="Ops attended", value=str(ops), inline=True)
+        e.add_field(name="Ops attended", value=str(came), inline=True)
         e.add_field(
             name="Last seen",
             value=ago(row["last_seen"]) if row else "Never",

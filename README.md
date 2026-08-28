@@ -19,9 +19,9 @@ Informational output goes in embeds with one accent colour; confirmations stay s
 | `/op list` or `!op list` | Last 10 ops with attendance counts |
 | `/op-setup <channel> [ping_role]` | Where ops get posted and who gets pinged (needs Manage Server) |
 
-Closing an op is how attendance gets recorded. Pick everyone who turned up from a member picker; anyone who said they were coming and isn't picked is logged as a no-show, and anyone who walked in without replying still counts as attending. A closed card shows the turnout and loses its buttons. `/profile` then reports signed up, attended and no-showed instead of a signup count that means nothing.
+Closing an op is how attendance gets recorded. The member picker opens with everyone marked Attending already ticked, so the host unticks the no-shows and ticks the walk-ins; anyone who said they were coming and isn't picked is logged as a no-show, and anyone who walked in without replying still counts as attending. A closed card shows the turnout and loses its buttons, and the op thread gets the turnout, a line for anyone hitting their first, fifth, tenth or twenty-fifth op, and a nudge to `/rate`, then archives. An hour after a timed op starts, the host gets pinged in the thread to close it. `/profile` then reports signed up, attended and no-showed instead of a signup count that means nothing.
 
-The card carries **Attending**, **Maybe** and **Can't make it**. Pressing one rewrites the card in place, so the three lists are always current, and changing your mind moves you rather than adding you twice. The buttons survive restarts.
+The card carries **Attending**, **Maybe** and **Can't make it**. Pressing one rewrites the card in place, so the three lists are always current, and changing your mind moves you rather than adding you twice. Attending also adds you to the op thread. The 30 minute reminder pings everyone Attending, and gives Maybe a last call. The buttons survive restarts. Cancelling deletes the card and its thread.
 
 `when` is free text, but if it matches `YYYY-MM-DD HH:MM` or `DD.MM HH:MM` (UTC), the op gets a real timestamp, shown in each viewer's local timezone, and the bot pings the roster in the op's channel 30 minutes before start.
 
