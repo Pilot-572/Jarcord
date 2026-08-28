@@ -316,7 +316,7 @@ def roster_embed(op_id: int) -> discord.Embed:
     e.add_field(name="Posted by", value=f"<@{op['created_by']}>", inline=True)
     roster = (
         "\n".join(f"`{i:>2}` <@{r['user_id']}>" for i, r in enumerate(rows, 1))
-        if rows else "*Nobody yet. Be the first.*"
+        if rows else "*Nobody yet.*"
     )
     e.add_field(name="Roster", value=roster, inline=False)
     e.set_footer(text=f"Op ID {op_id}")

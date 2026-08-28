@@ -1,8 +1,8 @@
 # Jarcord
 
-Operations management for Discord teams: scheduled op signups, member performance ratings, and activity tracking, all inside your server. Built for faction/milsim communities; lean by design (Discord's built-in AutoMod handles moderation, so Jarcord doesn't).
+Scheduled op signups, member performance ratings and activity tracking for a Discord faction or milsim server, all inside the server itself. It stays small on purpose: Discord's built-in AutoMod handles moderation, so Jarcord doesn't.
 
-All informational output uses clean embeds with a consistent accent; confirmations stay short and inline.
+Informational output goes in embeds with one accent colour; confirmations stay short and inline.
 
 ## Features
 

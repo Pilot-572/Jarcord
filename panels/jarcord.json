@@ -16,7 +16,7 @@
     },
     {
       "title": "📈  ACTIVITY",
-      "body": "> `/activity @member` shows messages, ops attended and last seen\n> `/inactive [days]` lists who's gone quiet (default 14 days)\n\nActivity is tracked passively. No check-ins and no forms. Just show up and talk."
+      "body": "> `/activity @member` shows messages, ops attended and last seen\n> `/inactive [days]` lists who's gone quiet (default 14 days)\n\nThe bot tracks activity on its own, so there are no check-ins or forms to fill in. Just show up and talk."
     }
   ],
   "buttons": [

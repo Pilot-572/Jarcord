@@ -23,11 +23,11 @@
         },
         {
           "name": "Medic",
-          "value": "Keeps the unit in the fight. Patches people up, and calls the extraction when they cannot be."
+          "value": "Keeps the unit in the fight. Patches people up, and calls the extraction when patching isn't enough."
         },
         {
           "name": "JTAC",
-          "value": "The ground operator who talks to the pilots and calls the air in. This is what makes air support real."
+          "value": "The ground operator who talks to the pilots and calls the air in. Air support only works with one."
         }
       ]
     }

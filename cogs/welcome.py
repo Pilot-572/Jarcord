@@ -84,7 +84,7 @@ class Welcome(commands.Cog):
     async def welcome_setup(self, ctx: commands.Context, channel: discord.TextChannel,
                             message: str = None):
         set_setting("welcome_channel_id", str(channel.id))
-        msg = f"New members will be welcomed in {channel.mention}."
+        msg = f"Welcome cards go to {channel.mention}."
         if message:
             set_setting("welcome_text", message)
             msg += " Message updated."

@@ -133,7 +133,7 @@ class CallsignModal(discord.ui.Modal, title="Operator ID"):
         except RobloxDown:
             await interaction.followup.send(
                 "Roblox isn't answering right now, so I can't check that username. "
-                "Give it a minute and press Verify again, nothing else is needed.",
+                "Give it a minute and press Verify again. You don't need to do anything else.",
                 ephemeral=True,
             )
             return

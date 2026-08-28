@@ -18,8 +18,8 @@
           "value": "**SPC2** {role:Specialist 2}\nBriefs new joins and knows every loadout.\n**SPC1** {role:Specialist 1}\nReliable, picks their own kit.\n**PVT3** {role:Private 3}\nA regular, trusted in a fireteam.\n**PVT2** {role:Private 2}\nHas ops on record.\n**PVT1** {role:Private 1}\nVerified, no ops yet. Everyone starts here.\n\n──────────────────────────────"
         },
         {
-          "name": "POSITIONS  ·  jobs, not ranks, they stack on any rank",
-          "value": "{role:Op Planner} writes the briefings and builds the scenarios, so ops are planned and not improvised at kickoff. More than one is fine.\n{role:Media} records ops, runs <#1541926692983930950>, and keeps the advert fed with real footage.\n{role:JTAC} is the ground operator who talks to the pilots and calls the air in."
+          "name": "POSITIONS  ·  jobs that sit on top of any rank",
+          "value": "{role:Op Planner} writes the briefings and builds the scenarios, so nobody is improvising the op at kickoff. More than one is fine.\n{role:Media} records ops, runs <#1541926692983930950>, and keeps the advert fed with real footage.\n{role:JTAC} is the ground operator who talks to the pilots and calls the air in."
         }
       ]
     },
