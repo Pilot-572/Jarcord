@@ -2,6 +2,7 @@
 import discord
 from discord.ext import commands
 
+from cogs.ops import attendance
 from cogs.profile import save_profile, set_exclusive_role
 from db import conn, get_setting, set_setting
 from ui import ACCENT, embed, staff_check
@@ -66,18 +67,47 @@ async def apply_rank(member: discord.Member, rank: str) -> bool:
     return True
 
 
+def abbrev(rank: str | None) -> str:
+    return ABBREV[RANKS.index(rank)] if rank in RANKS else "..."
+
+
+def ladder_bar(rank: str) -> str:
+    """Nine blocks, filled up to where they stand. Reads at a glance on a phone."""
+    i = RANKS.index(rank)
+    return "▰" * (i + 1) + "▱" * (len(RANKS) - 1 - i)
+
+
+def rank_pill(guild: discord.Guild, rank: str | None) -> str:
+    """The role itself, which renders as a coloured pill and never pings from an embed."""
+    if rank is None:
+        return "*unranked*"
+    role = discord.utils.get(guild.roles, name=rank)
+    return role.mention if role else f"**{rank}**"
+
+
 def rank_card(member: discord.Member, old: str | None, new: str, officer: discord.Member,
               reason: str | None, up: bool) -> discord.Embed:
+    i = RANKS.index(new)
+    ahead = step(new, True)
     e = embed(
-        title=f"{member.display_name}: {'promoted' if up else 'demoted'} to {new}",
+        title=f"{abbrev(new)}  ·  {member.display_name}",
+        description=(
+            f"{rank_pill(member.guild, old)}  →  {rank_pill(member.guild, new)}\n"
+            f"`{ladder_bar(new)}`  **{i + 1}** of **{len(RANKS)}**"
+        ),
         colour=PROMOTED if up else DEMOTED,
     )
+    e.set_author(name="PROMOTED" if up else "REDUCED IN RANK",
+                 icon_url=member.guild.icon.url if member.guild.icon else None)
     e.set_thumbnail(url=member.display_avatar.url)
-    e.add_field(name="From", value=old or "no rank", inline=True)
-    e.add_field(name="To", value=new, inline=True)
+
+    came, missed = attendance(member.id)
+    if came or missed:
+        e.add_field(name="Record", value=f"{came} attended, {missed} no-showed", inline=True)
     e.add_field(name="By", value=officer.mention, inline=True)
     if reason:
         e.add_field(name="Reason", value=reason, inline=False)
+    e.set_footer(text=f"Next up: {ahead}" if ahead else "Top of the ladder")
     return e
 
 

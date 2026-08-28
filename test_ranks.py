@@ -3,7 +3,7 @@
 # members read names every rank exactly as the role is called.
 from pathlib import Path
 
-from cogs.ranks import ABBREV, NCO_FROM, RANKS, is_nco, step
+from cogs.ranks import ABBREV, NCO_FROM, RANKS, abbrev, is_nco, ladder_bar, step
 
 assert len(RANKS) == len(ABBREV) == len(set(RANKS))
 
@@ -21,6 +21,13 @@ for expected in RANKS:
 for expected in reversed(RANKS[:-1]):
     rank = step(rank, False)
     assert rank == expected, (rank, expected)
+
+# the card's bar always has one block per rank, filled up to where they stand
+for i, rank in enumerate(RANKS):
+    bar = ladder_bar(rank)
+    assert len(bar) == len(RANKS), rank
+    assert bar.count("▰") == i + 1, rank
+assert abbrev(None) == "..." and abbrev(RANKS[0]) == ABBREV[0]
 
 # the NCO marker starts exactly at Corporal 1
 assert RANKS[NCO_FROM] == "Corporal 1"
