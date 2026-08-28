@@ -1,0 +1,72 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "SERVER GUIDE",
+      "body": "Everything you need to find your way around ROC.\n\nIf you've just verified, read <#1542514728297959457> first, grab your roles in <#1542515113347649606>, then say hello in <#1540826188094644438>.\n\nFor what ROC actually is, see <#1542215038985576539>. For who runs it, see <#1542215043033342024>."
+    },
+    {
+      "title": "WHERE THINGS LIVE",
+      "fields": [
+        {
+          "name": "Arrival",
+          "value": "<#1542215058099277884> the welcome card\n<#1542514728297959457> the rules, read them once\n<#1542256936161124412> verification, one button and two short forms\n<#1542515113347649606> pick your unit, continent and pings"
+        },
+        {
+          "name": "Public",
+          "value": "<#1540826188094644438> general chat\n<#1542215031410663524> this channel\n<#1542215038985576539> what ROC is and what we do\n<#1542215043033342024> who holds what rank\n<#1542531684023406674> run bot commands here so you don't spam general\n<#1541926692983930950> clips and screenshots"
+        },
+        {
+          "name": "Operations",
+          "value": "<#1542215046820663346> ops get posted here, RSVP on the card\n<#1542215050108997684> the plan for a specific op\n<#1542215054022156389> talk during and after an op"
+        },
+        {
+          "name": "Voice",
+          "value": "<#1540826188535304223> hang out\n<#1542215062436184124> ground unit comms\n<#1542215066185769030> sniper unit comms"
+        }
+      ]
+    },
+    {
+      "title": "ROLES",
+      "fields": [
+        {
+          "name": "Command",
+          "value": "**First in Command** runs ROC.\n**Second in Command** deputises and can run everything Command can.\n**Command** is the wider leadership group.\nUnit leaders run their own unit: **Ground Unit Leader**, **Sniper Unit Leader**."
+        },
+        {
+          "name": "Units",
+          "value": "**Ground Unit** is the main assault force.\n**Sniper Unit** is overwatch and recon.\nYou pick one during verification. Change it any time in <#1542515113347649606>."
+        },
+        {
+          "name": "Membership",
+          "value": "**Unverified** is where you land on join. You can only see the Arrival channels.\n**Operator** is the real member role. Verification grants it and opens the server."
+        },
+        {
+          "name": "Support",
+          "value": "**Primary Pilot** and **Reserve Pilot** fly transport and air support.\n**Medic** patches people up in the field.\nAsk a unit leader if you want one of these."
+        }
+      ]
+    },
+    {
+      "title": "OPERATIONS",
+      "body": "Ops are posted in <#1542215046820663346> with the time shown in your own timezone, so there's nothing to convert.\n\nEach post has three buttons. Press **Attending**, **Maybe** or **Can't make it**. You can change your answer any time before the op starts. A reminder goes out shortly before kickoff.\n\nAfter the op, whoever ran it records who actually turned up. Saying you're coming and not showing counts as a no-show, and it's visible on your `/profile`. Press **Can't make it** instead, nobody minds."
+    },
+    {
+      "title": "BOT COMMANDS",
+      "fields": [
+        {
+          "name": "Yours",
+          "value": "`/profile` your record: unit, ops attended, no-shows, warnings, rating\n`/roblox` link or update your Roblox username\n`/continent` change where you're playing from\n`/op list` what's coming up\n`/op join` and `/op leave` RSVP without touching the buttons\n`/op roster` who's signed up for an op"
+        },
+        {
+          "name": "Command only",
+          "value": "`/op create`, `/op edit`, `/op close`, `/op cancel`\n`/warn`, `/warns`, `/unwarn`\n`/rate`, `/rating-history`, `/activity`, `/inactive`\n`/record`, `/panel`, `/setup`"
+        },
+        {
+          "name": "Where",
+          "value": "Use them in <#1542531684023406674>. Most replies are only visible to you."
+        }
+      ]
+    }
+  ]
+}
