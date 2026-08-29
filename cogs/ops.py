@@ -97,9 +97,20 @@ def get_op(op_id: int):
     return conn.execute("SELECT * FROM ops WHERE id = ?", (op_id,)).fetchone()
 
 
-def create_embed(op_id: int, author: discord.Member = None) -> discord.Embed:
+def who(guild, user_id: int) -> str:
+    """A name for the card. Discord only renders <@id> inside an embed when that viewer's
+    client already has the user cached, so a mention here shows as raw text to somebody
+    who hasn't loaded them. Plain names always read. Pings still use mentions."""
+    member = guild.get_member(user_id) if guild else None
+    if member is not None:
+        return member.display_name
+    return f"<@{user_id}>"
+
+
+def create_embed(op_id: int, author: discord.Member = None, guild=None) -> discord.Embed:
     """The op card. Rebuilt from the database every time somebody replies."""
     op = get_op(op_id)
+    guild = guild or (author.guild if author is not None else None)
     e = embed(title=op["title"], colour=ACCENT)
     if author is not None:
         e.set_author(name=f"Op posted by {author.display_name}", icon_url=author.display_avatar.url)
@@ -116,7 +127,7 @@ def create_embed(op_id: int, author: discord.Member = None) -> discord.Embed:
         ids = people.get(key, [])
         e.add_field(
             name=f"{heading} ({len(ids)})",
-            value="\n".join(f"<@{u}>" for u in ids) if ids else "*nobody yet*",
+            value="\n".join(who(guild, u) for u in ids) if ids else "*nobody yet*",
             inline=True,
         )
     if op["closed"]:
@@ -174,7 +185,8 @@ class OpView(discord.ui.View):
             await interaction.response.send_message("This op is gone.", ephemeral=True)
             return
         set_status(op["id"], interaction.user.id, status)
-        await interaction.response.edit_message(embed=create_embed(op["id"]), view=self)
+        await interaction.response.edit_message(
+            embed=create_embed(op["id"], guild=interaction.guild), view=self)
         if status == "in":
             await add_to_thread(interaction.client, op, interaction.user)
 
@@ -272,7 +284,7 @@ async def sync_card(bot, op_id: int, ref: tuple = None) -> None:
         if op is None:
             await msg.delete()
         else:
-            await msg.edit(embed=create_embed(op_id),
+            await msg.edit(embed=create_embed(op_id, guild=channel.guild),
                            view=None if op["closed"] else OpView())
     except discord.HTTPException:
         pass  # card deleted by hand, nothing to keep in sync
@@ -380,7 +392,7 @@ def cancel_op(op_id: int, user_id: int, is_officer: bool) -> str:
     return f"Cancelled **{op['title']}** (ID `{op_id}`)."
 
 
-def roster_embed(op_id: int) -> discord.Embed:
+def roster_embed(op_id: int, guild=None) -> discord.Embed:
     op = get_op(op_id)
     if op is None:
         return embed(description=f"No op with ID `{op_id}`.")
@@ -390,9 +402,9 @@ def roster_embed(op_id: int) -> discord.Embed:
     e = embed(title=op["title"])
     e.add_field(name="When", value=when_display(op), inline=True)
     e.add_field(name="Signed up", value=str(len(rows)), inline=True)
-    e.add_field(name="Posted by", value=f"<@{op['created_by']}>", inline=True)
+    e.add_field(name="Posted by", value=who(guild, op["created_by"]), inline=True)
     roster = (
-        "\n".join(f"`{i:>2}` <@{r['user_id']}>" for i, r in enumerate(rows, 1))
+        "\n".join(f"`{i:>2}` {who(guild, r['user_id'])}" for i, r in enumerate(rows, 1))
         if rows else "*Nobody yet.*"
     )
     e.add_field(name="Roster", value=roster, inline=False)
@@ -646,7 +658,8 @@ class Ops(commands.Cog):
     @op.command(name="roster", description="Who is attending an op")
     @app_commands.describe(op_id="The op ID")
     async def op_roster_slash(self, interaction: discord.Interaction, op_id: int):
-        await interaction.response.send_message(embed=roster_embed(op_id), ephemeral=True)
+        await interaction.response.send_message(
+            embed=roster_embed(op_id, interaction.guild), ephemeral=True)
 
     @op.command(name="list", description="The last 10 ops and their IDs")
     async def op_list_slash(self, interaction: discord.Interaction):
@@ -680,7 +693,7 @@ class Ops(commands.Cog):
 
     @op_prefix.command(name="roster")
     async def op_roster(self, ctx: commands.Context, op_id: int):
-        await ctx.send(embed=roster_embed(op_id))
+        await ctx.send(embed=roster_embed(op_id, ctx.guild))
 
     @op_prefix.command(name="list")
     async def op_list(self, ctx: commands.Context):
