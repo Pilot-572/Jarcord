@@ -81,6 +81,33 @@ class Roles(commands.Cog):
             "see in Server Settings, Integrations, Jarcord."
         )
 
+    @commands.hybrid_command(name="c", description="Clear the last N messages in this channel")
+    @discord.app_commands.describe(count="How many messages to delete, 1 to 100")
+    @discord.app_commands.default_permissions(manage_messages=True)
+    @staff_check(officer=True, manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True, read_message_history=True)
+    async def clear(self, ctx: commands.Context, count: commands.Range[int, 1, 100]):
+        # Pinned messages are the panels and the hub, so they are never in the sweep.
+        # ponytail: Discord's own cap is 100 per bulk delete, so the range is the cap.
+        if ctx.interaction is not None:
+            await ctx.defer(ephemeral=True)
+            limit = count
+        else:
+            limit = count + 1  # the "!c 5" message itself is one of the last messages
+        try:
+            gone = await ctx.channel.purge(limit=limit, check=lambda m: not m.pinned)
+        except discord.HTTPException as exc:
+            await ctx.send(
+                "Couldn't clear those. Discord only bulk deletes messages under 14 days old, "
+                f"and it said: {exc.text or exc}", ephemeral=True)
+            return
+        n = len(gone) - (0 if ctx.interaction else 1)
+        print(f">> {ctx.author.id} cleared {n} messages in #{ctx.channel.name}")
+        await ctx.send(
+            f"Cleared **{max(n, 0)}** message(s). Pinned messages were left alone.",
+            ephemeral=True, delete_after=None if ctx.interaction else 6,
+        )
+
     @commands.hybrid_command(name="code", description="The current private server code")
     async def code(self, ctx: commands.Context):
         if ctx.interaction is None:  # a prefix reply is public, and the whole point is that this is not

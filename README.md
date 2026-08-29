@@ -59,6 +59,7 @@ Without setup Jarcord picks the first channel whose name contains `operator-id`,
 | Command | What it does |
 |---|---|
 | `/dividers [count]` | Create N blank divider roles (default 10, max 25) to separate groups in the role list |
+| `/c <count>` or `!c <count>` | Clear the last N messages in this channel, 1 to 100, pinned messages skipped (needs Manage Messages) |
 
 They're created with no permissions at the bottom of the list, so drag them into place.
 
@@ -73,7 +74,7 @@ Setting `/officer-role` grants that role a fixed, curated set. It is not per com
 
 | Tier | Commands | Who |
 |---|---|---|
-| Officer | `/op create`, `/op edit`, `/op cancel`, `/op close`, `/promote`, `/demote`, `/warn`, `/warns`, `/unwarn`, `/nickname`, `/panel`, `/record`, `/verify-panel`, `/code-set` | The officer role, plus anyone with the underlying permission. `/code-set` also passes for the **Server Host** role |
+| Officer | `/op create`, `/op edit`, `/op cancel`, `/op close`, `/promote`, `/demote`, `/warn`, `/warns`, `/unwarn`, `/nickname`, `/panel`, `/record`, `/verify-panel`, `/c`, `/code-set` | The officer role, plus anyone with the underlying permission. `/code-set` also passes for the **Server Host** role |
 | Admin | `/op-setup`, `/verify-setup`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/officer-role`, `/ranks-setup`, `/promotions-setup`, `/dividers` | Manage Server only |
 | Member | `/profile`, `/code`, `/op join`, `/op leave`, `/op roster`, `/op list`, `/rate`, `/rating-history`, `/continent`, `/unit`, `/roblox`, `/activity`, `/panel-list` | Everyone |
 
