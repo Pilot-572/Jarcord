@@ -8,7 +8,7 @@ from cogs.profile import (CONTINENTS, UNITS, RobloxDown, resolve_roblox,
                           save_profile, set_continent, set_unit)
 from cogs.ranks import RANKS, apply_rank, current_rank
 from db import conn, get_setting, set_setting
-from ui import ACCENT, embed, staff_check
+from ui import ACCENT, embed, log_action, staff_check
 
 UNVERIFIED = "Unverified"
 OPERATOR = "Operator"
@@ -314,6 +314,8 @@ async def finish(interaction: discord.Interaction) -> None:
     await post_record(member)
     stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
     print(f">> verified {member.id} as {member.display_name!r} (roblox {name}) at {stamp}")
+    await log_action(member.guild, f"Verified: {member.display_name}", member,
+                     f"Roblox **{name}**, now an Operator on {RANKS[0]}")
     await interaction.followup.send(
         f"Verified as **{member.display_name}**. Welcome aboard, Operator.\n"
         "One thing before your first op: ROC wears a **black outfit** in game. "

@@ -5,7 +5,7 @@ from discord.ext import commands
 from cogs.ops import attendance
 from cogs.profile import save_profile, set_exclusive_role
 from db import conn, get_setting, set_setting
-from ui import ACCENT, embed, staff_check
+from ui import ACCENT, embed, log_action, staff_check
 
 # Lowest to highest. These are the Discord role names, so renaming here renames the ladder.
 RANKS = (
@@ -167,6 +167,8 @@ class Ranks(commands.Cog):
                     notes.append(f"couldn't post it in #{channel.name}")
 
         print(f">> {member.id} {verb} {old} -> {new} by {ctx.author.id}")
+        await log_action(ctx.guild, f"{verb.capitalize()}: {member.display_name}", ctx.author,
+                         f"{old or 'unranked'} to **{new}**" + (f"\n{reason}" if reason else ""))
         msg = f"{member.mention} is now **{new}**."
         if notes:
             msg += " Note: " + "; ".join(notes) + "."

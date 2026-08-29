@@ -30,6 +30,25 @@ def embed(title: str = None, description: str = None,
     )
 
 
+async def log_action(guild, action: str, actor=None, detail: str = None) -> None:
+    """Write one line to the log channel, if /logs-setup named one. Never raises:
+    a logging failure must not take the command that triggered it down."""
+    channel_id = get_setting("log_channel_id")
+    if not channel_id or guild is None:
+        return
+    channel = guild.get_channel(int(channel_id))
+    if channel is None:
+        return
+    e = embed(title=action, description=detail, colour=ACTIVITY)
+    if actor is not None:
+        e.set_author(name=str(actor), icon_url=actor.display_avatar.url)
+        e.set_footer(text=f"user {actor.id}")
+    try:
+        await channel.send(embed=e)
+    except discord.HTTPException as exc:
+        print(f">> couldn't log to channel {channel_id}: {exc!r}")
+
+
 def _allowed(member, perms, officer: bool) -> bool:
     """Admins always pass. So does anyone holding the named Discord permissions. The role
     set with /officer-role passes only on commands marked officer=True."""

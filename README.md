@@ -59,7 +59,11 @@ Without setup Jarcord picks the first channel whose name contains `operator-id`,
 | Command | What it does |
 |---|---|
 | `/dividers [count]` | Create N blank divider roles (default 10, max 25) to separate groups in the role list |
-| `/c <count>` or `!c <count>` | Clear the last N messages in this channel, 1 to 100, pinned messages skipped (needs Manage Messages) |
+| `/c <count>` or `!c <count>` | Clear the last N messages in this channel, 1 to 100, pinned messages skipped, no receipt left behind (needs Manage Messages) |
+| `/logs-setup <channel>` | Write every notable action to this channel (needs Manage Server) |
+
+### Logs
+With `/logs-setup` pointed at a Command only channel, Jarcord writes a card for each verification, promotion, demotion, warning, deleted warning, op posted, op closed, op cancelled, message clear and server code change. The card carries who did it, who it was done to and the reason where there is one, so enforcement has a paper trail without anyone keeping notes. The server code itself is never written to the log, only the fact that it changed.
 
 They're created with no permissions at the bottom of the list, so drag them into place.
 

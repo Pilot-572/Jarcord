@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 
 from db import conn, get_setting
-from ui import ACCENT, ago, embed, staff_check
+from ui import ACCENT, ago, embed, log_action, staff_check
 
 WARNED = discord.Colour(0xF59E0B)
 
@@ -84,6 +84,8 @@ class Warnings(commands.Cog):
                     notes.append(f"couldn't file it in #{channel.name}")
 
         print(f">> warned {member.id} (#{warning_id}) by {ctx.author.id}: {reason}")
+        await log_action(ctx.guild, f"Warned: {member.display_name}", ctx.author,
+                         f"Warning `#{warning_id}`, {len(rows)} on record\n{reason}")
         msg = f"Warned {member.mention}. That's **{len(rows)}** on record (`#{warning_id}`)."
         if notes:
             msg += " Note: " + "; ".join(notes) + "."
@@ -101,6 +103,7 @@ class Warnings(commands.Cog):
     async def unwarn(self, ctx: commands.Context, warning_id: int):
         if drop_warning(warning_id):
             print(f">> warning #{warning_id} deleted by {ctx.author.id}")
+            await log_action(ctx.guild, "Warning deleted", ctx.author, f"Warning `#{warning_id}`")
             await ctx.send(f"Warning `#{warning_id}` deleted.", ephemeral=True)
         else:
             await ctx.send(f"No warning with ID `{warning_id}`.", ephemeral=True)

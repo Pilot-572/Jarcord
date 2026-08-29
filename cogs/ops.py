@@ -8,7 +8,7 @@ from discord import app_commands
 from discord.ext import commands, tasks
 
 from db import conn, get_setting, set_setting
-from ui import ACCENT, app_staff_check, embed, is_officer
+from ui import ACCENT, app_staff_check, embed, is_officer, log_action
 
 REMIND_BEFORE = 30 * 60  # ponytail: fixed 30-min reminder; make it per-op if anyone asks
 CLOSE_NUDGE_AFTER = 60 * 60   # an hour after start, ask the host to close it
@@ -156,6 +156,7 @@ class CloseView(discord.ui.View):
         await interaction.response.edit_message(content=msg, view=None)
         await sync_card(self.bot, self.op_id)
         if not was_closed and get_op(self.op_id)["closed"]:
+            await log_action(interaction.guild, "Op closed", interaction.user, msg)
             await post_turnout(self.bot, self.op_id, ids)
 
 
@@ -548,6 +549,8 @@ class Ops(commands.Cog):
             print(f">> no thread for op {op_id}: {e}")
             thread_note = " I couldn't open a thread, check I have Create Public Threads there."
 
+        await log_action(interaction.guild, f"Op posted: {what}", interaction.user,
+                         f"Op `{op_id}` in {channel.mention}, {when}")
         await interaction.response.send_message(
             f"Op `{op_id}` posted in {channel.mention}.{when_feedback(get_op(op_id)['when_ts'])} "
             f"{msg.jump_url}{thread_note}", ephemeral=True
@@ -635,7 +638,9 @@ class Ops(commands.Cog):
         officer = is_officer(interaction.user)
         op = get_op(op_id)
         ref = (op["channel_id"], op["message_id"], op["thread_id"]) if op else None
-        await interaction.response.send_message(cancel_op(op_id, interaction.user.id, officer))
+        result = cancel_op(op_id, interaction.user.id, officer)
+        await interaction.response.send_message(result)
+        await log_action(interaction.guild, "Op cancelled", interaction.user, result)
         await sync_card(self.bot, op_id, ref)
 
     @op.command(name="roster", description="Who is attending an op")

@@ -4,7 +4,7 @@ from discord.ext import commands
 
 from cogs.verify import OPERATOR
 from db import get_setting, set_setting
-from ui import ACCENT, embed, is_officer, staff_check
+from ui import ACCENT, embed, is_officer, log_action, staff_check
 
 DIVIDER = "─" * 32  # ponytail: fixed width, Discord truncates the role list anyway
 SERVER_HOST = "Server Host"  # whoever owns the private server, may change the code without being Command
@@ -20,6 +20,7 @@ SETTINGS = (
     ("Op timezone",          "op_timezone",        "text",    "/op-setup"),
     ("Officer role",         "officer_role_id",    "role",    "/officer-role"),
     ("Promotions channel",   "promotions_channel_id", "channel", "/promotions-setup"),
+    ("Log channel",          "log_channel_id",     "channel", "/logs-setup"),
     ("Server code",          "server_code",        "secret",  "/code-set"),
 )
 
@@ -81,6 +82,17 @@ class Roles(commands.Cog):
             "see in Server Settings, Integrations, Jarcord."
         )
 
+    @commands.hybrid_command(name="logs-setup", description="Channel where Jarcord writes what it did")
+    @discord.app_commands.default_permissions(manage_guild=True)
+    @commands.has_permissions(manage_guild=True)
+    async def logs_setup(self, ctx: commands.Context, channel: discord.TextChannel):
+        set_setting("log_channel_id", str(channel.id))
+        await log_action(ctx.guild, "Logging started", ctx.author, f"Logs go to {channel.mention}")
+        await ctx.send(
+            f"Logging to {channel.mention}: verifications, promotions, warnings, ops, "
+            "message clears and code changes. Keep it Command only, it names members.",
+            ephemeral=True)
+
     @commands.hybrid_command(name="c", description="Clear the last N messages in this channel")
     @discord.app_commands.describe(count="How many messages to delete, 1 to 100")
     @discord.app_commands.default_permissions(manage_messages=True)
@@ -101,12 +113,14 @@ class Roles(commands.Cog):
                 "Couldn't clear those. Discord only bulk deletes messages under 14 days old, "
                 f"and it said: {exc.text or exc}", ephemeral=True)
             return
-        n = len(gone) - (0 if ctx.interaction else 1)
+        n = max(len(gone) - (0 if ctx.interaction else 1), 0)
         print(f">> {ctx.author.id} cleared {n} messages in #{ctx.channel.name}")
-        await ctx.send(
-            f"Cleared **{max(n, 0)}** message(s). Pinned messages were left alone.",
-            ephemeral=True, delete_after=None if ctx.interaction else 6,
-        )
+        await log_action(ctx.guild, "Messages cleared", ctx.author,
+                         f"{n} message(s) in {ctx.channel.mention}")
+        # ponytail: no receipt in the channel. A slash interaction still has to be
+        # answered or Discord shows a failure, and only the caller sees that.
+        if ctx.interaction is not None:
+            await ctx.send(f"Done, {n} gone.", ephemeral=True)
 
     @commands.hybrid_command(name="code", description="The current private server code")
     async def code(self, ctx: commands.Context):
@@ -122,6 +136,8 @@ class Roles(commands.Cog):
             return
         set_setting("server_code", code.strip())
         print(f">> server code changed by {ctx.author.id}")
+        # the code itself never goes in the log, only that it moved
+        await log_action(ctx.guild, "Server code changed", ctx.author)
         await ctx.send("Server code updated. `/code` and the information hub show it live.", ephemeral=True)
 
     @commands.hybrid_command(name="dividers", description="Create blank divider roles for the role list")
