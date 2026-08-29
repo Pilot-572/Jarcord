@@ -45,7 +45,11 @@
           "value": "If Command or 2iC makes a call mid-op, it stands. Disagree after, in DMs, not during."
         },
         {
-          "name": "10  ·  No application, no free pass",
+          "name": "10  ·  Wear the uniform",
+          "value": "All personnel run a **black outfit** in game. It's how ROC reads as one unit on the field and in the footage, and it's the only kit rule there is.\n`Turn up out of uniform and you'll be asked to change before the op starts.`"
+        },
+        {
+          "name": "11  ·  No application, no free pass",
           "value": "You joined easy. That's the deal. Repeated no-shows, disruption, or breaking rule 01 or 02 gets you removed."
         }
       ]

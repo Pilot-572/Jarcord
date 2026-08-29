@@ -315,7 +315,9 @@ async def finish(interaction: discord.Interaction) -> None:
     stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
     print(f">> verified {member.id} as {member.display_name!r} (roblox {name}) at {stamp}")
     await interaction.followup.send(
-        f"Verified as **{member.display_name}**. Welcome aboard, Operator.", ephemeral=True
+        f"Verified as **{member.display_name}**. Welcome aboard, Operator.\n"
+        "One thing before your first op: ROC wears a **black outfit** in game. "
+        "Set yours now so nobody has to ask you on the night.", ephemeral=True
     )
 
 
