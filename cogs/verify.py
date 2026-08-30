@@ -15,7 +15,7 @@ UNVERIFIED = "Unverified"
 OPERATOR = "Operator"
 # Somebody from another group: an ally, a client booking us as OPFOR, an event host.
 # They never become an Operator, so they get their own role and their own questions.
-DIPLOMAT = "Diplomat"
+GUEST = "Guest"
 PURPOSES = ("Booking ROC for an event", "Alliance or partnership",
             "Joint operation", "Training exchange", "Something else")
 NUDGE_STEPS = (24, 72)  # hours after joining, one reminder each, then we stop
@@ -124,10 +124,10 @@ async def grant_operator(member: discord.Member) -> None:
     await apply_rank(member, current_rank(member) or RANKS[0])
 
 
-async def grant_diplomat(member: discord.Member) -> None:
-    """Swap Unverified for Diplomat. No rank, no unit, they are not one of ours."""
-    diplomat = await find_role(member.guild, DIPLOMAT, create=True)
-    await member.add_roles(diplomat, reason="verified as an outside contact")
+async def grant_guest(member: discord.Member) -> None:
+    """Swap Unverified for Guest. No rank, no unit, they are not one of ours."""
+    guest = await find_role(member.guild, GUEST, create=True)
+    await member.add_roles(guest, reason="verified as an outside contact")
     unverified = await find_role(member.guild, UNVERIFIED)
     if unverified is not None and unverified in member.roles:
         await member.remove_roles(unverified, reason="verified as an outside contact")
@@ -174,10 +174,10 @@ class CollabModal(discord.ui.Modal, title="Working with ROC"):
         group = str(self.group).strip()
 
         try:
-            await grant_diplomat(member)
+            await grant_guest(member)
         except discord.Forbidden:
             await interaction.followup.send(
-                f"I couldn't give you the **{DIPLOMAT}** role. Ping anyone in Command and "
+                f"I couldn't give you the **{GUEST}** role. Ping anyone in Command and "
                 "they will sort it by hand.", ephemeral=True)
             return
 
@@ -206,11 +206,11 @@ class CollabModal(discord.ui.Modal, title="Working with ROC"):
         except discord.Forbidden:
             where = "Message anyone in Command directly, I couldn't open a channel for you."
 
-        print(f">> {member.id} verified as a {DIPLOMAT} for {group!r}")
+        print(f">> {member.id} verified as a {GUEST} for {group!r}")
         await log_action(guild, f"Outside contact: {member.display_name}", member,
                          f"**{group}**, {picked[0] if picked else 'purpose not given'}")
         await interaction.followup.send(
-            f"You're marked as a **{DIPLOMAT}** for **{group}**.{note}\n{where}", ephemeral=True)
+            f"You're marked as a **{GUEST}** for **{group}**.{note}\n{where}", ephemeral=True)
 
 
 # ── Chasing the ones who never finished ──
@@ -516,10 +516,10 @@ class VerifyView(discord.ui.View):
     @discord.ui.button(label="Work with ROC", style=discord.ButtonStyle.secondary,
                        custom_id="jarcord:verify:collab")
     async def collab(self, interaction: discord.Interaction, button: discord.ui.Button):
-        diplomat = await find_role(interaction.guild, DIPLOMAT)
-        if diplomat is not None and diplomat in interaction.user.roles:
+        guest = await find_role(interaction.guild, GUEST)
+        if guest is not None and guest in interaction.user.roles:
             await interaction.response.send_message(
-                f"You're already marked as a **{DIPLOMAT}**. Open a ticket if you need "
+                f"You're already marked as a **{GUEST}**. Open a ticket if you need "
                 "Command again.", ephemeral=True)
             return
         await interaction.response.send_modal(CollabModal())

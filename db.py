@@ -76,7 +76,9 @@ CREATE TABLE IF NOT EXISTS tickets (
     status     TEXT NOT NULL DEFAULT 'open',   -- open | closed
     opened_at  TEXT NOT NULL DEFAULT (datetime('now')),
     closed_at  TEXT,
-    closed_by  INTEGER
+    closed_by  INTEGER,
+    answers    TEXT,                -- the form, one "label: value" per line
+    transcript TEXT                 -- the whole channel, written on close
 );
 
 CREATE TABLE IF NOT EXISTS settings (
@@ -121,6 +123,8 @@ for ddl in (
     "ALTER TABLE ops ADD COLUMN thread_id INTEGER",
     "ALTER TABLE profiles ADD COLUMN rank TEXT",
     "ALTER TABLE profiles ADD COLUMN nudged INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE tickets ADD COLUMN answers TEXT",
+    "ALTER TABLE tickets ADD COLUMN transcript TEXT",
     "ALTER TABLE ops ADD COLUMN notes TEXT",
     "ALTER TABLE signups ADD COLUMN status TEXT NOT NULL DEFAULT 'in'",
     "ALTER TABLE signups ADD COLUMN attended INTEGER",

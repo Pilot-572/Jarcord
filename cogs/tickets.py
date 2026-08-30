@@ -160,7 +160,10 @@ async def open_ticket(guild: discord.Guild, member: discord.Member, kind: str,
         conn.execute("UPDATE tickets SET status = 'closed' WHERE id = ?", (existing["id"],))
         conn.commit()
 
-    cur = conn.execute("INSERT INTO tickets (user_id, kind) VALUES (?, ?)", (member.id, kind))
+    # the answers live in the database too, so a ticket can be read without Discord
+    filed = "\n".join(f"{label}: {value}" for label, value in answers if value)
+    cur = conn.execute("INSERT INTO tickets (user_id, kind, answers) VALUES (?, ?, ?)",
+                       (member.id, kind, filed))
     conn.commit()
     ticket_id = cur.lastrowid
 
@@ -189,12 +192,13 @@ async def open_ticket(guild: discord.Guild, member: discord.Member, kind: str,
     conn.execute("UPDATE tickets SET channel_id = ? WHERE id = ?", (channel.id, ticket_id))
     conn.commit()
 
-    ping = member.mention + (f" {staff.mention}" if staff is not None else "")
+    # ponytail: only the opener is pinged. Command gets the card in command-logs and the
+    # channel in the sidebar, a role ping per ticket would wake everyone for everything.
     await channel.send(
-        content=ping + (f"\n{note}" if note else ""),
+        content=member.mention + (f"\n{note}" if note else ""),
         embed=ticket_embed(kind, member, answers, ticket_id),
         view=TicketControls(ticket_id),
-        allowed_mentions=discord.AllowedMentions(users=True, roles=True),
+        allowed_mentions=discord.AllowedMentions(users=True, roles=False),
     )
     print(f">> ticket #{ticket_id} ({kind}) opened by {member.id} in #{channel.name}")
     await log_action(guild, f"Ticket opened: {KINDS[kind]['title']}", member,
@@ -208,9 +212,9 @@ class AlreadyOpen(Exception):
         self.channel = channel
 
 
-async def transcript(channel: discord.TextChannel) -> discord.File:
-    """The whole channel as one text file. Attachments become links, since Discord keeps
-    the file behind the URL long after the channel is gone."""
+async def transcript(channel: discord.TextChannel) -> str:
+    """The whole channel as text. Attachments become links, since Discord keeps the file
+    behind the URL long after the channel is gone."""
     lines = [f"# {channel.name} · {channel.topic or 'ticket'}", ""]
     async for m in channel.history(limit=HISTORY_LIMIT, oldest_first=True):
         stamp = m.created_at.strftime("%Y-%m-%d %H:%M")
@@ -221,8 +225,7 @@ async def transcript(channel: discord.TextChannel) -> discord.File:
         for a in m.attachments:
             body += f"\n  [file] {a.filename} {a.url}"
         lines.append(f"[{stamp}] {m.author}: {body}")
-    data = "\n".join(lines).encode("utf-8")
-    return discord.File(io.BytesIO(data), filename=f"{channel.name}.txt")
+    return "\n".join(lines)
 
 
 async def close_ticket(channel: discord.TextChannel, closer: discord.Member,
@@ -247,15 +250,17 @@ async def close_ticket(channel: discord.TextChannel, closer: discord.Member,
         e.add_field(name="Handled by", value=f"<@{row['claimed_by']}>", inline=True)
     if reason:
         e.add_field(name="Reason", value=reason[:1024], inline=False)
+    text = await transcript(channel)
     try:
-        await log.send(embed=e, file=await transcript(channel))
+        await log.send(embed=e, file=discord.File(io.BytesIO(text.encode("utf-8")),
+                                                  filename=f"{channel.name}.txt"))
     except discord.HTTPException as exc:
         print(f">> transcript for ticket {row['id']} failed: {exc!r}")
         return f"Couldn't file the transcript, so nothing was deleted: {exc.text or exc}"
 
     conn.execute(
-        "UPDATE tickets SET status = 'closed', closed_at = datetime('now'), closed_by = ? "
-        "WHERE id = ?", (closer.id, row["id"]),
+        "UPDATE tickets SET status = 'closed', closed_at = datetime('now'), closed_by = ?, "
+        "transcript = ? WHERE id = ?", (closer.id, text, row["id"]),
     )
     conn.commit()
 
