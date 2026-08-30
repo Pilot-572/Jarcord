@@ -21,6 +21,8 @@ SETTINGS = (
     ("Officer role",         "officer_role_id",    "role",    "/officer-role"),
     ("Promotions channel",   "promotions_channel_id", "channel", "/promotions-setup"),
     ("Log channel",          "log_channel_id",     "channel", "/logs-setup"),
+    ("Ticket panel",         "ticket_panel_channel_id", "channel", "/tickets-setup"),
+    ("Ticket transcripts",   "ticket_log_channel_id",   "channel", "/tickets-setup"),
     ("Server code",          "server_code",        "secret",  "/code-set"),
 )
 

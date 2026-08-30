@@ -55,6 +55,10 @@ Roles are matched by exact name and created only if missing, and existing ones a
 
 Without setup Jarcord picks the first channel whose name contains `operator-id`, `verify`, or `register`. Emoji and dividers in the name don't matter.
 
+**The other door.** Somebody from another group (an ally, a client booking ROC as OPFOR, an event host) is not an Operator and should not answer Operator questions. The panel has a second button, **Work with ROC**, with its own form: which group they speak for, their role there, Roblox name, what they are here for, and the detail. Submitting it swaps **Unverified** for **Diplomat**, tags the group onto their nickname, and opens a Work with ROC ticket with the answers already in it, so Command finds them in a private channel instead of in general. Diplomats hold no rank and no unit. Give the role whatever visibility you want; a diplomacy category with one overwrite is enough.
+
+**Chasing the stragglers.** Every six hours Jarcord looks at who still holds **Unverified**. 24 hours after joining they get a DM with a link to the verification channel; 72 hours after joining a last one, and if their DMs are closed, a ping in the channel itself. After that they are left alone. `/nudge` sends the next reminder to everybody due right now, `/nudge @member` to one person, and both report how many were reached.
+
 ### Role utilities
 | Command | What it does |
 |---|---|
@@ -63,7 +67,7 @@ Without setup Jarcord picks the first channel whose name contains `operator-id`,
 | `/logs-setup <channel>` | Write every notable action to this channel (needs Manage Server) |
 
 ### Logs
-With `/logs-setup` pointed at a Command only channel, Jarcord writes a card for each verification, promotion, demotion, warning, deleted warning, op posted, op closed, op cancelled, message clear and server code change. The card carries who did it, who it was done to and the reason where there is one, so enforcement has a paper trail without anyone keeping notes. The server code itself is never written to the log, only the fact that it changed.
+With `/logs-setup` pointed at a Command only channel, Jarcord writes a card for each verification, outside contact, nudge, ticket opened and closed, promotion, demotion, warning, deleted warning, op posted, op closed, op cancelled, message clear and server code change. The card carries who did it, who it was done to and the reason where there is one, so enforcement has a paper trail without anyone keeping notes. The server code itself is never written to the log, only the fact that it changed.
 
 They're created with no permissions at the bottom of the list, so drag them into place.
 
@@ -125,6 +129,21 @@ From Corporal 1 up a member also holds the `NCO` marker, so an NCO channel needs
 
 The information hub's key button reads the same setting live, so changing the code never means re-posting anything.
 
+### Tickets
+A private channel per request, filed on close. `/tickets-setup` creates a `TICKETS` category with a panel channel everyone can read and a transcript channel only Command can, then posts the panel. Five buttons: a question or problem, a leave of absence, a position application (Media, Op Planner, JTAC, Server Host), a member report, and Work with ROC for outside groups. Each opens a short form; submitting it cuts a channel named after the kind and the member (`loa-heero`, `dip-somebody`) that only they, Command and Jarcord can see, and posts their answers as a card with **Claim** and **Close** underneath. One open ticket per kind per person, so nobody floods the category.
+
+Closing files the whole channel as a text transcript in the log channel, with who opened it, who closed it, who claimed it and the reason, DMs the member, and only then deletes the channel. If the transcript cannot be filed the channel stays. A member who leaves with a ticket open gets a line posted in it rather than the ticket being closed under Command's feet.
+
+| Command | What it does |
+|---|---|
+| `/tickets-setup` | Create the category, panel channel and transcript channel that are missing, post the panel (needs Manage Server) |
+| `/tickets-panel [channel]` | Post the panel again somewhere else |
+| `/tickets [@member]` | Every open ticket, or one member's last fifteen |
+| `/ticket-add @member` | Pull somebody else into the ticket you are standing in |
+| `/ticket-close [reason]` | Same as the button. The opener can close their own, Command can close any |
+
+The support role is whatever `/officer-role` points at, and Jarcord needs **Manage Channels**. Ticket kinds live in one table at the top of `cogs/tickets.py`; adding one is adding an entry.
+
 ### Info panels and the hub
 Reference posts (banner image, section cards, buttons) defined as JSON files in `panels/` and posted on demand.
 
@@ -163,6 +182,7 @@ cogs/roles.py     server setup, role utilities, server code
 cogs/welcome.py   join welcome card
 cogs/warnings.py  warning log
 cogs/ranks.py     rank ladder
+cogs/tickets.py   tickets, transcripts, the Work with ROC door
 panels/*.json     panel definitions
 panels/assets/    images attached to panels
 setup.sh          LXC provisioning script

@@ -55,7 +55,8 @@ CREATE TABLE IF NOT EXISTS profiles (
     heard_from  TEXT,
     experience  TEXT,
     age_group   TEXT,
-    rank        TEXT              -- a name from cogs.ranks.RANKS, NULL until first promotion
+    rank        TEXT,             -- a name from cogs.ranks.RANKS, NULL until first promotion
+    nudged      INTEGER NOT NULL DEFAULT 0   -- verification reminders sent, 0 to 2
 );
 
 CREATE TABLE IF NOT EXISTS warnings (
@@ -64,6 +65,18 @@ CREATE TABLE IF NOT EXISTS warnings (
     officer_id INTEGER NOT NULL,
     reason     TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS tickets (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL,
+    kind       TEXT NOT NULL,          -- a key from cogs.tickets.KINDS
+    channel_id INTEGER,                -- NULL for the moment between the row and the channel
+    claimed_by INTEGER,
+    status     TEXT NOT NULL DEFAULT 'open',   -- open | closed
+    opened_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    closed_at  TEXT,
+    closed_by  INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS settings (
@@ -107,6 +120,7 @@ for ddl in (
     "ALTER TABLE ops ADD COLUMN message_id INTEGER",
     "ALTER TABLE ops ADD COLUMN thread_id INTEGER",
     "ALTER TABLE profiles ADD COLUMN rank TEXT",
+    "ALTER TABLE profiles ADD COLUMN nudged INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE ops ADD COLUMN notes TEXT",
     "ALTER TABLE signups ADD COLUMN status TEXT NOT NULL DEFAULT 'in'",
     "ALTER TABLE signups ADD COLUMN attended INTEGER",

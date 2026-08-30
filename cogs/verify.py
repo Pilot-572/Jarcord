@@ -2,16 +2,23 @@
 from datetime import datetime, timezone
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 from cogs.profile import (CONTINENTS, UNITS, RobloxDown, resolve_roblox,
                           save_profile, set_continent, set_unit)
 from cogs.ranks import RANKS, apply_rank, current_rank
+from cogs.tickets import AlreadyOpen, open_ticket
 from db import conn, get_setting, set_setting
 from ui import ACCENT, embed, log_action, staff_check
 
 UNVERIFIED = "Unverified"
 OPERATOR = "Operator"
+# Somebody from another group: an ally, a client booking us as OPFOR, an event host.
+# They never become an Operator, so they get their own role and their own questions.
+DIPLOMAT = "Diplomat"
+PURPOSES = ("Booking ROC for an event", "Alliance or partnership",
+            "Joint operation", "Training exchange", "Something else")
+NUDGE_STEPS = (24, 72)  # hours after joining, one reminder each, then we stop
 # ponytail: channel names carry emoji and dividers ("📋｜register"), so an exact
 # match is useless. Fall back to a normalized substring, in priority order.
 CHANNEL_WORDS = ("operator-id", "verify", "register")
@@ -66,6 +73,12 @@ def prompt_embed(guild: discord.Guild, member: discord.Member = None) -> discord
         value="Your nickname is set for you and the rest of the server opens up immediately.",
         inline=False,
     )
+    e.add_field(
+        name="Not joining?",
+        value=f"If you are here for another group, press **Work with ROC** instead. "
+              f"Different questions, and you land straight in front of Command.",
+        inline=False,
+    )
     if member is not None:
         e.set_thumbnail(url=member.display_avatar.url)
         e.set_footer(text=f"{member} · {member.id}")
@@ -109,6 +122,139 @@ async def grant_operator(member: discord.Member) -> None:
         await member.remove_roles(unverified, reason="verified callsign")
     # everyone starts at the bottom of the ladder, and a rejoin gets their old rank role back
     await apply_rank(member, current_rank(member) or RANKS[0])
+
+
+async def grant_diplomat(member: discord.Member) -> None:
+    """Swap Unverified for Diplomat. No rank, no unit, they are not one of ours."""
+    diplomat = await find_role(member.guild, DIPLOMAT, create=True)
+    await member.add_roles(diplomat, reason="verified as an outside contact")
+    unverified = await find_role(member.guild, UNVERIFIED)
+    if unverified is not None and unverified in member.roles:
+        await member.remove_roles(unverified, reason="verified as an outside contact")
+
+
+class CollabModal(discord.ui.Modal, title="Working with ROC"):
+    """The other door. Different questions, different role, and it lands as a ticket in
+    front of Command instead of quietly opening the server."""
+
+    group = discord.ui.TextInput(
+        label="Which group do you speak for?",
+        placeholder="the faction, unit or server you are here on behalf of",
+        max_length=80,
+    )
+    position = discord.ui.TextInput(
+        label="Your role there",
+        placeholder="Command, event host, recruiter",
+        max_length=60,
+    )
+    contact = discord.ui.TextInput(
+        label="Your Roblox username",
+        placeholder="so we know who turns up in game",
+        required=False,
+        max_length=20,
+    )
+    purpose = discord.ui.Label(
+        text="What brings you here?",
+        component=discord.ui.Select(
+            placeholder="pick the closest one",
+            options=[discord.SelectOption(label=p) for p in PURPOSES],
+        ),
+    )
+    detail = discord.ui.TextInput(
+        label="Give us the detail",
+        placeholder="what you want, how many people, and when, in your own timezone",
+        style=discord.TextStyle.paragraph,
+        required=False,
+        max_length=700,
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        member, guild = interaction.user, interaction.guild
+        group = str(self.group).strip()
+
+        try:
+            await grant_diplomat(member)
+        except discord.Forbidden:
+            await interaction.followup.send(
+                f"I couldn't give you the **{DIPLOMAT}** role. Ping anyone in Command and "
+                "they will sort it by hand.", ephemeral=True)
+            return
+
+        note = ""
+        try:  # a faction tag on the nickname saves Command asking twice
+            await member.edit(nick=f"{member.display_name} | {group}"[:32],
+                              reason="outside contact")
+        except discord.Forbidden:
+            note = " I couldn't change your nickname, so put your group in it yourself."
+
+        picked = self.purpose.component.values
+        answers = [
+            ("Group", group),
+            ("Their role there", str(self.position).strip()),
+            ("Roblox", str(self.contact).strip()),
+            ("Here for", picked[0] if picked else "not given"),
+            ("Detail", str(self.detail).strip()),
+        ]
+        try:
+            channel = await open_ticket(
+                guild, member, "diplomacy", answers,
+                note=f"**{member.display_name}** came in through verification as an outside contact.")
+            where = f"Command is waiting for you in {channel.mention}."
+        except AlreadyOpen as already:
+            where = f"You already have a channel open: {already.channel.mention}."
+        except discord.Forbidden:
+            where = "Message anyone in Command directly, I couldn't open a channel for you."
+
+        print(f">> {member.id} verified as a {DIPLOMAT} for {group!r}")
+        await log_action(guild, f"Outside contact: {member.display_name}", member,
+                         f"**{group}**, {picked[0] if picked else 'purpose not given'}")
+        await interaction.followup.send(
+            f"You're marked as a **{DIPLOMAT}** for **{group}**.{note}\n{where}", ephemeral=True)
+
+
+# ── Chasing the ones who never finished ──
+def nudge_count(user_id: int) -> int:
+    row = conn.execute("SELECT nudged FROM profiles WHERE user_id = ?", (user_id,)).fetchone()
+    return row["nudged"] if row else 0
+
+
+async def nudge(member: discord.Member, channel: discord.TextChannel, step: int) -> str:
+    """One reminder. DM first, and on the last one ping them in the channel as well,
+    because a closed DM is the usual reason somebody is still sitting on Unverified."""
+    link = f"https://discord.com/channels/{member.guild.id}/{channel.id}"
+    if step < len(NUDGE_STEPS):
+        text = (f"You joined **{member.guild.name}** but you never finished verifying, so "
+                f"the server is still shut to you.\n\nIt is one button and your Roblox "
+                f"username: {link}")
+    else:
+        text = (f"Last nudge from **{member.guild.name}**. Press **Verify** and you're an "
+                f"Operator in about a minute: {link}\n\nNot for you? No hard feelings, "
+                "leave the server and I'll stop.")
+
+    sent = "dm"
+    try:
+        await member.send(text)
+    except discord.HTTPException:
+        sent = "none"
+    if step >= len(NUDGE_STEPS) or sent == "none":
+        try:
+            await channel.send(
+                f"{member.mention} you're still unverified. Press **Verify** above and "
+                "the rest of the server opens up.")
+            sent = "ping" if sent == "none" else "both"
+        except discord.HTTPException:
+            pass
+    save_profile(member.id, nudged=step)
+    return sent
+
+
+def pending(guild: discord.Guild, unverified: discord.Role):
+    """Unverified members who are not bots and have not already had every reminder."""
+    for member in unverified.members:
+        if member.bot or nudge_count(member.id) >= len(NUDGE_STEPS):
+            continue
+        yield member
 
 
 class CallsignModal(discord.ui.Modal, title="Operator ID"):
@@ -367,6 +513,17 @@ class VerifyView(discord.ui.View):
             return
         await interaction.response.send_modal(CallsignModal())
 
+    @discord.ui.button(label="Work with ROC", style=discord.ButtonStyle.secondary,
+                       custom_id="jarcord:verify:collab")
+    async def collab(self, interaction: discord.Interaction, button: discord.ui.Button):
+        diplomat = await find_role(interaction.guild, DIPLOMAT)
+        if diplomat is not None and diplomat in interaction.user.roles:
+            await interaction.response.send_message(
+                f"You're already marked as a **{DIPLOMAT}**. Open a ticket if you need "
+                "Command again.", ephemeral=True)
+            return
+        await interaction.response.send_modal(CollabModal())
+
 
 class Verify(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -374,6 +531,68 @@ class Verify(commands.Cog):
 
     async def cog_load(self):
         self.bot.add_view(VerifyView())  # survives restarts
+        self.nudge_loop.start()
+
+    async def cog_unload(self):
+        self.nudge_loop.cancel()
+
+    @tasks.loop(hours=6)
+    async def nudge_loop(self):
+        """Chase whoever is still sitting on Unverified. One reminder at each step in
+        NUDGE_STEPS, then they are left alone for good."""
+        for guild in self.bot.guilds:
+            unverified = await find_role(guild, UNVERIFIED)
+            channel = find_channel(guild)
+            if unverified is None or channel is None:
+                continue
+            for member in pending(guild, unverified):
+                if member.joined_at is None:
+                    continue
+                hours = (discord.utils.utcnow() - member.joined_at).total_seconds() / 3600
+                step = sum(1 for h in NUDGE_STEPS if hours >= h)
+                if step > nudge_count(member.id):
+                    sent = await nudge(member, channel, step)
+                    print(f">> nudge {step} to {member.id} after {hours:.0f}h: {sent}")
+
+    @nudge_loop.before_loop
+    async def before_nudge(self):
+        await self.bot.wait_until_ready()
+
+    @commands.hybrid_command(name="nudge", description="Remind unverified members to finish")
+    @discord.app_commands.default_permissions(manage_guild=True)
+    @staff_check(officer=True, manage_guild=True)
+    async def nudge_cmd(self, ctx: commands.Context, member: discord.Member = None):
+        await ctx.defer(ephemeral=True)
+        unverified = await find_role(ctx.guild, UNVERIFIED)
+        channel = find_channel(ctx.guild)
+        if unverified is None or channel is None:
+            await ctx.send("No Unverified role or no verification channel. Run `/verify-setup`.",
+                           ephemeral=True)
+            return
+
+        if member is not None:
+            if unverified not in member.roles:
+                await ctx.send(f"{member.mention} isn't unverified.", ephemeral=True)
+                return
+            targets = [member]
+        else:
+            targets = list(pending(ctx.guild, unverified))
+        if not targets:
+            await ctx.send("Nobody left to chase. Everyone is either verified or already "
+                           "had both reminders.", ephemeral=True)
+            return
+
+        counts = {"dm": 0, "ping": 0, "both": 0, "none": 0}
+        for target in targets:
+            step = min(nudge_count(target.id) + 1, len(NUDGE_STEPS))
+            counts[await nudge(target, channel, step)] += 1
+        print(f">> {ctx.author.id} nudged {len(targets)} unverified: {counts}")
+        await log_action(ctx.guild, "Unverified nudged", ctx.author,
+                         f"{len(targets)} member(s), {counts['dm'] + counts['both']} by DM")
+        await ctx.send(
+            f"Chased **{len(targets)}**. DM only {counts['dm']}, pinged in "
+            f"{channel.mention} {counts['ping'] + counts['both']}, unreachable {counts['none']}.",
+            ephemeral=True)
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
