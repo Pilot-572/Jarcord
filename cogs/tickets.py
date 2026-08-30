@@ -128,7 +128,8 @@ async def ticket_category(guild: discord.Guild) -> discord.CategoryChannel | Non
         found = guild.get_channel(int(cid))
         if isinstance(found, discord.CategoryChannel):
             return found
-    found = discord.utils.get(guild.categories, name=CATEGORY_NAME)
+    # ponytail: any category with "ticket" in the name, so a hand-made one counts
+    found = discord.utils.find(lambda c: "ticket" in c.name.casefold(), guild.categories)
     if found is not None:
         set_setting("ticket_category_id", str(found.id))
     return found
@@ -470,9 +471,11 @@ class Tickets(commands.Cog):
         command_logs = guild.get_channel(int(get_setting("log_channel_id") or 0))
         info = named(guild, "information") or guild.get_channel(int(get_setting("op_channel_id") or 0))
 
-        # Where opened tickets pile up. They carry their own overwrites, so the Command
-        # category is as good as a hidden one, and a TICKETS category is the last resort.
+        # A ticket category, yours or one passed in, holds everything: the panel, the
+        # transcripts and every opened ticket. Without one, the panel goes next to the
+        # information hub, transcripts next to command-logs, and opened tickets under Command.
         category = category or await ticket_category(guild)
+        dedicated = category is not None
         if category is None and command_logs is not None:
             category = command_logs.category
         if category is None:
@@ -481,32 +484,37 @@ class Tickets(commands.Cog):
                 overwrites={guild.default_role: discord.PermissionOverwrite(view_channel=False)},
                 reason="ticket system")
             made.append(category.name)
+            dedicated = True
         set_setting("ticket_category_id", str(category.id))
 
-        # The panel sits next to the information hub, read only. A new channel does not
-        # inherit its category's overwrites on its own, so they are copied in by hand.
+        def inherit(home, **everyone):
+            """A new channel does not pick up its category's overwrites on its own, so copy
+            them and adjust the @everyone line. Explicit overwrites beat category sync."""
+            overwrites = dict(home.overwrites) if home is not None else {}
+            line = overwrites.get(guild.default_role, discord.PermissionOverwrite())
+            line.update(**everyone)
+            overwrites[guild.default_role] = line
+            return overwrites
+
         panel = panel or guild.get_channel(int(get_setting("ticket_panel_channel_id") or 0))
         if panel is None:
-            home = info.category if info is not None else category
-            overwrites = dict(home.overwrites) if home is not None else {}
-            everyone = overwrites.get(guild.default_role, discord.PermissionOverwrite())
-            everyone.update(send_messages=False)
-            overwrites[guild.default_role] = everyone
+            if dedicated:  # a ticket category is usually hidden, and the panel must not be
+                home, overwrites = category, inherit(category, view_channel=True, send_messages=False)
+            else:
+                home = info.category if info is not None else category
+                overwrites = inherit(home, send_messages=False)
             panel = await guild.create_text_channel(
                 PANEL_CHANNEL, category=home, overwrites=overwrites, reason="ticket panel")
             made.append(panel.name)
         set_setting("ticket_panel_channel_id", str(panel.id))
 
-        # Transcripts sit next to command-logs and see whatever that category sees.
         log = logs or guild.get_channel(int(get_setting("ticket_log_channel_id") or 0))
         if log is None:
-            home = command_logs.category if command_logs is not None else category
-            overwrites = dict(home.overwrites) if home is not None else {}
-            if not overwrites:  # nothing to copy, so lock it down ourselves
-                overwrites[guild.default_role] = discord.PermissionOverwrite(view_channel=False)
-                if staff is not None:
-                    overwrites[staff] = discord.PermissionOverwrite(view_channel=True,
-                                                                    read_message_history=True)
+            home = category if dedicated or command_logs is None else command_logs.category
+            overwrites = inherit(home, view_channel=False)  # Command only, wherever it sits
+            if staff is not None:
+                overwrites[staff] = discord.PermissionOverwrite(view_channel=True,
+                                                                read_message_history=True)
             log = await guild.create_text_channel(LOG_CHANNEL, category=home,
                                                   overwrites=overwrites, reason="ticket transcripts")
             made.append(log.name)
