@@ -6,6 +6,7 @@ import discord
 from discord.ext import commands
 
 from cogs.ranks import POSITIONS
+from cogs.welcome import named
 from db import conn, get_setting, set_setting
 from ui import ACCENT, embed, is_officer, log_action, staff_check
 
@@ -466,10 +467,14 @@ class Tickets(commands.Cog):
                             category: discord.CategoryChannel = None):
         await ctx.defer(ephemeral=True)
         guild, staff, made = ctx.guild, support_role(ctx.guild), []
+        command_logs = guild.get_channel(int(get_setting("log_channel_id") or 0))
+        info = named(guild, "information") or guild.get_channel(int(get_setting("op_channel_id") or 0))
 
-        # ponytail: the category is only where opened tickets pile up. They carry their own
-        # overwrites, so a public category works as well as a hidden one.
+        # Where opened tickets pile up. They carry their own overwrites, so the Command
+        # category is as good as a hidden one, and a TICKETS category is the last resort.
         category = category or await ticket_category(guild)
+        if category is None and command_logs is not None:
+            category = command_logs.category
         if category is None:
             category = await guild.create_category(
                 CATEGORY_NAME,
@@ -478,23 +483,31 @@ class Tickets(commands.Cog):
             made.append(category.name)
         set_setting("ticket_category_id", str(category.id))
 
-        # the panel has to be readable by everyone, including members who cannot verify yet
+        # The panel sits next to the information hub, read only. A new channel does not
+        # inherit its category's overwrites on its own, so they are copied in by hand.
         panel = panel or guild.get_channel(int(get_setting("ticket_panel_channel_id") or 0))
         if panel is None:
+            home = info.category if info is not None else category
+            overwrites = dict(home.overwrites) if home is not None else {}
+            everyone = overwrites.get(guild.default_role, discord.PermissionOverwrite())
+            everyone.update(send_messages=False)
+            overwrites[guild.default_role] = everyone
             panel = await guild.create_text_channel(
-                PANEL_CHANNEL, category=category, reason="ticket panel",
-                overwrites={guild.default_role: discord.PermissionOverwrite(
-                    view_channel=True, send_messages=False, read_message_history=True)})
+                PANEL_CHANNEL, category=home, overwrites=overwrites, reason="ticket panel")
             made.append(panel.name)
         set_setting("ticket_panel_channel_id", str(panel.id))
 
+        # Transcripts sit next to command-logs and see whatever that category sees.
         log = logs or guild.get_channel(int(get_setting("ticket_log_channel_id") or 0))
         if log is None:
-            overwrites = {guild.default_role: discord.PermissionOverwrite(view_channel=False)}
-            if staff is not None:
-                overwrites[staff] = discord.PermissionOverwrite(view_channel=True,
-                                                                read_message_history=True)
-            log = await guild.create_text_channel(LOG_CHANNEL, category=category,
+            home = command_logs.category if command_logs is not None else category
+            overwrites = dict(home.overwrites) if home is not None else {}
+            if not overwrites:  # nothing to copy, so lock it down ourselves
+                overwrites[guild.default_role] = discord.PermissionOverwrite(view_channel=False)
+                if staff is not None:
+                    overwrites[staff] = discord.PermissionOverwrite(view_channel=True,
+                                                                    read_message_history=True)
+            log = await guild.create_text_channel(LOG_CHANNEL, category=home,
                                                   overwrites=overwrites, reason="ticket transcripts")
             made.append(log.name)
         set_setting("ticket_log_channel_id", str(log.id))
