@@ -453,15 +453,23 @@ class Tickets(commands.Cog):
                 await channel.send(f"**{member}** left the server. Close this when you are done with it.")
 
     @commands.hybrid_command(name="tickets-setup",
-                             description="Create the ticket channels and post the panel")
+                             description="Set up tickets: your channels, or new ones if you leave them out")
+    @discord.app_commands.describe(
+        panel="Where the ticket panel goes, anything everyone can read",
+        logs="Where transcripts are filed, keep it Command only",
+        category="Where opened ticket channels land, any category will do")
     @discord.app_commands.default_permissions(manage_guild=True)
     @staff_check(manage_guild=True)
     @commands.bot_has_permissions(manage_channels=True)
-    async def tickets_setup(self, ctx: commands.Context):
+    async def tickets_setup(self, ctx: commands.Context, panel: discord.TextChannel = None,
+                            logs: discord.TextChannel = None,
+                            category: discord.CategoryChannel = None):
         await ctx.defer(ephemeral=True)
         guild, staff, made = ctx.guild, support_role(ctx.guild), []
 
-        category = await ticket_category(guild)
+        # ponytail: the category is only where opened tickets pile up. They carry their own
+        # overwrites, so a public category works as well as a hidden one.
+        category = category or await ticket_category(guild)
         if category is None:
             category = await guild.create_category(
                 CATEGORY_NAME,
@@ -471,7 +479,7 @@ class Tickets(commands.Cog):
         set_setting("ticket_category_id", str(category.id))
 
         # the panel has to be readable by everyone, including members who cannot verify yet
-        panel = guild.get_channel(int(get_setting("ticket_panel_channel_id") or 0))
+        panel = panel or guild.get_channel(int(get_setting("ticket_panel_channel_id") or 0))
         if panel is None:
             panel = await guild.create_text_channel(
                 PANEL_CHANNEL, category=category, reason="ticket panel",
@@ -480,7 +488,7 @@ class Tickets(commands.Cog):
             made.append(panel.name)
         set_setting("ticket_panel_channel_id", str(panel.id))
 
-        log = guild.get_channel(int(get_setting("ticket_log_channel_id") or 0))
+        log = logs or guild.get_channel(int(get_setting("ticket_log_channel_id") or 0))
         if log is None:
             overwrites = {guild.default_role: discord.PermissionOverwrite(view_channel=False)}
             if staff is not None:

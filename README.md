@@ -130,13 +130,13 @@ From Corporal 1 up a member also holds the `NCO` marker, so an NCO channel needs
 The information hub's key button reads the same setting live, so changing the code never means re-posting anything.
 
 ### Tickets
-A private channel per request, filed on close. `/tickets-setup` creates a `TICKETS` category with a panel channel everyone can read and a transcript channel only Command can, then posts the panel. Five buttons: a question or problem, a leave of absence, a position application (Media, Op Planner, JTAC, Server Host), a member report, and Work with ROC for outside groups. Each opens a short form; submitting it cuts a channel named after the kind and the member (`loa-heero`, `dip-somebody`) that only they, Command and Jarcord can see, and posts their answers as a card with **Claim** and **Close** underneath. One open ticket per kind per person, so nobody floods the category.
+A private channel per request, filed on close. `/tickets-setup` takes a panel channel (anything everyone can read), a transcript channel (Command only) and the category opened tickets land in, creates whichever you leave out, then posts the panel. No dedicated category is needed: opened tickets carry their own overwrites, so they are private wherever they sit. Five buttons: a question or problem, a leave of absence, a position application (Media, Op Planner, JTAC, Server Host), a member report, and Work with ROC for outside groups. Each opens a short form; submitting it cuts a channel named after the kind and the member (`loa-heero`, `dip-somebody`) that only they, Command and Jarcord can see, and posts their answers as a card with **Claim** and **Close** underneath. One open ticket per kind per person, so nobody floods the category.
 
 Closing files the whole channel as a text transcript in the log channel, with who opened it, who closed it, who claimed it and the reason, DMs the member, and only then deletes the channel. If the transcript cannot be filed the channel stays. A member who leaves with a ticket open gets a line posted in it rather than the ticket being closed under Command's feet.
 
 | Command | What it does |
 |---|---|
-| `/tickets-setup` | Create the category, panel channel and transcript channel that are missing, post the panel (needs Manage Server) |
+| `/tickets-setup [panel] [logs] [category]` | Point tickets at your own channels, or leave any of them out and Jarcord creates it. Posts the panel (needs Manage Server) |
 | `/tickets-panel [channel]` | Post the panel again somewhere else |
 | `/tickets [@member]` | Every open ticket, or one member's last fifteen |
 | `/ticket-add @member` | Pull somebody else into the ticket you are standing in |
