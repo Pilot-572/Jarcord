@@ -135,6 +135,21 @@ async def ticket_category(guild: discord.Guild) -> discord.CategoryChannel | Non
     return found
 
 
+async def lock_category(category: discord.CategoryChannel, staff) -> None:
+    """Hidden from everyone, open to Command. Each ticket adds its own opener on top, so
+    nothing else ever needs a line here. Quiet if the bot cannot edit the category."""
+    try:
+        await category.set_permissions(category.guild.default_role, view_channel=False,
+                                       reason="ticket category")
+        if staff is not None:
+            await category.set_permissions(
+                staff, view_channel=True, send_messages=True, read_message_history=True,
+                attach_files=True, embed_links=True, manage_messages=True,
+                reason="ticket category")
+    except discord.Forbidden:
+        print(f">> can't set overwrites on {category.name}, lock it down by hand")
+
+
 def ticket_embed(kind: str, member: discord.Member, answers, ticket_id: int) -> discord.Embed:
     spec = KINDS[kind]
     e = embed(title=f"{spec['title']} · #{ticket_id:03d}", colour=ACCENT)
@@ -192,13 +207,12 @@ async def open_ticket(guild: discord.Guild, member: discord.Member, kind: str,
     conn.execute("UPDATE tickets SET channel_id = ? WHERE id = ?", (channel.id, ticket_id))
     conn.commit()
 
-    # ponytail: only the opener is pinged. Command gets the card in command-logs and the
-    # channel in the sidebar, a role ping per ticket would wake everyone for everything.
+    # Command is pinged, nobody else. The opener already got the channel link as a reply.
     await channel.send(
-        content=member.mention + (f"\n{note}" if note else ""),
+        content=(staff.mention if staff is not None else "Command") + (f"\n{note}" if note else ""),
         embed=ticket_embed(kind, member, answers, ticket_id),
         view=TicketControls(ticket_id),
-        allowed_mentions=discord.AllowedMentions(users=True, roles=False),
+        allowed_mentions=discord.AllowedMentions(users=False, roles=True),
     )
     print(f">> ticket #{ticket_id} ({kind}) opened by {member.id} in #{channel.name}")
     await log_action(guild, f"Ticket opened: {KINDS[kind]['title']}", member,
@@ -491,6 +505,8 @@ class Tickets(commands.Cog):
             made.append(category.name)
             dedicated = True
         set_setting("ticket_category_id", str(category.id))
+        if dedicated:
+            await lock_category(category, staff)
 
         def inherit(home, **everyone):
             """A new channel does not pick up its category's overwrites on its own, so copy
