@@ -21,9 +21,9 @@ Informational output goes in embeds with one accent colour; confirmations stay s
 
 Closing an op is how attendance gets recorded. The member picker opens with everyone marked Attending already ticked, so the host unticks the no-shows and ticks the walk-ins; anyone who said they were coming and isn't picked is logged as a no-show, and anyone who walked in without replying still counts as attending. A closed card shows the turnout and loses its buttons, and the op thread gets the turnout, a line for anyone hitting their first, fifth, tenth or twenty-fifth op, and a nudge to `/rate`, then archives. An hour after a timed op starts, the host gets pinged in the thread to close it. `/profile` then reports signed up, attended and no-showed instead of a signup count that means nothing.
 
-The card carries **Attending**, **Maybe** and **Can't make it**. Pressing one rewrites the card in place, so the three lists are always current, and changing your mind moves you rather than adding you twice. Attending also adds you to the op thread. The 30 minute reminder pings everyone Attending, and gives Maybe a last call. The buttons survive restarts. Cancelling deletes the card and its thread.
+The card carries **Attending**, **Maybe** and **Can't make it**. Pressing one rewrites the card in place, so the three lists are always current, and changing your mind moves you rather than adding you twice. Attending also adds you to the op thread. The 10 minute reminder pings everyone Attending, and gives Maybe a last call. The buttons survive restarts. Cancelling deletes the card and its thread.
 
-`when` is free text, but if it matches `YYYY-MM-DD HH:MM` or `DD.MM HH:MM` (UTC), the op gets a real timestamp, shown in each viewer's local timezone, and the bot pings the roster in the op's channel 30 minutes before start.
+`when` is free text, but if it matches `YYYY-MM-DD HH:MM` or `DD.MM HH:MM` (read in the server timezone from `/op-setup`), the op gets a real timestamp, shown in each viewer's local timezone, and the bot pings the roster in the op's thread 10 minutes before start. Anyone holding the **Op Planner** role can post, edit, close and cancel ops without being Command.
 
 ### Member ratings
 | Command | What it does |
@@ -82,7 +82,7 @@ Setting `/officer-role` grants that role a fixed, curated set. It is not per com
 
 | Tier | Commands | Who |
 |---|---|---|
-| Officer | `/op create`, `/op edit`, `/op cancel`, `/op close`, `/promote`, `/demote`, `/warn`, `/warns`, `/unwarn`, `/nickname`, `/panel`, `/record`, `/verify-panel`, `/c`, `/code-set` | The officer role, plus anyone with the underlying permission. `/code-set` also passes for the **Server Host** role |
+| Officer | `/op create`, `/op edit`, `/op cancel`, `/op close`, `/promote`, `/demote`, `/warn`, `/warns`, `/unwarn`, `/nickname`, `/panel`, `/record`, `/verify-panel`, `/c`, `/code-set` | The officer role, plus anyone with the underlying permission. `/code-set` also passes for the **Server Host** role, and the `/op` commands for **Op Planner** |
 | Admin | `/op-setup`, `/verify-setup`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/officer-role`, `/ranks-setup`, `/promotions-setup`, `/dividers` | Manage Server only |
 | Member | `/profile`, `/code`, `/op join`, `/op leave`, `/op roster`, `/op list`, `/rate`, `/rating-history`, `/continent`, `/unit`, `/roblox`, `/activity`, `/panel-list` | Everyone |
 

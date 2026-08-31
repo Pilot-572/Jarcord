@@ -49,9 +49,10 @@ async def log_action(guild, action: str, actor=None, detail: str = None) -> None
         print(f">> couldn't log to channel {channel_id}: {exc!r}")
 
 
-def _allowed(member, perms, officer: bool) -> bool:
+def _allowed(member, perms, officer: bool, roles=()) -> bool:
     """Admins always pass. So does anyone holding the named Discord permissions. The role
-    set with /officer-role passes only on commands marked officer=True."""
+    set with /officer-role passes only on commands marked officer=True, and any role named
+    in `roles` passes for that command alone (a position, like Op Planner on /op)."""
     mine = member.guild_permissions
     if mine.administrator or (perms and all(getattr(mine, p, False) for p in perms)):
         return True
@@ -59,31 +60,31 @@ def _allowed(member, perms, officer: bool) -> bool:
         role_id = get_setting("officer_role_id")
         if role_id and any(r.id == int(role_id) for r in member.roles):
             return True
-    return False
+    return bool(roles) and any(r.name in roles for r in member.roles)
 
 
-def is_officer(member) -> bool:
+def is_officer(member, roles=()) -> bool:
     """Manage Server, or the configured officer role. For runtime branching, not gating."""
-    return _allowed(member, {"manage_guild": True}, officer=True)
+    return _allowed(member, {"manage_guild": True}, officer=True, roles=roles)
 
 
-def staff_check(*, officer: bool = False, **perms):
+def staff_check(*, officer: bool = False, roles=(), **perms):
     """Gate for prefix and hybrid commands."""
     async def predicate(ctx) -> bool:
         if ctx.guild is None:
             raise commands.NoPrivateMessage()
-        if _allowed(ctx.author, perms, officer):
+        if _allowed(ctx.author, perms, officer, roles):
             return True
         raise commands.MissingPermissions(list(perms))
     return commands.check(predicate)
 
 
-def app_staff_check(*, officer: bool = False, **perms):
+def app_staff_check(*, officer: bool = False, roles=(), **perms):
     """Same gate for slash-only commands."""
     async def predicate(interaction: discord.Interaction) -> bool:
         if interaction.guild is None:
             raise app_commands.NoPrivateMessage()
-        if _allowed(interaction.user, perms, officer):
+        if _allowed(interaction.user, perms, officer, roles):
             return True
         raise app_commands.MissingPermissions(list(perms))
     return app_commands.check(predicate)

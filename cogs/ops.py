@@ -10,7 +10,8 @@ from discord.ext import commands, tasks
 from db import conn, get_setting, set_setting
 from ui import ACCENT, app_staff_check, embed, is_officer, log_action
 
-REMIND_BEFORE = 30 * 60  # ponytail: fixed 30-min reminder; make it per-op if anyone asks
+REMIND_BEFORE = 10 * 60  # ponytail: fixed 10-min reminder; make it per-op if anyone asks
+OP_PLANNER = "Op Planner"  # position role that may post and run ops without being Command
 CLOSE_NUDGE_AFTER = 60 * 60   # an hour after start, ask the host to close it
 NUDGE_WINDOW = 7 * 86400      # ponytail: older unclosed ops are history, not a to-do
 MILESTONES = (1, 5, 10, 25)   # ops attended worth a line in the thread
@@ -140,7 +141,7 @@ def create_embed(op_id: int, author: discord.Member = None, guild=None) -> disco
         e.add_field(name="Turned out", value=f"{came} attended, {missed} no-showed", inline=False)
         e.set_footer(text=f"Op ID {op_id} · closed")
     elif op["when_ts"]:
-        e.set_footer(text=f"Op ID {op_id} · attending get pinged 30 min before start")
+        e.set_footer(text=f"Op ID {op_id} · attending get pinged 10 min before start")
     else:
         e.set_footer(text=f"Op ID {op_id}")
     return e
@@ -163,7 +164,7 @@ class CloseView(discord.ui.View):
     async def picked(self, interaction: discord.Interaction, select: discord.ui.UserSelect):
         was_closed = (get_op(self.op_id) or {"closed": 1})["closed"]
         ids = [u.id for u in select.values]
-        msg = close_op(self.op_id, interaction.user.id, is_officer(interaction.user), ids)
+        msg = close_op(self.op_id, interaction.user.id, is_officer(interaction.user, roles=(OP_PLANNER,)), ids)
         await interaction.response.edit_message(content=msg, view=None)
         await sync_card(self.bot, self.op_id)
         if not was_closed and get_op(self.op_id)["closed"]:
@@ -514,7 +515,7 @@ class Ops(commands.Cog):
         who="Role to ping. Defaults to whatever /op-setup configured",
         notes="Loadout, meeting point, anything else",
     )
-    @app_staff_check(officer=True, manage_events=True)
+    @app_staff_check(officer=True, manage_events=True, roles=(OP_PLANNER,))
     async def op_create(self, interaction: discord.Interaction, what: str, when: str,
                         who: discord.Role = None, notes: str = None):
         channel = interaction.channel
@@ -622,12 +623,12 @@ class Ops(commands.Cog):
     @app_commands.describe(
         op_id="The op ID",
         what="New name",
-        when="New time, read in the server timezone. Rescheduling re-arms the 30 minute reminder",
+        when="New time, read in the server timezone. Rescheduling re-arms the 10 minute reminder",
         notes="New notes. Pass a single space to clear them",
     )
     async def op_edit(self, interaction: discord.Interaction, op_id: int, what: str = None,
                       when: str = None, notes: str = None):
-        msg = edit_op(op_id, interaction.user.id, is_officer(interaction.user),
+        msg = edit_op(op_id, interaction.user.id, is_officer(interaction.user, roles=(OP_PLANNER,)),
                       what, when, notes.strip() if notes is not None else None)
         await interaction.response.send_message(msg, ephemeral=True)
         await sync_card(self.bot, op_id)
@@ -644,7 +645,7 @@ class Ops(commands.Cog):
             # trust the RSVPs: no no-shows, no picker, one command and it is done
             was_closed = op["closed"]
             ids = roster(op_id)["in"]
-            msg = close_op(op_id, interaction.user.id, is_officer(interaction.user), ids)
+            msg = close_op(op_id, interaction.user.id, is_officer(interaction.user, roles=(OP_PLANNER,)), ids)
             await interaction.response.send_message(msg, ephemeral=True)
             await sync_card(self.bot, op_id)
             if not was_closed and get_op(op_id)["closed"]:
@@ -660,7 +661,7 @@ class Ops(commands.Cog):
     @op.command(name="cancel", description="Cancel an op (creator or an officer)")
     @app_commands.describe(op_id="The op ID")
     async def op_cancel(self, interaction: discord.Interaction, op_id: int):
-        officer = is_officer(interaction.user)
+        officer = is_officer(interaction.user, roles=(OP_PLANNER,))
         op = get_op(op_id)
         ref = (op["channel_id"], op["message_id"], op["thread_id"]) if op else None
         result = cancel_op(op_id, interaction.user.id, officer)
@@ -698,7 +699,7 @@ class Ops(commands.Cog):
 
     @op_prefix.command(name="cancel")
     async def op_cancel_prefix(self, ctx: commands.Context, op_id: int):
-        officer = is_officer(ctx.author)
+        officer = is_officer(ctx.author, roles=(OP_PLANNER,))
         op = get_op(op_id)
         ref = (op["channel_id"], op["message_id"], op["thread_id"]) if op else None
         await ctx.send(cancel_op(op_id, ctx.author.id, officer))

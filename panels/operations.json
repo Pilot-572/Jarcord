@@ -3,7 +3,7 @@
   "sections": [
     {
       "title": "OPERATIONS",
-      "body": "Ops are posted in <#1542215046820663346> with the time shown in your own timezone, so there's nothing to convert.\n\nEach card has three buttons. Press **Attending**, **Maybe** or **Can't make it**. You can change your answer any time before the op starts. Everyone attending gets pinged 30 minutes before kickoff.\n\nEvery op gets its own thread, linked from the card. Loadouts, questions and the after-action talk go there, not in general."
+      "body": "Ops are posted in <#1542215046820663346> with the time shown in your own timezone, so there's nothing to convert.\n\nEach card has three buttons. Press **Attending**, **Maybe** or **Can't make it**. You can change your answer any time before the op starts. Everyone attending gets pinged 10 minutes before kickoff.\n\nEvery op gets its own thread, linked from the card. Loadouts, questions and the after-action talk go there, not in general."
     },
     {
       "title": "SHOWING UP",
