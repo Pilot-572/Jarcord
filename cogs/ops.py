@@ -251,7 +251,8 @@ async def post_turnout(bot, op_id: int, attended_ids) -> None:
     if ids:
         lines.append("Rate who you played with: `/rate @name 1-5 note`")
     try:
-        await thread.send("\n".join(lines), allowed_mentions=discord.AllowedMentions(users=True))
+        # names render as mentions either way, this just keeps eleven phones from buzzing
+        await thread.send("\n".join(lines), allowed_mentions=discord.AllowedMentions.none())
         await thread.edit(archived=True)
     except discord.HTTPException as exc:
         print(f">> turnout post failed for op {op_id}: {exc!r}")
