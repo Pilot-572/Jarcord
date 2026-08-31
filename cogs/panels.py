@@ -6,6 +6,7 @@ from pathlib import Path
 import discord
 from discord.ext import commands
 
+from cogs.profile import CONTINENTS, UNITS, set_continent, set_unit
 from cogs.roles import code_text
 from ui import ACCENT, embed, staff_check
 
@@ -62,6 +63,51 @@ class HubButton(discord.ui.DynamicItem[discord.ui.Button],
         await interaction.response.send_message(**send_kwargs(panel, interaction.guild), ephemeral=True)
 
 
+class RoleButton(discord.ui.DynamicItem[discord.ui.Button],
+                 template=r"jarcord:role:(?P<name>.+)"):
+    """A self-serve role toggle. The role name rides in the custom_id, so any panel file can
+    hand out roles with a "role" button and restarts forget nothing. Units and continents go
+    through their profile setters so the database moves with the role."""
+
+    def __init__(self, name: str, label: str = None, emoji: str = None):
+        super().__init__(discord.ui.Button(
+            label=label or name, emoji=emoji, style=discord.ButtonStyle.secondary,
+            custom_id=f"jarcord:role:{name}",
+        ))
+        self.name = name
+
+    @classmethod
+    async def from_custom_id(cls, interaction: discord.Interaction, item: discord.ui.Button, match, /):
+        return cls(match["name"])
+
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        member = interaction.user
+        if self.name in UNITS:
+            ok = await set_unit(member, self.name)
+            msg = f"You're **{self.name}** now." if ok else "I couldn't swap your unit role."
+        elif self.name in CONTINENTS:
+            ok = await set_continent(member, self.name)
+            msg = f"Region set: **{self.name}**." if ok else "I couldn't swap your region role."
+        else:
+            role = discord.utils.get(interaction.guild.roles, name=self.name)
+            # never hand out anything that carries permissions or outranks the bot
+            if (role is None or role.permissions.value != 0 or role.managed
+                    or role >= interaction.guild.me.top_role):
+                msg = "That role isn't self-serve. Tell Command."
+            else:
+                try:
+                    if role in member.roles:
+                        await member.remove_roles(role, reason="get-roles panel")
+                        msg = f"**{self.name}** removed."
+                    else:
+                        await member.add_roles(role, reason="get-roles panel")
+                        msg = f"**{self.name}** added."
+                except discord.Forbidden:
+                    msg = "I can't manage that role. Tell Command."
+        await interaction.followup.send(msg, ephemeral=True)
+
+
 def build(panel: dict, guild: discord.Guild = None) -> tuple[list[discord.Embed], discord.ui.View | None, list[discord.File]]:
     panel = resolve_roles(panel, guild)
     colour = discord.Colour(int(panel["colour"], 16)) if panel.get("colour") else ACCENT
@@ -100,6 +146,8 @@ def build(panel: dict, guild: discord.Guild = None) -> tuple[list[discord.Embed]
                     label=b["label"], url=b["url"], emoji=b.get("emoji"),
                     style=discord.ButtonStyle.link,
                 ))
+            elif b.get("role"):
+                view.add_item(RoleButton(b["role"], label=b.get("label"), emoji=b.get("emoji")))
             else:
                 view.add_item(HubButton(b["panel"], label=b["label"], emoji=b.get("emoji")))
     return embeds, view, files
@@ -122,7 +170,7 @@ class Panels(commands.Cog):
         self.bot = bot
 
     async def cog_load(self):
-        self.bot.add_dynamic_items(HubButton)  # hub buttons survive restarts
+        self.bot.add_dynamic_items(HubButton, RoleButton)  # panel buttons survive restarts
 
     @commands.hybrid_command(name="panel", description="Post an info panel (needs Manage Messages)")
     @discord.app_commands.default_permissions(manage_messages=True)

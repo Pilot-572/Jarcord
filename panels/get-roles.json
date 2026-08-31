@@ -1,0 +1,29 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "PICK YOUR ROLES",
+      "body": "Press a button, the role is yours. Press it again to drop it. Only you see the replies.\n\n──────────────────────────────",
+      "fields": [
+        {
+          "name": "Unit",
+          "value": "One or the other. Switching moves your role and your record with it."
+        },
+        {
+          "name": "Region",
+          "value": "Where you play from, so ops can be timed around the roster."
+        }
+      ]
+    }
+  ],
+  "buttons": [
+    { "emoji": "💥", "label": "Ground Unit", "role": "Ground Unit" },
+    { "emoji": "🎯", "label": "Sniper Unit", "role": "Sniper Unit" },
+    { "emoji": "🌍", "label": "Europe", "role": "Europe" },
+    { "emoji": "🌎", "label": "North America", "role": "North America" },
+    { "emoji": "🌎", "label": "South America", "role": "South America" },
+    { "emoji": "🌏", "label": "Asia", "role": "Asia" },
+    { "emoji": "🌍", "label": "Africa", "role": "Africa" },
+    { "emoji": "🌏", "label": "Oceania", "role": "Oceania" }
+  ]
+}

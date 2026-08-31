@@ -632,11 +632,23 @@ class Ops(commands.Cog):
         await sync_card(self.bot, op_id)
 
     @op.command(name="close", description="Record who turned up and close the op")
-    @app_commands.describe(op_id="The op ID")
-    async def op_close(self, interaction: discord.Interaction, op_id: int):
+    @app_commands.describe(op_id="The op ID",
+                           force="Skip the picker: everyone marked Attending counts as showed")
+    async def op_close(self, interaction: discord.Interaction, op_id: int, force: bool = False):
         op = get_op(op_id)
         if op is None:
             await interaction.response.send_message(f"No op with ID `{op_id}`.", ephemeral=True)
+            return
+        if force:
+            # trust the RSVPs: no no-shows, no picker, one command and it is done
+            was_closed = op["closed"]
+            ids = roster(op_id)["in"]
+            msg = close_op(op_id, interaction.user.id, is_officer(interaction.user), ids)
+            await interaction.response.send_message(msg, ephemeral=True)
+            await sync_card(self.bot, op_id)
+            if not was_closed and get_op(op_id)["closed"]:
+                await log_action(interaction.guild, "Op closed", interaction.user, msg)
+                await post_turnout(self.bot, op_id, ids)
             return
         await interaction.response.send_message(
             f"**{op['title']}**: pick everyone who actually turned up. "

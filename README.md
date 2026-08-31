@@ -13,7 +13,7 @@ Informational output goes in embeds with one accent colour; confirmations stay s
 | `/op join <id>` or `!op join <id>` | Sign up without the buttons |
 | `/op leave <id>` or `!op leave <id>` | Drop off the roster |
 | `/op edit <id> [what] [when] [notes]` | Change an op. Rescheduling re-arms the reminder (creator or officer) |
-| `/op close <id>` | Record who actually turned up, then close the op |
+| `/op close <id> [force]` | Record who actually turned up, then close the op. `force:True` skips the picker and counts everyone marked Attending as showed |
 | `/op cancel <id>` or `!op cancel <id>` | Cancel an op and remove its card (creator or officer) |
 | `/op roster <id>` or `!op roster <id>` | Who's attending |
 | `/op list` or `!op list` | Last 10 ops with attendance counts |
@@ -154,7 +154,7 @@ Reference posts (banner image, section cards, buttons) defined as JSON files in 
 
 A section is either a block of `body` text or a list of `fields`, which render as evenly sized rows inside one card. Use fields for anything list shaped, like rules, so you get one tidy card instead of a dozen ragged ones. Copy `panels/example.json`, rename it, edit; the filename is the panel name.
 
-A banner can be a URL or `file:name.png` for an image shipped in `panels/assets/`, attached at post time so nothing needs hosting. A button with a `url` is a link. A button with a `panel` opens that panel as an ephemeral reply, only the presser sees it, which is how `hub` works: one message in the information channel, a banner, and a row of buttons for who we are, rules, units, chain of command, working with ROC, channels, operations, commands and the server code. Hub buttons survive restarts.
+A banner can be a URL or `file:name.png` for an image shipped in `panels/assets/`, attached at post time so nothing needs hosting. A button with a `url` is a link. A button with a `panel` opens that panel as an ephemeral reply, only the presser sees it, which is how `hub` works: one message in the information channel, a banner, and a row of buttons for who we are, rules, units, chain of command, working with ROC, channels, operations, commands and the server code. A button with a `role` toggles that role on whoever presses it, which is what `get-roles` does for units and regions; unit and region buttons go through the profile setters so the record moves with the role, and anything else is a plain toggle that refuses roles carrying permissions or sitting above the bot. All panel buttons survive restarts.
 
 ### Activity tracking
 Every non-bot guild message bumps a per-user counter and `last_seen` timestamp (UTC).

@@ -46,8 +46,12 @@ def check_panels():
             if len(b.get("label") or "") > 80:
                 errors.append(f"{f.name} button '{b.get('label')}' label is over 80 chars")
             target = b.get("panel")
-            if not b.get("url") and not target:
-                errors.append(f"{f.name} button '{b.get('label')}' has neither a url nor a panel")
+            role = b.get("role")
+            if not b.get("url") and not target and not role:
+                errors.append(f"{f.name} button '{b.get('label')}' has no url, panel or role")
+            elif role and len(role) > 80:
+                # the custom_id carries the role name and Discord caps it at 100
+                errors.append(f"{f.name} button '{b.get('label')}' role name is over 80 chars")
             elif target and not re.fullmatch(r"[a-z0-9-]+", target):
                 # the hub button id carries the name and only accepts these characters
                 errors.append(f"{f.name} button '{b.get('label')}' target '{target}' must be lowercase letters, digits and dashes")
