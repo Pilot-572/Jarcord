@@ -66,8 +66,8 @@ class Activity(commands.Cog):
             ))
             return
         lines = [
-            f"<@{m.id}> · last seen {ago(seen[m.id])}" if m.id in seen
-            else f"<@{m.id}> · never seen"
+            f"<@{m.id}>, last seen {ago(seen[m.id])}" if m.id in seen
+            else f"<@{m.id}>, never seen"
             for m in stale[:30]
         ]
         extra = f"\n*…and {len(stale) - 30} more.*" if len(stale) > 30 else ""

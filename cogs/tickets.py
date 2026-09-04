@@ -8,14 +8,14 @@ from discord.ext import commands
 from cogs.ranks import POSITIONS
 from cogs.welcome import named
 from db import conn, get_setting, set_setting
-from ui import ACCENT, embed, is_officer, log_action, staff_check
+from ui import ACCENT, NEUTRAL, embed, is_officer, log_action, staff_check
 
 PARA = discord.TextStyle.paragraph
 CATEGORY_NAME = "TICKETS"
 PANEL_CHANNEL = "🎫┃tickets"
 LOG_CHANNEL = "📁┃ticket-logs"
 HISTORY_LIMIT = 500  # ponytail: a ticket that runs past 500 messages is a channel, not a ticket
-CLOSED = discord.Colour(0x64748B)
+CLOSED = NEUTRAL
 
 # Each kind is one button on the panel and one modal. Adding a kind is adding a dict entry:
 # the button, the form, the channel name and the panel line all come from here.
@@ -152,7 +152,7 @@ async def lock_category(category: discord.CategoryChannel, staff) -> None:
 
 def ticket_embed(kind: str, member: discord.Member, answers, ticket_id: int) -> discord.Embed:
     spec = KINDS[kind]
-    e = embed(title=f"{spec['title']} · #{ticket_id:03d}", colour=ACCENT)
+    e = embed(title=f"{spec['title']}, ticket {ticket_id:03d}", colour=ACCENT)
     e.set_author(name=str(member), icon_url=member.display_avatar.url)
     for label, value in answers:
         if value:
@@ -201,7 +201,7 @@ async def open_ticket(guild: discord.Guild, member: discord.Member, kind: str,
         name=f"{KINDS[kind]['slug']}-{slugify(member.name)}"[:100],
         category=await ticket_category(guild),
         overwrites=overwrites,
-        topic=f"Ticket #{ticket_id:03d} · {KINDS[kind]['title']} · opened by {member}",
+        topic=f"Ticket {ticket_id:03d}, {KINDS[kind]['title']}, opened by {member}",
         reason=f"ticket #{ticket_id} opened by {member}",
     )
     conn.execute("UPDATE tickets SET channel_id = ? WHERE id = ?", (channel.id, ticket_id))
@@ -229,7 +229,7 @@ class AlreadyOpen(Exception):
 async def transcript(channel: discord.TextChannel) -> str:
     """The whole channel as text. Attachments become links, since Discord keeps the file
     behind the URL long after the channel is gone."""
-    lines = [f"# {channel.name} · {channel.topic or 'ticket'}", ""]
+    lines = [f"# {channel.name}, {channel.topic or 'ticket'}", ""]
     async for m in channel.history(limit=HISTORY_LIMIT, oldest_first=True):
         stamp = m.created_at.strftime("%Y-%m-%d %H:%M")
         body = m.clean_content
@@ -257,7 +257,7 @@ async def close_ticket(channel: discord.TextChannel, closer: discord.Member,
                 "Run `/tickets-setup` first.")
 
     spec = KINDS.get(row["kind"], {"title": row["kind"]})
-    e = embed(title=f"Closed · {spec['title']} #{row['id']:03d}", colour=CLOSED)
+    e = embed(title=f"Closed: {spec['title']}, ticket {row['id']:03d}", colour=CLOSED)
     e.add_field(name="Opened by", value=f"<@{row['user_id']}>", inline=True)
     e.add_field(name="Closed by", value=closer.mention, inline=True)
     if row["claimed_by"]:
@@ -609,7 +609,7 @@ class Tickets(commands.Cog):
             spec = KINDS.get(r["kind"], {"title": r["kind"]})
             where = f"<#{r['channel_id']}>" if r["status"] == "open" else "closed"
             e.add_field(name=f"#{r['id']:03d} {spec['title']}",
-                        value=f"<@{r['user_id']}> · {where}", inline=False)
+                        value=f"<@{r['user_id']}>, {where}", inline=False)
         if not rows:
             e.description = "Nothing open."
         await ctx.send(embed=e, ephemeral=True)

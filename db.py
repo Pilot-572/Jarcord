@@ -86,6 +86,20 @@ CREATE TABLE IF NOT EXISTS settings (
     value TEXT NOT NULL
 );
 
+-- Recurring posts that go out with nobody present: the recruitment advert first.
+-- next_ts is recomputed after every send, so a restart never double-posts and a
+-- missed window is simply the next window.
+CREATE TABLE IF NOT EXISTS posts (
+    name       TEXT PRIMARY KEY,       -- 'advert'
+    channel_id INTEGER,
+    body       TEXT NOT NULL,
+    every_min  INTEGER NOT NULL,       -- 1440 = daily
+    at_minute  INTEGER,                -- minutes past local midnight for the day's first slot
+    enabled    INTEGER NOT NULL DEFAULT 1,
+    last_run   TEXT,
+    next_ts    INTEGER
+);
+
 CREATE TABLE IF NOT EXISTS applications (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id      INTEGER NOT NULL,

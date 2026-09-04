@@ -5,7 +5,7 @@ from discord.ext import commands
 from cogs.ops import attendance
 from cogs.profile import save_profile, set_exclusive_role
 from db import conn, get_setting, set_setting
-from ui import ACCENT, embed, log_action, staff_check
+from ui import ACCENT, COYOTE, OLIVE, embed, log_action, staff_check
 
 # Lowest to highest. These are the Discord role names, so renaming here renames the ladder.
 RANKS = (
@@ -20,8 +20,8 @@ NCO_FROM = RANKS.index("Corporal 1")
 # Jobs, not ranks. /ranks-setup creates them, Command hands them out by hand.
 POSITIONS = ("Media", "Op Planner", "JTAC", "Server Host")
 
-PROMOTED = discord.Colour(0x22C55E)
-DEMOTED = discord.Colour(0xF59E0B)
+PROMOTED = OLIVE
+DEMOTED = COYOTE  # a demotion needs attention; red is for sanctions
 
 
 # ── Ladder helpers (pure, tested in test_ranks.py) ──
@@ -90,14 +90,14 @@ def rank_card(member: discord.Member, old: str | None, new: str, officer: discor
     i = RANKS.index(new)
     ahead = step(new, True)
     e = embed(
-        title=f"{abbrev(new)}  ·  {member.display_name}",
+        title=f"{abbrev(new)} {member.display_name}",
         description=(
             f"{rank_pill(member.guild, old)}  →  {rank_pill(member.guild, new)}\n"
             f"`{ladder_bar(new)}`  **{i + 1}** of **{len(RANKS)}**"
         ),
         colour=PROMOTED if up else DEMOTED,
     )
-    e.set_author(name="PROMOTED" if up else "REDUCED IN RANK",
+    e.set_author(name="Promoted" if up else "Reduced in rank",
                  icon_url=member.guild.icon.url if member.guild.icon else None)
     e.set_thumbnail(url=member.display_avatar.url)
 

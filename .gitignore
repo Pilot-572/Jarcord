@@ -8,4 +8,10 @@ banner/Logos.dc.html
 banner/export/banner-render.html
 banner/export/wide-render.html
 
-.claude/settings.local.json
+.claude/
+.cursor/
+CLAUDE.md
+AGENTS.md
+.playwright-mcp/
+site/jarcord-page.png
+docs/superpowers/

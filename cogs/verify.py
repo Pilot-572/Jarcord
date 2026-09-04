@@ -81,7 +81,7 @@ def prompt_embed(guild: discord.Guild, member: discord.Member = None) -> discord
     )
     if member is not None:
         e.set_thumbnail(url=member.display_avatar.url)
-        e.set_footer(text=f"{member} · {member.id}")
+        e.set_footer(text=f"{member}, {member.id}")
     elif guild.icon:
         e.set_thumbnail(url=guild.icon.url)
     return e

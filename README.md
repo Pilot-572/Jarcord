@@ -164,6 +164,31 @@ Every non-bot guild message bumps a per-user counter and `last_seen` timestamp (
 | `/activity @member` | Message count, ops attended, last seen |
 | `!inactive [days]` | Members inactive for N+ days (default 14, includes never-seen) |
 
+### Duty rota and the daily list
+Set a rotation and the bot names one person a day, worked out from the date rather than stored, so a week of downtime cannot push the rota out of step. At 12:00 (Europe/Bucharest unless `duty_tz` is set) it posts a five line list in the duty channel and pings whoever is on. Each line is read from the live state of the server, so it ticks itself when the thing is actually done: the advert went out, there is an op on the board, every started op has been closed, no ticket has sat unclaimed for twelve hours, nobody is still unverified. If the list is still open four hours later the next person in the rota is pinged, and after eight the server owner is, once. A **Nothing needed today** button holds it for the day.
+
+| Command | What it does |
+|---|---|
+| `/duty today` | The list, on demand. Anyone can run it |
+| `/duty rota @a @b @c [rotate_days] [channel]` | Set the rotation in order, how many days each person holds it, and where the list posts (officer role or Manage Server) |
+
+Nothing posts until `/duty rota` has named a channel. `docs/running-roc.md` is the page to hand whoever is on duty.
+
+### Recurring advert
+One post that sends itself on a schedule the bot keeps across restarts. The next send time is worked out again after every post, so a restart never posts twice and a missed window is simply the next window.
+
+| Command | What it does |
+|---|---|
+| `/advert set <channel> <body> [hour] [every_hours]` | Write it and schedule it. Local hour, 12 by default, every 24 hours by default |
+| `/advert show` | What is set and when it next goes out |
+| `/advert now` | Post it now without touching the schedule |
+| `/advert off` | Stop it |
+
+All four need the officer role or Manage Server.
+
+### Ask
+`/ask <question>` answers from this server's own panels, the live command tree and the server's settings, through any API that speaks the OpenAI chat shape (Groq by default). It is read only: no tool calling and no action path, so a wrong sentence is the worst case. It sees the asker's own record and nobody else's. Two calls a minute per person, 200 a day per server, and every answer is labelled as written by a model. Put `LLM_API_KEY` in `.env` to switch it on; `LLM_BASE_URL` and `LLM_MODEL` change the endpoint and the model. `/ask-status` shows whether it is on and how much of the day's quota is used.
+
 Most commands are hybrid, so they work as both slash and prefix versions.
 
 ## Project structure
@@ -183,6 +208,8 @@ cogs/welcome.py   join welcome card
 cogs/warnings.py  warning log
 cogs/ranks.py     rank ladder
 cogs/tickets.py   tickets, transcripts, the Work with ROC door
+cogs/duty.py      duty rota, the recurring advert, the daily list
+cogs/assistant.py /ask, read-only answers from the panels
 panels/*.json     panel definitions
 panels/assets/    images attached to panels
 setup.sh          LXC provisioning script
@@ -198,6 +225,7 @@ jarcord.service   systemd unit
    ```bash
    cp .env.example .env
    # fill in DISCORD_TOKEN, GUILD_ID (server ID), COMMAND_PREFIX (default !)
+   # LLM_API_KEY is optional and switches /ask on
    ```
 4. Run locally:
    ```bash

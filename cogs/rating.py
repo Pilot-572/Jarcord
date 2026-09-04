@@ -59,13 +59,13 @@ class Rating(commands.Cog):
         ).fetchall()
         e = embed(
             title=member.display_name,
-            description=f"{stars(summary['avg'])} **{summary['avg']:.2f} / 5** · {summary['n']} rating(s)",
+            description=f"{stars(summary['avg'])} **{summary['avg']:.2f} / 5**, {summary['n']} rating(s)",
             colour=RATING,
         )
         e.set_thumbnail(url=member.display_avatar.url)
         lines = []
         for r in recent:
-            line = f"**{r['score']}/5** by <@{r['rater_id']}> · {ago(r['rated_at'])}"
+            line = f"**{r['score']}/5** by <@{r['rater_id']}>, {ago(r['rated_at'])}"
             if r["note"]:
                 line += f"\n> {r['note']}"
             lines.append(line)

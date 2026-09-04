@@ -139,11 +139,11 @@ def create_embed(op_id: int, author: discord.Member = None, guild=None) -> disco
             "SELECT COUNT(*) AS n FROM signups WHERE op_id = ? AND attended = 0", (op_id,)
         ).fetchone()["n"]
         e.add_field(name="Turned out", value=f"{came} attended, {missed} no-showed", inline=False)
-        e.set_footer(text=f"Op ID {op_id} · closed")
+        e.set_footer(text=f"Op {op_id}, closed")
     elif op["when_ts"]:
-        e.set_footer(text=f"Op ID {op_id} · attending get pinged 10 min before start")
+        e.set_footer(text=f"Op {op_id}. Attending get pinged 10 minutes before start.")
     else:
-        e.set_footer(text=f"Op ID {op_id}")
+        e.set_footer(text=f"Op {op_id}")
     return e
 
 
@@ -410,7 +410,7 @@ def roster_embed(op_id: int, guild=None) -> discord.Embed:
         if rows else "*Nobody yet.*"
     )
     e.add_field(name="Roster", value=roster, inline=False)
-    e.set_footer(text=f"Op ID {op_id}")
+    e.set_footer(text=f"Op {op_id}")
     return e
 
 
@@ -423,7 +423,7 @@ def list_embed() -> discord.Embed:
     if not rows:
         return embed(title="Recent ops", description="No ops posted yet.")
     lines = "\n".join(
-        f"`{r['id']:>3}` **{r['title']}**, {when_display(r)} · {r['n']} signed up" for r in rows
+        f"`{r['id']:>3}` **{r['title']}**, {when_display(r)}, {r['n']} signed up" for r in rows
     )
     e = embed(title="Recent ops", description=lines)
     e.set_footer(text="RSVP on the op card, or use /op join <id>")
@@ -470,7 +470,7 @@ class Ops(commands.Cog):
                 description=f"Starts <t:{op['when_ts']}:R> (<t:{op['when_ts']}:F>)",
             )
             e.set_author(name="Op reminder")
-            e.set_footer(text=f"Op ID {op['id']}")
+            e.set_footer(text=f"Op {op['id']}")
             try:
                 await channel.send(content=mentions or None, embed=e)
                 print(f">> reminder sent for op {op['id']} ({op['title']})")

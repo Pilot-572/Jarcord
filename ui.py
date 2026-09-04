@@ -7,9 +7,19 @@ from discord.ext import commands
 
 from db import get_setting
 
-ACCENT = discord.Colour(0x94A3B8)    # ops / default, steel
-RATING = discord.Colour(0xE2E8F0)    # ratings, light steel
-ACTIVITY = discord.Colour(0x64748B)  # activity, dark steel
+# ── Field Order accent strips ──
+# Four states, each clearing 3:1 on both Discord themes. The steel palette these
+# replaced sat at 1.9 to 2.6:1 on light theme, so half the readers saw nothing.
+# Colour never carries state on its own: a Nitro theme flattens every strip to
+# grey, so the state is always a word in the first line as well.
+OLIVE = discord.Colour(0x8C8F5B)    # reference, and normal business
+COYOTE = discord.Colour(0xA07A4A)   # needs attention
+RED = discord.Colour(0xD64545)      # wrong, or done to a person
+NEUTRAL = discord.Colour(0x7F8288)  # finished, archived, logged
+
+ACCENT = OLIVE      # ops, profiles, panels, welcome, verification
+RATING = OLIVE      # a rating is reference, not a sanction
+ACTIVITY = NEUTRAL  # the audit log records things already done
 
 
 def ago(text: str) -> str:
@@ -97,6 +107,8 @@ def check_message(error) -> str | None:
     if isinstance(error, (commands.BotMissingPermissions, app_commands.BotMissingPermissions)):
         missing = ", ".join(error.missing_permissions)
         return f"I'm missing the **{missing}** permission. Add it in Server Settings → Roles."
+    if isinstance(error, commands.CommandOnCooldown):
+        return f"Give it {error.retry_after:.0f} seconds and try again."
     if isinstance(error, (commands.CheckFailure, app_commands.CheckFailure)):
         return "That command can't be used here."
     return None

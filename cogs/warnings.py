@@ -3,9 +3,9 @@ import discord
 from discord.ext import commands
 
 from db import conn, get_setting
-from ui import ACCENT, ago, embed, log_action, staff_check
+from ui import ACCENT, RED, ago, embed, log_action, staff_check
 
-WARNED = discord.Colour(0xF59E0B)
+WARNED = RED  # a warning is done to a person
 
 
 def add_warning(user_id: int, officer_id: int, reason: str) -> int:
