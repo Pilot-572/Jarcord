@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jarcord</title>
+<meta name="description" content="The service record of your faction, kept inside Discord. Post the op, record who turned up, excuse the people on leave, and let promotion read the record.">
+<link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/*
+  Jarcord, command board
+
+  Colour
+    ground  #21252B  graphite with a cool cast. Discord's own chat ground (#313338)
+                     is cool as well, so the real screenshots sit one step brighter
+                     than the page and read as lit windows.
+    raised  #2A2F36  the step between the ground and a screenshot
+    bone    #E9E3D6  text
+    dim     #B4AEA2  secondary text
+    tan     #C2925A  coyote. What a person does: the buttons, and the steps where
+                     an officer posts or ticks the list.
+    olive   #A2A56C  what the record says: the turnout count and the olive word
+                     stack, plus the number tiles on steps 3 and 4.
+    Chartreuse #DFFF00 appears once, on the footer credit.
+
+  Type
+    Big Shoulders Display 800 for display and Atkinson Hyperlegible for text: a tall
+    condensed poster face so the headline works as a graphic, over a text face drawn
+    for small sizes on a phone.
+
+  Radius
+    0 for the page and the board grid, 4px for buttons, 10px for a screenshot mat
+    (one step over Discord's own 8px so the mat reads as a frame).
+
+  Layout
+    One centred shell, 1320px wide plus the gutters, and a twelve column grid inside
+    it. Text is left aligned within the shell and never touches the window edge.
+    The hero splits 7 and 5: headline on the left, the three real cards fanned on
+    the right and bleeding a little past the shell. The loop alternates which side
+    the screenshot sits on. One full bleed band lightens to bone as it scrolls in.
+
+        +------------------------------------------------------------------+
+        | Jarcord                            How an op runs  Read the code |
+        |                                                                  |
+        | The service                .--------.                            |
+        | record of your             | rank   |  .---------.               |
+        | faction, kept              |  .-----+--| open    |               |
+        | inside Discord.            '--| closed  |         |-> bleeds     |
+        |                               |         '---------'              |
+        | sub, about 60 chars           | 7 attended, 1 no-showed          |
+        | [Read the code] See how an op runs      '--------'               |
+        +------------------------------------------------------------------+
+        | How an op runs                                                   |
+        | [1] Posted.     text            [op-open screenshot]             |
+        | [op-closed screenshot]          [2] Turned up.  text             |
+        |                                 7 attended, 1 no-showed (rolls)  |
+        | [3] On record.  text            attendance, no-show ... in olive |
+        | [rank screenshot]               [4] Promoted.   text             |
+        +------------------------------------------------------------------+
+    | bone band, full bleed:    What else it does | 2 by 4 hairlines             |
+        +------------------------------------------------------------------+
+        | Free and open source.  Jarcord+ line.         [Read the code]    |
+        | Made by Chartreuse.       Built for ROC, but not just ROC.       |
+        +------------------------------------------------------------------+
+
+  Motion
+    One spring stepper in JS drives what answers the person: the headline settles,
+    the three cards deal in one after another and then keep a slow idle drift, the
+    fan tilts to the pointer and a card lifts toward it, the tally digits roll, and
+    each arrival (screenshot, heading, tile, olive line, board row) springs from
+    its offset. Scroll linked motion is continuous: screenshots drift inside their
+    section and the board lightens with its own entry, while a tan hairline at the
+    top fills with page progress. View timelines do that in CSS where they exist, with
+    a scroll handler as the fallback. Every spring moves from its current value,
+    so scroll and pointer never wait for anything. Only the hero starts hidden, and
+    only when the script runs; everything below the fold rests visible and arms
+    itself after the first scroll, while still off screen. Reduced motion turns off
+    drift, parallax and tilt, and arrivals become opacity crossfades.
+*/
+
+:root {
+  --ground: #21252B;
+  --raised: #2A2F36;
+  --discord: #313338;
+  --bone: #E9E3D6;
+  --dim: #B4AEA2;
+  --line: rgba(233, 227, 214, 0.16);
+  --tan: #C2925A;
+  --tan-lit: #D3A56C;
+  --olive: #A2A56C;
+  --display: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  --text: "Atkinson Hyperlegible", sans-serif;
+  --r-btn: 4px;
+  --r-mat: 10px;
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+  --col-gap: 2rem;
+  --shell: 1320px;
+}
+
+/* the board's lightness, 1 is bone. Registered so a view timeline can interpolate it */
+@property --p { syntax: "<number>"; inherits: true; initial-value: 1; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: var(--ground);
+  color: var(--bone);
+  font: 400 1.0625rem/1.55 var(--text);
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+body { margin: 0; background: var(--ground); color: var(--bone); font: inherit; overflow-x: clip; }
+/* the open card bleeds past the shell; clipping here keeps that bleed out of the
+   viewport's scroll range, which a clip on body or html cannot do */
+main { overflow-x: clip; }
+img { max-width: 100%; height: auto; display: block; }
+
+h1, h2, h3 {
+  font-family: var(--display);
+  font-weight: 800;
+  margin: 0;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+h2, h3 { text-wrap: balance; }
+p { margin: 0; max-width: 34em; }
+
+a {
+  color: inherit;
+  text-decoration-color: var(--tan);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.15em;
+}
+a:hover { text-decoration-color: var(--bone); }
+:focus-visible { outline: 2px solid var(--tan); outline-offset: 3px; }
+
+/* one centred shell for every section; the gutter is its inline padding */
+.shell {
+  max-width: calc(var(--shell) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.skip {
+  position: absolute;
+  left: var(--gutter);
+  top: -4rem;
+  z-index: 9;
+  padding: 0.5em 1em;
+  background: var(--tan);
+  color: var(--ground);
+  border-radius: var(--r-btn);
+  text-decoration: none;
+  font-weight: 700;
+}
+.skip:focus { top: 1rem; }
+
+/* page progress, a tan hairline along the top edge */
+.progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: var(--tan);
+  transform: scaleX(0);
+  transform-origin: left;
+  z-index: 8;
+}
+
+/* top bar */
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding-block: 1.5rem;
+}
+.mark { font: 800 1.4rem/1 var(--display); letter-spacing: -0.02em; }
+.top nav { display: flex; gap: 1.75rem; font-weight: 700; }
+.top nav a { text-decoration: none; white-space: nowrap; }
+.top nav a:hover { text-decoration: underline; }
+
+/* hero */
+.hero {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--col-gap);
+  align-items: center;
+  padding-block: 3rem 6rem;
+  background: radial-gradient(55% 45% at 78% 50%, var(--raised) 0%, rgba(42, 47, 54, 0) 70%);
+}
+.hero-text { grid-column: 1 / 8; }
+.hero h1 { font-size: clamp(2.8rem, 6.6vw, 6.2rem); line-height: .96; }
+.hero h1 .line { display: block; }
+.sub {
+  margin-top: 2rem;
+  max-width: 30em;
+  font-size: clamp(1.1rem, 1.4vw, 1.35rem);
+  color: var(--dim);
+}
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-top: 2.25rem;
+  max-width: none;
+}
+.btn {
+  display: inline-block;
+  padding: 0.8em 1.35em;
+  border-radius: var(--r-btn);
+  background: var(--tan);
+  color: var(--ground);
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: transform 100ms ease-out;
+}
+.btn:hover { background: var(--tan-lit); }
+.btn:active { transform: scale(0.97); }
+.btn.ghost {
+  background: transparent;
+  color: var(--bone);
+  box-shadow: inset 0 0 0 1px rgba(233, 227, 214, 0.35);
+}
+.btn.ghost:hover { background: transparent; box-shadow: inset 0 0 0 1px var(--bone); }
+
+.fan {
+  grid-column: 8 / 13;
+  position: relative;
+  aspect-ratio: 1 / 1.15;
+  perspective: 1400px;
+}
+.tilt { position: absolute; inset: 0; }
+.card {
+  position: absolute;
+  margin: 0;
+  border-radius: var(--r-mat);
+  background: var(--discord);
+  outline: 1px solid rgba(255, 255, 255, 0.06);
+  transform: rotate(var(--r));
+  will-change: transform;
+}
+.card img { width: 100%; border-radius: var(--r-mat); }
+.card.rank {
+  --r: -6deg;
+  left: -10%; top: 0;
+  width: 84%; max-width: 482px;
+  z-index: 1;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.55);
+}
+.card.closed {
+  --r: -2deg;
+  left: -4%; top: 26%;
+  width: 96%; max-width: 549px;
+  z-index: 2;
+  box-shadow: 0 22px 44px -14px rgba(0, 0, 0, 0.65);
+}
+.card.open {
+  --r: 4deg;
+  left: 30%; top: 8%;
+  width: 84%; max-width: 473px;
+  z-index: 3;
+  box-shadow: 0 34px 64px -18px rgba(0, 0, 0, 0.75);
+}
+.stack { display: none; margin: 3rem 0 0; }
+
+/* the loop */
+.loop { padding-block: 6rem 3rem; }
+.loop h2 { font-size: clamp(2.25rem, 5vw, 4.5rem); margin-bottom: 3rem; }
+.step {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--col-gap);
+  align-items: center;
+  padding: 4rem 0;
+  border-top: 1px solid var(--line);
+}
+.step-text { grid-column: 1 / 7; }
+.step-media { grid-column: 7 / 13; margin: 0; justify-self: start; }
+.step.flip .step-media { grid-column: 1 / 7; justify-self: end; }
+.step.flip .step-text { grid-column: 7 / 13; }
+.step h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-bottom: 1.25rem;
+  font-size: clamp(1.9rem, 3.6vw, 3.25rem);
+}
+.tile {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.05em; height: 1.05em;
+  font-size: 0.8em;
+  line-height: 1;
+  color: var(--ground);
+  background: var(--tan);
+}
+.tile.olive { background: var(--olive); }
+.tally {
+  margin-top: 2rem;
+  max-width: none;
+  white-space: nowrap;
+  font: 800 clamp(1.9rem, 4.6vw, 4.5rem)/1 var(--display);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--olive);
+}
+/* each digit is a window over a strip of 0 to 9 that rolls to its value */
+.num { display: inline-block; height: 1em; overflow: hidden; vertical-align: top; }
+.roll { display: block; white-space: pre; line-height: 1; }
+.lines {
+  display: flex;
+  flex-direction: column;
+  font: 800 clamp(2rem, 4.2vw, 3.75rem)/1.05 var(--display);
+  letter-spacing: -0.02em;
+  color: var(--olive);
+}
+.shot {
+  display: inline-block;
+  border-radius: var(--r-mat);
+  background: var(--discord);
+  box-shadow: 0 26px 50px -18px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.shot img { border-radius: var(--r-mat); }
+
+/* the board rests as bone and lightens with its own entry once the page has scrolled */
+.board {
+  padding-block: 6rem;
+  background: color-mix(in srgb, var(--bone) calc(var(--p) * 100%), var(--ground));
+  color: color-mix(in srgb, var(--ground) calc(var(--p) * 100%), var(--bone));
+}
+.board .wrap {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--col-gap);
+  align-items: start;
+}
+.board h2 { grid-column: 1 / 5; font-size: clamp(1.9rem, 3.6vw, 3.25rem); }
+.board ul {
+  grid-column: 5 / 13;
+  list-style: none;
+  margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  --hair: color-mix(in srgb, currentColor 28%, transparent);
+}
+.board li { padding: 1.1rem 1.5rem 1.1rem 0; border-top: 1px solid var(--hair); }
+.board li:nth-child(odd) { border-right: 1px solid var(--hair); }
+.board li:nth-child(even) { padding-left: 1.5rem; }
+.board li:nth-last-child(-n + 2) { border-bottom: 1px solid var(--hair); }
+
+/* close */
+.close {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--col-gap);
+  align-items: end;
+  padding-block: 7rem 6rem;
+}
+.close h2 { grid-column: 1 / 8; font-size: clamp(2.25rem, 5vw, 4.75rem); }
+.close p { grid-column: 1 / 8; margin-top: 1.5rem; font-size: 1.15rem; color: var(--dim); }
+.close .cta { grid-column: 8 / 13; justify-self: end; margin-top: 0; }
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  padding-block: 2rem 2.5rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.95rem;
+  color: var(--dim);
+}
+.credit { color: #DFFF00; font-weight: 700; }
+
+/* motion: only the hero starts hidden, and only once the script is running */
+.js .rise, .js .card { opacity: 0; }
+.js .rise.in, .js .card.in { opacity: 1; transition: opacity 0.45s ease; }
+
+/* scroll linked motion in CSS where view timelines exist; the script covers the rest */
+@supports (animation-timeline: view()) {
+  .js .drift { animation: drift linear both; animation-timeline: view(); }
+  .js.scrolled .board { animation: lighten linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
+  .js .progress { animation: fill linear both; animation-timeline: scroll(root); }
+}
+@keyframes drift { from { translate: 0 48px; } to { translate: 0 -48px; } }
+@keyframes lighten { from { --p: 0; } to { --p: 1; } }
+@keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js .drift { animation: none; }
+  .js figure.arrive, .js .lines span, .js .board li { transition: opacity 0.45s ease; }
+}
+
+/* below 1500px the shell fills the window and the bleed would leave the viewport */
+@media (max-width: 1500px) {
+  .card.open { left: 16%; }
+}
+
+@media (max-width: 1100px) {
+  .hero { grid-template-columns: 1fr; padding-top: 1.5rem; background: none; }
+  .hero-text { grid-column: auto; }
+  .fan { display: none; }
+  .stack { display: block; justify-self: start; }
+  .step, .close, .board .wrap { grid-template-columns: 1fr; }
+  .step-text, .step-media, .step.flip .step-text, .step.flip .step-media,
+  .board h2, .board ul, .close h2, .close p, .close .cta { grid-column: auto; }
+  .step-media, .step.flip .step-media { justify-self: start; margin-top: 2rem; order: 2; }
+  .board ul { margin-top: 2rem; }
+  .close .cta { justify-self: start; margin-top: 2.5rem; }
+}
+
+@media (max-width: 640px) {
+  .top { padding-block: 1.1rem; }
+  .top nav { gap: 1.1rem; font-size: 0.95rem; }
+  .top nav a:first-child { display: none; }
+  .hero { padding-bottom: 4rem; }
+  .loop { padding-top: 4rem; }
+  .step { padding: 3rem 0; }
+  .board { padding-block: 4rem; }
+  .board ul { grid-template-columns: 1fr; }
+  .board li:nth-child(odd) { border-right: 0; }
+  .board li:nth-child(even) { padding-left: 0; }
+  .board li:nth-last-child(-n + 2) { border-bottom: 0; }
+  .board li:last-child { border-bottom: 1px solid var(--hair); }
+  .close { padding-block: 5rem 4rem; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"></div>
+
+<header class="top shell">
+  <span class="mark">Jarcord</span>
+  <nav aria-label="Page">
+    <a href="#loop">How an op runs</a>
+    <a href="https://github.com/Pilot-572/Jarcord">Read the code</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="hero shell" aria-labelledby="h1">
+    <div class="hero-text">
+      <h1 id="h1">
+        <span class="line rise">The service</span>
+        <span class="line rise">record of</span>
+        <span class="line rise">your faction,</span>
+        <span class="line rise">kept inside</span>
+        <span class="line rise">Discord.</span>
+      </h1>
+      <p class="sub rise">Post the op, record who turned up, excuse the people on leave, and let promotion read the record. Nothing moves to a website.</p>
+      <p class="cta rise">
+        <a class="btn" href="https://github.com/Pilot-572/Jarcord">Read the code</a>
+        <a class="btn ghost" href="#loop">See how an op runs</a>
+      </p>
+    </div>
+
+    <div class="fan">
+      <div class="tilt">
+        <figure class="card rank">
+          <img src="img/rank.png" width="482" height="268" alt="Promotion card: PVT3 Jay Jay moved from Private 2 to Private 3, a ladder bar reading 3 of 9, a record of 5 attended and 0 no-showed, and the reason: led a squad on two ops without being asked.">
+        </figure>
+        <figure class="card closed">
+          <img src="img/op-closed.png" width="549" height="506" alt="Closed op card for Op READY FIVE with eight attending, three maybe and one not coming, and the line Turned out: 7 attended, 1 no-showed.">
+        </figure>
+        <figure class="card open">
+          <img src="img/op-open.png" width="473" height="408" fetchpriority="high" alt="Open op card posted by Jarcord: Op Nightfall on Saturday 5 September 2026 at 19:00, six attending, two maybe, one not coming, with Attending, Maybe and Can't make it buttons.">
+        </figure>
+      </div>
+    </div>
+
+    <figure class="stack rise">
+      <div class="shot">
+        <img src="img/cards.png" width="609" height="1167" loading="lazy" alt="One Discord channel with all three cards in a row: the open op with its buttons, the closed op with its turnout count, and the promotion card.">
+      </div>
+    </figure>
+  </section>
+
+  <section class="loop shell" id="loop" aria-labelledby="h-loop">
+    <h2 id="h-loop" class="head">How an op runs</h2>
+
+    <div class="step">
+      <div class="step-text">
+        <h3 class="head"><span class="tile">1</span> Posted.</h3>
+        <p>One command posts the op with a time everyone sees in their own timezone and three buttons: attending, maybe, can't make it. Attending get pinged ten minutes before start.</p>
+      </div>
+      <figure class="step-media arrive drift" data-from="right">
+        <div class="shot">
+          <img src="img/op-open.png" width="473" height="408" loading="lazy" alt="The open op card again, at full size: Op Nightfall, the time shown in the reader's own timezone, the attending, maybe and not coming lists, and the three buttons under the message.">
+        </div>
+      </figure>
+    </div>
+
+    <div class="step flip">
+      <figure class="step-media arrive drift" data-from="left">
+        <div class="shot">
+          <img src="img/op-closed.png" width="549" height="506" loading="lazy" alt="The closed op card at full size: Op READY FIVE, the signup lists, and the Turned out line reading 7 attended, 1 no-showed, marked Op 7, closed.">
+        </div>
+      </figure>
+      <div class="step-text">
+        <h3 class="head"><span class="tile">2</span> Turned up.</h3>
+        <p>When the op ends an officer ticks who was actually there. The card closes with the count, on the same message the signups were on.</p>
+        <p class="tally" role="img" aria-label="7 attended, 1 no-showed"><span class="num" data-n="7"><span class="roll" style="transform: translateY(-7em)">0
+1
+2
+3
+4
+5
+6
+7
+8
+9</span></span> attended,<br><span class="num" data-n="1"><span class="roll" style="transform: translateY(-1em)">0
+1
+2
+3
+4
+5
+6
+7
+8
+9</span></span> no-showed</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-text">
+        <h3 class="head"><span class="tile olive">3</span> On record.</h3>
+        <p>Every attendance, no-show, warning, rating and promotion is a line on the member's record. Leave that was filed excuses a missed op. Anyone can read their own. Officers read everyone's.</p>
+      </div>
+      <div class="step-media lines" data-from="right" aria-hidden="true">
+        <span>attendance</span>
+        <span>no-show</span>
+        <span>warning</span>
+        <span>rating</span>
+        <span>promotion</span>
+      </div>
+    </div>
+
+    <div class="step flip">
+      <figure class="step-media arrive drift" data-from="left">
+        <div class="shot">
+          <img src="img/rank.png" width="482" height="268" loading="lazy" alt="The promotion card at full size: PVT3 Jay Jay, Private 2 to Private 3, ladder bar 3 of 9, record 5 attended and 0 no-showed, promoted by Pilot_572, reason written out, next up Specialist 1.">
+        </div>
+      </figure>
+      <div class="step-text">
+        <h3 class="head"><span class="tile olive">4</span> Promoted.</h3>
+        <p>Promotion reads the record. Promote and demote refuse to run without a written reason, then post the card so the whole unit sees why.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="board" aria-labelledby="h-more">
+    <div class="wrap shell">
+      <h2 id="h-more" class="head">What else it does</h2>
+      <ul>
+        <li>Verification that links a Roblox account.</li>
+        <li>Tickets with transcripts filed on close.</li>
+        <li>Warnings with a trail.</li>
+        <li>A welcome card.</li>
+        <li>An information hub built from panels.</li>
+        <li>Activity and inactivity reports.</li>
+        <li>A duty rota with a daily chore list that ticks itself.</li>
+        <li>/ask, which answers from the faction's own rules and never reads anyone else's record.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="close shell" aria-labelledby="h-free">
+    <h2 id="h-free" class="head">Free and open source.</h2>
+    <p>Jarcord+ comes later, with unlimited ops, the full history and ticket transcripts.</p>
+    <p class="cta">
+      <a class="btn" href="https://github.com/Pilot-572/Jarcord">Read the code</a>
+      <a class="btn ghost" href="#loop">See how an op runs</a>
+    </p>
+  </section>
+</main>
+
+<footer class="foot shell">
+  <p class="credit">Made by Chartreuse.</p>
+  <p>Built for ROC, but not just ROC. Runs on discord.py.</p>
+</footer>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  root.classList.add('js');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const pointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const viewTimeline = CSS.supports('animation-timeline: view()');
+  const clamp01 = v => Math.min(1, Math.max(0, v));
+
+  // One spring stepper for the whole page. Parameters are a damping ratio
+  // (1 settles clean, under 1 overshoots) and a response time in seconds.
+  // Every spring moves from wherever it is now, so retargeting never jumps
+  // and a spring that is still moving keeps its velocity into the new target.
+  const live = new Set();
+  let running = false, last = 0;
+  function step(now) {
+    const dt = Math.min((now - last) / 1000, 0.25);
+    last = now;
+    for (const s of live) {
+      const w = 2 * Math.PI / s.response;
+      // fixed substeps: real elapsed time is honoured on a slow frame and the integrator stays stable
+      for (let r = dt; r > 0; r -= 1 / 120) {
+        const h = Math.min(r, 1 / 120);
+        s.v += (-w * w * (s.x - s.to) - 2 * s.damping * w * s.v) * h;
+        s.x += s.v * h;
+      }
+      if (Math.abs(s.x - s.to) < 0.0005 && Math.abs(s.v) < 0.005) { s.x = s.to; s.v = 0; live.delete(s); }
+      s.draw(s.x);
+    }
+    running = live.size > 0;
+    if (running) requestAnimationFrame(step);
+  }
+  function spring(o) {
+    const s = { x: 0, v: 0, to: 0, damping: 1, response: 0.5, ...o };
+    s.go = to => {
+      s.to = to;
+      live.add(s);
+      if (!running) { running = true; last = performance.now(); requestAnimationFrame(step); }
+    };
+    return s;
+  }
+
+  // Progress runs 0 to 1 and may overshoot. Under reduced motion only opacity moves.
+  function reveal(el, draw, o) {
+    if (reduce) { el.classList.add('in'); return; }
+    spring({ ...o, draw: t => { draw(t); el.style.opacity = clamp01(t * 1.5); } }).go(1);
+  }
+
+  // Hero. The headline lines settle, the cards deal onto the table, then each
+  // card keeps a slow idle drift (about 6px and half a degree) on its own period
+  // so the fan never sits dead. The tilt plane and each card's lift are springs
+  // that retarget from their live value; parallax and the pointer track 1:1.
+  const hero = document.querySelector('.hero');
+  const heroText = document.querySelector('.hero-text');
+  const fan = document.querySelector('.fan');
+  const tilt = document.querySelector('.tilt');
+  const T0 = performance.now();
+  const cards = [...document.querySelectorAll('.card')].map((el, i) => {
+    const c = {
+      el, depth: (i + 1) / 3, t: 0, px: 0, py: 0,
+      period: [9, 11.5, 14][i], phase: i * 2.1,
+      rest: parseFloat(getComputedStyle(el).getPropertyValue('--r'))
+    };
+    c.lift = spring({ response: 0.35, draw: render });
+    return c;
+  });
+  const tx = spring({ response: 0.4, draw: render });
+  const ty = spring({ response: 0.4, draw: render });
+  let sy = 0, heroOn = true;
+
+  function render() {
+    const w = 2 * Math.PI * (performance.now() - T0) / 1000;
+    tilt.style.transform = tx.x || ty.x ? `rotateX(${tx.x}deg) rotateY(${ty.x}deg)` : '';
+    for (const c of cards) {
+      const u = 1 - c.t, a = clamp01(c.t);
+      const ix = a * 6 * Math.sin(w / c.period + c.phase);
+      const iy = a * 6 * Math.sin(w / (c.period * 1.27) + c.phase + 1);
+      const ir = a * 0.5 * Math.sin(w / (c.period * 0.83) + c.phase + 2);
+      const x = 160 * u + ty.x * 3 * c.depth + ix + c.lift.x * c.px * 14;
+      const y = -140 * u - tx.x * 3 * c.depth - sy * (0.06 + 0.14 * c.depth) + iy + c.lift.x * c.py * 14;
+      c.el.style.transform = `translate(${x}px, ${y}px) rotate(${c.rest + 16 * u + ir}deg) scale(${1 + 0.06 * u + 0.04 * c.lift.x})`;
+      c.el.style.opacity = clamp01(c.t * 1.6);
+    }
+  }
+
+  // The whole hero is at rest inside 1.5 seconds: last line starts at 420ms,
+  // last card at 480ms, and each spring settles in about a second.
+  function start() {
+    document.querySelectorAll('.hero .rise').forEach((el, i) => setTimeout(() => {
+      reveal(el, t => { el.style.transform = `translateY(${(1 - t) * 44}px)`; }, { response: 0.55 });
+    }, i * 70));
+    cards.forEach((c, i) => setTimeout(() => {
+      if (reduce) { c.el.classList.add('in'); return; }
+      spring({ damping: 0.8, response: 0.5, draw: t => { c.t = t; render(); } }).go(1);
+    }, 200 + i * 140));
+  }
+  if (reduce) start();
+  else Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 350))]).then(start);
+
+  if (!reduce) {
+    new IntersectionObserver(([e]) => { heroOn = e.isIntersecting; }).observe(fan);
+    (function idle() { if (heroOn) render(); requestAnimationFrame(idle); })();
+  }
+  if (!reduce && pointer) {
+    hero.addEventListener('pointermove', e => {
+      const r = fan.getBoundingClientRect();
+      const nx = (e.clientX - (r.left + r.width / 2)) / r.width;
+      const ny = (e.clientY - (r.top + r.height / 2)) / r.height;
+      ty.go(Math.max(-12, Math.min(12, nx * 22)));
+      tx.go(Math.max(-12, Math.min(12, -ny * 22)));
+    });
+    hero.addEventListener('pointerleave', () => { tx.go(0); ty.go(0); });
+    for (const c of cards) {
+      c.el.addEventListener('pointermove', e => {
+        const r = c.el.getBoundingClientRect();
+        c.px = (e.clientX - r.left) / r.width - 0.5;
+        c.py = (e.clientY - r.top) / r.height - 0.5;
+      });
+      c.el.addEventListener('pointerenter', () => c.lift.go(1));
+      c.el.addEventListener('pointerleave', () => c.lift.go(0));
+    }
+  }
+
+  // Scroll. The headline drifts down and the cards drift up at their own rates.
+  // Without view timelines the handler also drives the screenshot drift and the
+  // board's lightness, plus the progress hairline.
+  const board = document.querySelector('.board');
+  const progress = document.querySelector('.progress');
+  const drifts = [...document.querySelectorAll('.drift')];
+  addEventListener('scroll', () => {
+    const vh = innerHeight, y = scrollY;
+    if (!reduce) {
+      sy = Math.min(y, vh * 1.3);
+      heroText.style.transform = `translateY(${sy * 0.1}px)`;
+      if (heroOn) render();
+    }
+    if (viewTimeline) return;
+    progress.style.transform = `scaleX(${clamp01(y / (root.scrollHeight - vh))})`;
+    const b = board.getBoundingClientRect();
+    board.style.setProperty('--p', clamp01((vh - b.top) / Math.min(b.height, vh)));
+    if (reduce) return;
+    for (const el of drifts) {
+      const r = el.getBoundingClientRect();
+      el.style.translate = `0 ${(1 - 2 * clamp01((vh - r.top) / (vh + r.height))) * 48}px`;
+    }
+  }, { passive: true });
+
+  // Arrivals. Below the fold everything rests visible. Nothing arms before the
+  // first scroll, and then only while still off screen (the approach zone runs to
+  // 60% of a viewport below the fold, so a fast scroll cannot skip it), so a page
+  // that is never scrolled reads at rest top to bottom. Each kind names its
+  // selector, its offset at u (1 is fully out, 0 is at rest), whether its children
+  // stagger, its spring, and whether it also fades. Headings and tiles only move,
+  // so they are never invisible; under reduced motion they stay put and the
+  // fading kinds crossfade instead.
+  const dir = el => el.dataset.from === 'left' ? -1 : 1;
+  const kinds = [
+    ['figure.arrive', (el, u) => `translateX(${90 * dir(el) * u}px)`, false, { damping: 0.85, response: 0.55 }, true],
+    ['.lines', (el, u) => `translateX(${60 * dir(el) * u}px)`, true, { response: 0.5 }, true],
+    ['.board ul', (el, u) => `translateY(${18 * u}px)`, true, { response: 0.5 }, true],
+    ['.head', (el, u) => `translateY(${28 * u}px)`, false, { response: 0.6 }, false],
+    ['.tile', (el, u) => `scale(${1 - 0.5 * u})`, false, { damping: 0.7, response: 0.5 }, false]
+  ];
+  const kindOf = el => kinds.find(k => el.matches(k[0]));
+  const rolls = [...document.querySelectorAll('.num')].map(n => ({ el: n.firstElementChild, n: +n.dataset.n }));
+  const targets = [...document.querySelectorAll(kinds.map(k => k[0]).join(', ') + ', .tally')];
+
+  function arm(el) {
+    if (el.classList.contains('tally')) {
+      if (reduce) return;
+      el.dataset.armed = '1';
+      rolls.forEach(r => { r.el.style.transform = 'translateY(0)'; });
+      return;
+    }
+    const [, at, group, , fade] = kindOf(el);
+    if (reduce && !fade) return;
+    el.dataset.armed = '1';
+    for (const k of group ? el.children : [el]) {
+      if (fade) k.style.opacity = 0;
+      if (!reduce) k.style.transform = at(el, 1);
+    }
+  }
+  function fire(el) {
+    if (el.classList.contains('tally')) {
+      spring({ response: 0.75, draw: t => rolls.forEach(r => { r.el.style.transform = `translateY(${-t * r.n}em)`; }) }).go(1);
+      return;
+    }
+    const [, at, group, opts, fade] = kindOf(el);
+    [...(group ? el.children : [el])].forEach((k, i) => setTimeout(() => {
+      if (reduce) { k.style.opacity = 1; return; }
+      spring({ ...opts, draw: t => {
+        k.style.transform = at(el, 1 - t);
+        if (fade) k.style.opacity = clamp01(t * 1.5);
+      } }).go(1);
+    }, i * 60));
+  }
+  const near = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      near.unobserve(e.target);
+      if (e.boundingClientRect.top >= innerHeight) arm(e.target);
+    }
+  }, { rootMargin: '0px 0px 60% 0px' });
+  const enter = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      enter.unobserve(e.target);
+      if (e.target.dataset.armed) fire(e.target);
+    }
+  }, { threshold: 0.15 });
+  targets.forEach(el => enter.observe(el));
+  addEventListener('scroll', () => {
+    root.classList.add('scrolled');
+    targets.forEach(el => near.observe(el));
+  }, { once: true, passive: true });
+})();
+</script>
+</body>
+</html>
