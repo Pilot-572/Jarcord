@@ -97,14 +97,14 @@ def command_text(bot: commands.Bot) -> str:
     return "\n".join(lines)
 
 
-def state_text() -> str:
+def state_text(guild_id: int) -> str:
     """How this server is set up, plus what is on the board. No member data."""
     faction = get_setting("faction_name") or "this faction"
     ladder = ", ".join(f"{r} ({a})" for r, a in zip(RANKS, ABBREV))
     kinds = "; ".join(f"{k}: {v['title']}" for k, v in KINDS.items())
     ops = conn.execute(
-        "SELECT title, when_text FROM ops WHERE closed = 0 AND when_ts IS NOT NULL "
-        "AND when_ts > strftime('%s', 'now') ORDER BY when_ts LIMIT 5"
+        "SELECT title, when_text FROM ops WHERE guild_id = ? AND closed = 0 AND when_ts IS NOT NULL "
+        "AND when_ts > strftime('%s', 'now') ORDER BY when_ts LIMIT 5", (guild_id,)
     ).fetchall()
     board = ("\n".join(f"- {r['title']}, {r['when_text']}" for r in ops)
              or "- nothing scheduled")
@@ -140,7 +140,7 @@ def asker_text(member: discord.Member) -> str:
 
 
 def build_context(bot: commands.Bot, member: discord.Member) -> str:
-    head = state_text() + asker_text(member)
+    head = state_text(member.guild.id) + asker_text(member)
     commands_block = command_text(bot)
     budget = MAX_CONTEXT - len(head) - len(commands_block) - 200
     return (

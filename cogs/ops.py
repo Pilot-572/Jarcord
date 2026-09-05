@@ -65,11 +65,12 @@ def when_display(op) -> str:
 
 
 # ── DB helpers (shared by slash + prefix) ──
-def create_op(title: str, when: str, author_id: int, channel_id: int, notes: str = None) -> int:
+def create_op(title: str, when: str, author_id: int, channel_id: int, guild_id: int,
+              notes: str = None) -> int:
     cur = conn.execute(
-        """INSERT INTO ops (title, when_text, created_by, when_ts, channel_id, notes)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (title, when, author_id, parse_when(when), channel_id, notes),
+        """INSERT INTO ops (title, when_text, created_by, when_ts, channel_id, guild_id, notes)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (title, when, author_id, parse_when(when), channel_id, guild_id, notes),
     )
     conn.commit()
     return cur.lastrowid
@@ -94,8 +95,14 @@ def roster(op_id: int) -> dict:
     return out
 
 
-def get_op(op_id: int):
-    return conn.execute("SELECT * FROM ops WHERE id = ?", (op_id,)).fetchone()
+def get_op(op_id: int, guild_id: int = None):
+    """By number. Pass the caller's guild whenever the number came from a person, so a
+    number typed in one server never reaches another server's op. Internal callers that
+    got the id from a row the bot found itself leave it off."""
+    if guild_id is None:
+        return conn.execute("SELECT * FROM ops WHERE id = ?", (op_id,)).fetchone()
+    return conn.execute(
+        "SELECT * FROM ops WHERE id = ? AND guild_id = ?", (op_id, guild_id)).fetchone()
 
 
 def who(guild, user_id: int) -> str:
@@ -164,7 +171,8 @@ class CloseView(discord.ui.View):
     async def picked(self, interaction: discord.Interaction, select: discord.ui.UserSelect):
         was_closed = (get_op(self.op_id) or {"closed": 1})["closed"]
         ids = [u.id for u in select.values]
-        msg = close_op(self.op_id, interaction.user.id, is_officer(interaction.user, roles=(OP_PLANNER,)), ids)
+        msg = close_op(self.op_id, interaction.guild_id, interaction.user.id,
+                       is_officer(interaction.user, roles=(OP_PLANNER,)), ids)
         await interaction.response.edit_message(content=msg, view=None)
         await sync_card(self.bot, self.op_id)
         if not was_closed and get_op(self.op_id)["closed"]:
@@ -292,8 +300,8 @@ async def sync_card(bot, op_id: int, ref: tuple = None) -> None:
         pass  # card deleted by hand, nothing to keep in sync
 
 
-def join_op(op_id: int, user_id: int) -> str:
-    op = get_op(op_id)
+def join_op(op_id: int, guild_id: int, user_id: int) -> str:
+    op = get_op(op_id, guild_id)
     if op is None:
         return f"No op with ID `{op_id}`."
     already = conn.execute(
@@ -305,8 +313,8 @@ def join_op(op_id: int, user_id: int) -> str:
     return f"You're on the roster for **{op['title']}**, {when_display(op)}."
 
 
-def leave_op(op_id: int, user_id: int) -> str:
-    op = get_op(op_id)
+def leave_op(op_id: int, guild_id: int, user_id: int) -> str:
+    op = get_op(op_id, guild_id)
     if op is None:
         return f"No op with ID `{op_id}`."
     cur = conn.execute("DELETE FROM signups WHERE op_id = ? AND user_id = ?", (op_id, user_id))
@@ -316,9 +324,9 @@ def leave_op(op_id: int, user_id: int) -> str:
     return f"Removed you from **{op['title']}**."
 
 
-def edit_op(op_id: int, user_id: int, is_officer: bool, what: str = None,
+def edit_op(op_id: int, guild_id: int, user_id: int, is_officer: bool, what: str = None,
             when: str = None, notes: str = None) -> str:
-    op = get_op(op_id)
+    op = get_op(op_id, guild_id)
     if op is None:
         return f"No op with ID `{op_id}`."
     if user_id != op["created_by"] and not is_officer:
@@ -346,10 +354,10 @@ def edit_op(op_id: int, user_id: int, is_officer: bool, what: str = None,
     return line
 
 
-def close_op(op_id: int, user_id: int, is_officer: bool, attended_ids) -> str:
+def close_op(op_id: int, guild_id: int, user_id: int, is_officer: bool, attended_ids) -> str:
     """Record who actually turned up. Anyone who said they were coming and isn't in the
     list is a no-show. Anyone in the list who never replied still counts as attending."""
-    op = get_op(op_id)
+    op = get_op(op_id, guild_id)
     if op is None:
         return f"No op with ID `{op_id}`."
     if user_id != op["created_by"] and not is_officer:
@@ -382,8 +390,8 @@ def attendance(user_id: int) -> tuple[int, int]:
     return (row["came"] or 0, row["missed"] or 0)
 
 
-def cancel_op(op_id: int, user_id: int, is_officer: bool) -> str:
-    op = get_op(op_id)
+def cancel_op(op_id: int, guild_id: int, user_id: int, is_officer: bool) -> str:
+    op = get_op(op_id, guild_id)
     if op is None:
         return f"No op with ID `{op_id}`."
     if user_id != op["created_by"] and not is_officer:
@@ -394,8 +402,8 @@ def cancel_op(op_id: int, user_id: int, is_officer: bool) -> str:
     return f"Cancelled **{op['title']}** (ID `{op_id}`)."
 
 
-def roster_embed(op_id: int, guild=None) -> discord.Embed:
-    op = get_op(op_id)
+def roster_embed(op_id: int, guild) -> discord.Embed:
+    op = get_op(op_id, guild.id)
     if op is None:
         return embed(description=f"No op with ID `{op_id}`.")
     rows = conn.execute(
@@ -414,11 +422,13 @@ def roster_embed(op_id: int, guild=None) -> discord.Embed:
     return e
 
 
-def list_embed() -> discord.Embed:
+def list_embed(guild_id: int) -> discord.Embed:
     rows = conn.execute(
         """SELECT o.*, COUNT(s.user_id) AS n
            FROM ops o LEFT JOIN signups s ON s.op_id = o.id AND s.status = 'in'
-           GROUP BY o.id ORDER BY o.id DESC LIMIT 10"""
+           WHERE o.guild_id = ?
+           GROUP BY o.id ORDER BY o.id DESC LIMIT 10""",
+        (guild_id,),
     ).fetchall()
     if not rows:
         return embed(title="Recent ops", description="No ops posted yet.")
@@ -529,7 +539,7 @@ class Ops(commands.Cog):
             if role_id:
                 ping = interaction.guild.get_role(int(role_id))
 
-        op_id = create_op(what, when, interaction.user.id, channel.id, notes)
+        op_id = create_op(what, when, interaction.user.id, channel.id, interaction.guild_id, notes)
         try:
             msg = await channel.send(
                 content=ping.mention if ping else None,
@@ -538,7 +548,7 @@ class Ops(commands.Cog):
                 allowed_mentions=discord.AllowedMentions(roles=True),
             )
         except discord.Forbidden:
-            cancel_op(op_id, interaction.user.id, True)
+            cancel_op(op_id, interaction.guild_id, interaction.user.id, True)
             await interaction.response.send_message(
                 f"I can't post in {channel.mention}. Give me Send Messages there.", ephemeral=True
             )
@@ -607,16 +617,18 @@ class Ops(commands.Cog):
     @op.command(name="join", description="Sign up for an op")
     @app_commands.describe(op_id="The op ID")
     async def op_join(self, interaction: discord.Interaction, op_id: int):
-        await interaction.response.send_message(join_op(op_id, interaction.user.id), ephemeral=True)
+        await interaction.response.send_message(
+            join_op(op_id, interaction.guild_id, interaction.user.id), ephemeral=True)
         await sync_card(self.bot, op_id)
-        op = get_op(op_id)
+        op = get_op(op_id, interaction.guild_id)
         if op:
             await add_to_thread(self.bot, op, interaction.user)
 
     @op.command(name="leave", description="Take yourself off an op's roster")
     @app_commands.describe(op_id="The op ID")
     async def op_leave(self, interaction: discord.Interaction, op_id: int):
-        await interaction.response.send_message(leave_op(op_id, interaction.user.id), ephemeral=True)
+        await interaction.response.send_message(
+            leave_op(op_id, interaction.guild_id, interaction.user.id), ephemeral=True)
         await sync_card(self.bot, op_id)
 
     @op.command(name="edit", description="Change an op's name, time or notes")
@@ -628,7 +640,8 @@ class Ops(commands.Cog):
     )
     async def op_edit(self, interaction: discord.Interaction, op_id: int, what: str = None,
                       when: str = None, notes: str = None):
-        msg = edit_op(op_id, interaction.user.id, is_officer(interaction.user, roles=(OP_PLANNER,)),
+        msg = edit_op(op_id, interaction.guild_id, interaction.user.id,
+                      is_officer(interaction.user, roles=(OP_PLANNER,)),
                       what, when, notes.strip() if notes is not None else None)
         await interaction.response.send_message(msg, ephemeral=True)
         await sync_card(self.bot, op_id)
@@ -637,7 +650,7 @@ class Ops(commands.Cog):
     @app_commands.describe(op_id="The op ID",
                            force="Skip the picker: everyone marked Attending counts as showed")
     async def op_close(self, interaction: discord.Interaction, op_id: int, force: bool = False):
-        op = get_op(op_id)
+        op = get_op(op_id, interaction.guild_id)
         if op is None:
             await interaction.response.send_message(f"No op with ID `{op_id}`.", ephemeral=True)
             return
@@ -645,7 +658,8 @@ class Ops(commands.Cog):
             # trust the RSVPs: no no-shows, no picker, one command and it is done
             was_closed = op["closed"]
             ids = roster(op_id)["in"]
-            msg = close_op(op_id, interaction.user.id, is_officer(interaction.user, roles=(OP_PLANNER,)), ids)
+            msg = close_op(op_id, interaction.guild_id, interaction.user.id,
+                           is_officer(interaction.user, roles=(OP_PLANNER,)), ids)
             await interaction.response.send_message(msg, ephemeral=True)
             await sync_card(self.bot, op_id)
             if not was_closed and get_op(op_id)["closed"]:
@@ -662,9 +676,9 @@ class Ops(commands.Cog):
     @app_commands.describe(op_id="The op ID")
     async def op_cancel(self, interaction: discord.Interaction, op_id: int):
         officer = is_officer(interaction.user, roles=(OP_PLANNER,))
-        op = get_op(op_id)
+        op = get_op(op_id, interaction.guild_id)
         ref = (op["channel_id"], op["message_id"], op["thread_id"]) if op else None
-        result = cancel_op(op_id, interaction.user.id, officer)
+        result = cancel_op(op_id, interaction.guild_id, interaction.user.id, officer)
         await interaction.response.send_message(result)
         await log_action(interaction.guild, "Op cancelled", interaction.user, result)
         await sync_card(self.bot, op_id, ref)
@@ -677,7 +691,7 @@ class Ops(commands.Cog):
 
     @op.command(name="list", description="The last 10 ops and their IDs")
     async def op_list_slash(self, interaction: discord.Interaction):
-        await interaction.response.send_message(embed=list_embed(), ephemeral=True)
+        await interaction.response.send_message(embed=list_embed(interaction.guild_id), ephemeral=True)
 
     # ── Prefix commands: !op join / leave / cancel / roster / list ──
     @commands.group(name="op", invoke_without_command=True)
@@ -686,23 +700,23 @@ class Ops(commands.Cog):
 
     @op_prefix.command(name="join")
     async def op_join_prefix(self, ctx: commands.Context, op_id: int):
-        await ctx.send(join_op(op_id, ctx.author.id))
+        await ctx.send(join_op(op_id, ctx.guild.id, ctx.author.id))
         await sync_card(self.bot, op_id)
-        op = get_op(op_id)
+        op = get_op(op_id, ctx.guild.id)
         if op:
             await add_to_thread(self.bot, op, ctx.author)
 
     @op_prefix.command(name="leave")
     async def op_leave_prefix(self, ctx: commands.Context, op_id: int):
-        await ctx.send(leave_op(op_id, ctx.author.id))
+        await ctx.send(leave_op(op_id, ctx.guild.id, ctx.author.id))
         await sync_card(self.bot, op_id)
 
     @op_prefix.command(name="cancel")
     async def op_cancel_prefix(self, ctx: commands.Context, op_id: int):
         officer = is_officer(ctx.author, roles=(OP_PLANNER,))
-        op = get_op(op_id)
+        op = get_op(op_id, ctx.guild.id)
         ref = (op["channel_id"], op["message_id"], op["thread_id"]) if op else None
-        await ctx.send(cancel_op(op_id, ctx.author.id, officer))
+        await ctx.send(cancel_op(op_id, ctx.guild.id, ctx.author.id, officer))
         await sync_card(self.bot, op_id, ref)
 
     @op_prefix.command(name="roster")
@@ -711,7 +725,7 @@ class Ops(commands.Cog):
 
     @op_prefix.command(name="list")
     async def op_list(self, ctx: commands.Context):
-        await ctx.send(embed=list_embed())
+        await ctx.send(embed=list_embed(ctx.guild.id))
 
 
 async def setup(bot: commands.Bot):
