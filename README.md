@@ -236,6 +236,18 @@ jarcord.service   systemd unit
 
 Slash commands sync to the guild in `GUILD_ID` on startup, so they appear instantly.
 
+## Self-checks
+
+No test framework. Each `test_*.py` in the repo root is a plain script of asserts that
+prints `>> ok` or dies on the line that failed, and `check.py` scans shipped text for
+the dashes Discord users notice and panel JSON Discord would reject. Every test sets
+`JARCORD_DB=:memory:` before importing anything, so none of them touch `data/jarcord.db`.
+
+    venv/Scripts/python -X utf8 check.py
+    for f in test_*.py; do venv/Scripts/python -X utf8 "$f" || break; done
+
+On Nest use `venv/bin/python`.
+
 ## Deployment
 
 `setup.sh` handles both cases: run it as root and you get a system service, run it as a normal

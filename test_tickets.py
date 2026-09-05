@@ -1,6 +1,8 @@
 # ── Jarcord: self-check for the ticket kinds table (python -X utf8 test_tickets.py) ──
 # Discord rejects a modal with more than five inputs or a label over 45 characters at
 # send time, which is the worst moment to find out. This catches it at commit time.
+import os
+os.environ["JARCORD_DB"] = ":memory:"   # before any project import, so tests never touch data/jarcord.db
 import re
 
 from cogs.tickets import KINDS, panel_message, slugify

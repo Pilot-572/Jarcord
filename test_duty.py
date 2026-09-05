@@ -2,6 +2,8 @@
 # ponytail: asserts only. Guards the three things that fail silently and only show up
 # a day later: a slot that resolves to the wrong side of noon, a rota that drifts after
 # downtime, and a chore that reads as done when it isn't.
+import os
+os.environ["JARCORD_DB"] = ":memory:"   # before any project import, so tests never touch data/jarcord.db
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 

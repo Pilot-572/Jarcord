@@ -1,6 +1,8 @@
 # ── Jarcord: Roblox lookup self-check (venv/Scripts/python test_roblox.py) ──
 # ponytail: hits the real API, no mocks. The whole point is that a dead lookup
 # and a missing username stop looking identical to the caller.
+import os
+os.environ["JARCORD_DB"] = ":memory:"   # before any project import, so tests never touch data/jarcord.db
 import asyncio
 
 import cogs.profile as profile

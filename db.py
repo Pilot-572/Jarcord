@@ -1,9 +1,12 @@
 # ── Jarcord DB: plain sqlite3, single shared connection ──
+import os
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 
 DATA_DIR = Path(__file__).parent / "data"
-DB_PATH = DATA_DIR / "jarcord.db"
+# JARCORD_DB overrides the file. A test sets it to ":memory:" before importing anything.
+DB_PATH = os.getenv("JARCORD_DB") or str(DATA_DIR / "jarcord.db")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS ops (
@@ -115,12 +118,23 @@ CREATE TABLE IF NOT EXISTS applications (
 );
 """
 
+def connect(path: str) -> sqlite3.Connection:
+    """One connection with the pragmas every reader and writer needs. WAL lets a backup
+    or a read-only report run while the bot writes, the busy timeout makes a write wait
+    instead of raising, and NORMAL sync is safe under WAL and much cheaper than FULL."""
+    c = sqlite3.connect(path)
+    c.row_factory = sqlite3.Row
+    c.execute("PRAGMA foreign_keys = ON")
+    c.execute("PRAGMA journal_mode = WAL")      # answers "memory" on :memory:, which is fine
+    c.execute("PRAGMA busy_timeout = 5000")
+    c.execute("PRAGMA synchronous = NORMAL")
+    return c
+
+
 DATA_DIR.mkdir(exist_ok=True)
 # ponytail: one sync connection, no pool, single-server bot, writes are tiny.
 # discord.py runs everything on one event-loop thread, so this is safe.
-conn = sqlite3.connect(DB_PATH)
-conn.row_factory = sqlite3.Row
-conn.execute("PRAGMA foreign_keys = ON")
+conn = connect(DB_PATH)
 conn.executescript(SCHEMA)
 
 # migrate pre-reminder databases

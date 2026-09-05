@@ -1,6 +1,8 @@
 # ── Jarcord: rank ladder self-check (venv/Scripts/python -X utf8 test_ranks.py) ──
 # ponytail: asserts only. Guards the ladder order, the NCO line, and that the panel
 # members read names every rank exactly as the role is called.
+import os
+os.environ["JARCORD_DB"] = ":memory:"   # before any project import, so tests never touch data/jarcord.db
 from pathlib import Path
 
 from cogs.ranks import ABBREV, NCO_FROM, RANKS, abbrev, is_nco, ladder_bar, step

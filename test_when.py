@@ -1,6 +1,8 @@
 # ── Jarcord: op time parsing self-check (venv/Scripts/python test_when.py) ──
 # ponytail: asserts only, no framework. Guards the one thing that silently ships
 # an op at the wrong hour: a wall clock time typed by a human is NOT UTC.
+import os
+os.environ["JARCORD_DB"] = ":memory:"   # before any project import, so tests never touch data/jarcord.db
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 

@@ -1,6 +1,8 @@
 # ── Jarcord: op card naming self-check (venv/Scripts/python -X utf8 test_card.py) ──
 # ponytail: asserts only. Guards the one thing a second client sees differently:
 # a raw <@id> in an embed when their client has not cached that user.
+import os
+os.environ["JARCORD_DB"] = ":memory:"   # before any project import, so tests never touch data/jarcord.db
 from types import SimpleNamespace as NS
 
 from cogs.ops import who
