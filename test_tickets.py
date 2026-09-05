@@ -30,4 +30,22 @@ assert len(e.fields) == len(KINDS) <= 25
 assert len(view.children) == len(KINDS) <= 25
 assert {b.custom_id for b in view.children} == {f"jarcord:ticket:open:{k}" for k in KINDS}
 
+# ── query layer: every list stops at the guild line ──
+from cogs.tickets import member_tickets, open_ticket_row, open_tickets
+from db import conn
+
+kind = next(iter(KINDS))
+conn.execute("INSERT INTO tickets (guild_id, user_id, kind, channel_id) VALUES (100, 5, ?, 555)", (kind,))
+conn.execute("INSERT INTO tickets (guild_id, user_id, kind, channel_id, status) "
+             "VALUES (100, 5, ?, 556, 'closed')", (kind,))
+conn.execute("INSERT INTO tickets (guild_id, user_id, kind, channel_id) VALUES (200, 5, ?, 777)", (kind,))
+conn.commit()
+
+assert open_ticket_row(100, 5, kind)["channel_id"] == 555
+assert open_ticket_row(300, 5, kind) is None
+assert [r["channel_id"] for r in open_tickets(100)] == [555]          # open only, this guild only
+assert [r["channel_id"] for r in open_tickets(300)] == []
+assert [r["channel_id"] for r in member_tickets(100, 5)] == [556, 555]  # newest first, both states
+assert [r["channel_id"] for r in member_tickets(200, 5)] == [777]
+
 print(">> ok")

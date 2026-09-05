@@ -95,10 +95,10 @@ def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9-]+", "-", text.casefold()).strip("-") or "member"
 
 
-def open_ticket_row(user_id: int, kind: str):
+def open_ticket_row(guild_id: int, user_id: int, kind: str):
     return conn.execute(
-        "SELECT * FROM tickets WHERE user_id = ? AND kind = ? AND status = 'open'",
-        (user_id, kind),
+        "SELECT * FROM tickets WHERE guild_id = ? AND user_id = ? AND kind = ? AND status = 'open'",
+        (guild_id, user_id, kind),
     ).fetchone()
 
 
@@ -110,6 +110,19 @@ def row_for_channel(channel_id: int):
     return conn.execute(
         "SELECT * FROM tickets WHERE channel_id = ? AND status = 'open'", (channel_id,)
     ).fetchone()
+
+
+def open_tickets(guild_id: int):
+    return conn.execute(
+        "SELECT * FROM tickets WHERE guild_id = ? AND status = 'open' ORDER BY id", (guild_id,)
+    ).fetchall()
+
+
+def member_tickets(guild_id: int, user_id: int):
+    return conn.execute(
+        "SELECT * FROM tickets WHERE guild_id = ? AND user_id = ? ORDER BY id DESC LIMIT 15",
+        (guild_id, user_id),
+    ).fetchall()
 
 
 def support_role(guild: discord.Guild):
@@ -166,7 +179,7 @@ async def open_ticket(guild: discord.Guild, member: discord.Member, kind: str,
     """Cut a private channel, file the answers in it and pull staff in. Raises
     discord.Forbidden if the bot cannot make channels, and AlreadyOpen if there is
     already an open ticket of this kind, whose channel is returned on the exception."""
-    existing = open_ticket_row(member.id, kind)
+    existing = open_ticket_row(guild.id, member.id, kind)
     if existing is not None:
         channel = guild.get_channel(existing["channel_id"] or 0)
         if channel is not None:
@@ -177,8 +190,8 @@ async def open_ticket(guild: discord.Guild, member: discord.Member, kind: str,
 
     # the answers live in the database too, so a ticket can be read without Discord
     filed = "\n".join(f"{label}: {value}" for label, value in answers if value)
-    cur = conn.execute("INSERT INTO tickets (user_id, kind, answers) VALUES (?, ?, ?)",
-                       (member.id, kind, filed))
+    cur = conn.execute("INSERT INTO tickets (guild_id, user_id, kind, answers) VALUES (?, ?, ?, ?)",
+                       (guild.id, member.id, kind, filed))
     conn.commit()
     ticket_id = cur.lastrowid
 
@@ -366,7 +379,7 @@ class ClaimButton(discord.ui.DynamicItem[discord.ui.Button],
             await interaction.response.send_message("Command claims tickets.", ephemeral=True)
             return
         row = ticket_row(self.ticket_id)
-        if row is None:
+        if row is None or row["channel_id"] != interaction.channel_id:
             await interaction.response.send_message("That ticket is gone.", ephemeral=True)
             return
         if row["claimed_by"]:
@@ -397,8 +410,8 @@ class CloseButton(discord.ui.DynamicItem[discord.ui.Button],
 
     async def callback(self, interaction: discord.Interaction):
         row = ticket_row(self.ticket_id)
-        if row is None or row["status"] != "open":
-            await interaction.response.send_message("That ticket is already closed.", ephemeral=True)
+        if row is None or row["status"] != "open" or row["channel_id"] != interaction.channel_id:
+            await interaction.response.send_message("That ticket isn't open here.", ephemeral=True)
             return
         if not may_handle(interaction.user, row):
             await interaction.response.send_message("Not your ticket.", ephemeral=True)
@@ -466,7 +479,8 @@ class Tickets(commands.Cog):
         """Somebody left with a ticket open. Say so in it rather than closing it, because
         the answer in there is often still wanted."""
         rows = conn.execute(
-            "SELECT * FROM tickets WHERE user_id = ? AND status = 'open'", (member.id,)
+            "SELECT * FROM tickets WHERE guild_id = ? AND user_id = ? AND status = 'open'",
+            (member.guild.id, member.id),
         ).fetchall()
         for row in rows:
             channel = member.guild.get_channel(row["channel_id"] or 0)
@@ -595,13 +609,10 @@ class Tickets(commands.Cog):
     @staff_check(officer=True, manage_messages=True)
     async def tickets(self, ctx: commands.Context, member: discord.Member = None):
         if member is None:
-            rows = conn.execute(
-                "SELECT * FROM tickets WHERE status = 'open' ORDER BY id").fetchall()
+            rows = open_tickets(ctx.guild.id)
             title = f"{len(rows)} open ticket{'s' if len(rows) != 1 else ''}"
         else:
-            rows = conn.execute(
-                "SELECT * FROM tickets WHERE user_id = ? ORDER BY id DESC LIMIT 15",
-                (member.id,)).fetchall()
+            rows = member_tickets(ctx.guild.id, member.id)
             title = f"{member.display_name}: {len(rows)} ticket{'s' if len(rows) != 1 else ''}"
 
         e = embed(title=title, colour=ACCENT)
