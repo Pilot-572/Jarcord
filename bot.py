@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
+from db import claim_orphans
 from ui import check_message
 
 load_dotenv()
@@ -25,6 +26,7 @@ intents.members = True          # !inactive needs the full member list
 
 class Jarcord(commands.Bot):
     async def setup_hook(self):
+        claim_orphans(GUILD_ID)   # rows from before guild_id existed belong to this guild
         for cog in COGS:
             await self.load_extension(cog)
             print(f">> loaded {cog}")

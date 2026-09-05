@@ -169,7 +169,15 @@ def m1_legacy_columns(c: sqlite3.Connection) -> None:
             pass  # column already exists
 
 
-MIGRATIONS = [m1_legacy_columns]
+def m2_guild_id(c: sqlite3.Connection) -> None:
+    """Rows a member can name by number get the guild they belong to, so a number typed
+    in one server can never reach another server's row. Nullable for now: claim_orphans
+    fills the old rows at startup, and the column tightens in the schema step."""
+    for table in ("ops", "tickets", "warnings"):
+        c.execute(f"ALTER TABLE {table} ADD COLUMN guild_id INTEGER")
+
+
+MIGRATIONS = [m1_legacy_columns, m2_guild_id]
 
 
 def db_file(c: sqlite3.Connection) -> Path | None:
@@ -221,6 +229,15 @@ DATA_DIR.mkdir(exist_ok=True)
 # discord.py runs everything on one event-loop thread, so this is safe.
 conn = connect(DB_PATH)
 migrate(conn)
+
+
+def claim_orphans(guild_id: int) -> None:
+    """Rows written before guild_id existed all belong to the one guild this bot served
+    then. Idempotent, so bot.py calls it on every start.
+    ponytail: goes away with GUILD_ID in the multi-guild step, by which time no row is NULL."""
+    for table in ("ops", "tickets", "warnings"):
+        conn.execute(f"UPDATE {table} SET guild_id = ? WHERE guild_id IS NULL", (guild_id,))
+    conn.commit()
 
 
 # ── Settings helpers (guild config that shouldn't need a restart) ──

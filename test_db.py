@@ -86,4 +86,23 @@ c = connect(":memory:")
 assert backup(c, 0) is None
 c.close()
 
+from db import claim_orphans, conn as shared
+
+# ── m2: the three tables a member can address by number carry their guild ──
+for table in ("ops", "tickets", "warnings"):
+    cols = {r["name"] for r in shared.execute(f"PRAGMA table_info({table})")}
+    assert "guild_id" in cols, table
+
+# ── claim_orphans: rows from before the column all belong to the one guild, once ──
+shared.execute("INSERT INTO ops (title, when_text, created_by) VALUES ('before', 'x', 1)")
+shared.execute("INSERT INTO ops (title, when_text, created_by, guild_id) VALUES ('after', 'x', 1, 5)")
+shared.execute("INSERT INTO warnings (user_id, officer_id, reason) VALUES (1, 2, 'old')")
+shared.commit()
+claim_orphans(9)
+assert shared.execute("SELECT guild_id FROM ops WHERE title = 'before'").fetchone()[0] == 9
+assert shared.execute("SELECT guild_id FROM ops WHERE title = 'after'").fetchone()[0] == 5   # untouched
+assert shared.execute("SELECT guild_id FROM warnings").fetchone()[0] == 9
+claim_orphans(11)                                                                            # a second call finds nothing
+assert shared.execute("SELECT guild_id FROM ops WHERE title = 'before'").fetchone()[0] == 9
+
 print(">> ok")
