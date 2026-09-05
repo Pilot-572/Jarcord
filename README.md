@@ -248,6 +248,16 @@ the dashes Discord users notice and panel JSON Discord would reject. Every test 
 
 On Nest use `venv/bin/python`.
 
+## Database
+
+One SQLite file, `data/jarcord.db`, in WAL mode. Schema changes are numbered functions in
+`MIGRATIONS` in `db.py`; on start the bot reads `PRAGMA user_version`, and if the file is
+behind it copies the file to `data/backups/jarcord-v<old>-<stamp>.db` first, then runs each
+pending migration in its own transaction. A migration that fails rolls back, the version
+stays where it was, and the bot refuses to start, which is the correct outcome. To roll back
+by hand: stop the service, copy the backup over `data/jarcord.db`, check out the previous
+commit, start it.
+
 ## Deployment
 
 `setup.sh` handles both cases: run it as root and you get a system service, run it as a normal
