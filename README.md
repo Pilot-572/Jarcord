@@ -238,9 +238,9 @@ Slash commands sync to the guild in `GUILD_ID` on startup, so they appear instan
 
 ## Self-checks
 
-No test framework. Each `test_*.py` in the repo root is a plain script of asserts that
-prints `>> ok` or dies on the line that failed, and `check.py` scans shipped text for
-the dashes Discord users notice and panel JSON Discord would reject. Every test sets
+There is no test framework. Each `test_*.py` in the repo root is a plain script of asserts
+that prints `>> ok` or dies on the line that failed. `check.py` scans shipped text for the
+dashes Discord users notice and for panel JSON Discord would reject. Every test sets
 `JARCORD_DB=:memory:` before importing anything, so none of them touch `data/jarcord.db`.
 
     venv/Scripts/python -X utf8 check.py
@@ -250,13 +250,13 @@ On Nest use `venv/bin/python`.
 
 ## Database
 
-One SQLite file, `data/jarcord.db`, in WAL mode. Schema changes are numbered functions in
-`MIGRATIONS` in `db.py`; on start the bot reads `PRAGMA user_version`, and if the file is
-behind it copies the file to `data/backups/jarcord-v<old>-<stamp>.db` first, then runs each
-pending migration in its own transaction. A migration that fails rolls back, the version
-stays where it was, and the bot refuses to start, which is the correct outcome. To roll back
-by hand: stop the service, copy the backup over `data/jarcord.db`, check out the previous
-commit, start it.
+The database is one SQLite file, `data/jarcord.db`, in WAL mode. Schema changes are numbered
+functions in `MIGRATIONS` in `db.py`. On start the bot reads `PRAGMA user_version`; if the
+file is behind, it copies the file to `data/backups/jarcord-v<old>-<stamp>.db` first and then
+runs each pending migration in its own transaction. A failed migration rolls back and leaves
+the version where it was, and the bot refuses to start, which is the outcome you want. To
+roll back by hand: stop the service, copy the backup over `data/jarcord.db`, check out the
+previous commit, start it.
 
 ## Deployment
 

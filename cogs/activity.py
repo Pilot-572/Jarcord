@@ -11,8 +11,8 @@ from ui import ACTIVITY, ago, embed
 SQLITE_FMT = "%Y-%m-%d %H:%M:%S"  # matches sqlite datetime('now'), which is UTC
 FLUSH_EVERY = 30                  # seconds. ponytail: a crash loses at most this much counting
 
-# user_id -> [messages since the last flush, last seen]. Every message used to be its own
-# INSERT and commit on the event loop; now a busy evening is one write every half minute.
+# user_id -> [messages since the last flush, last seen]. Counting here means a busy evening
+# is one write every half minute rather than an INSERT and a commit per message on the loop.
 pending: dict[int, list] = {}
 
 
