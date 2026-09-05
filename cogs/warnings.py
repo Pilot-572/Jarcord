@@ -8,23 +8,26 @@ from ui import ACCENT, RED, ago, embed, log_action, staff_check
 WARNED = RED  # a warning is done to a person
 
 
-def add_warning(user_id: int, officer_id: int, reason: str) -> int:
+def add_warning(guild_id: int, user_id: int, officer_id: int, reason: str) -> int:
     cur = conn.execute(
-        "INSERT INTO warnings (user_id, officer_id, reason) VALUES (?, ?, ?)",
-        (user_id, officer_id, reason),
+        "INSERT INTO warnings (guild_id, user_id, officer_id, reason) VALUES (?, ?, ?, ?)",
+        (guild_id, user_id, officer_id, reason),
     )
     conn.commit()
     return cur.lastrowid
 
 
-def warnings_for(user_id: int):
+def warnings_for(guild_id: int, user_id: int):
     return conn.execute(
-        "SELECT * FROM warnings WHERE user_id = ? ORDER BY id", (user_id,)
+        "SELECT * FROM warnings WHERE guild_id = ? AND user_id = ? ORDER BY id",
+        (guild_id, user_id),
     ).fetchall()
 
 
-def drop_warning(warning_id: int) -> bool:
-    cur = conn.execute("DELETE FROM warnings WHERE id = ?", (warning_id,))
+def drop_warning(guild_id: int, warning_id: int) -> bool:
+    """The number comes from a person, so it only reaches this guild's rows."""
+    cur = conn.execute("DELETE FROM warnings WHERE id = ? AND guild_id = ?",
+                       (warning_id, guild_id))
     conn.commit()
     return cur.rowcount > 0
 
@@ -62,8 +65,8 @@ class Warnings(commands.Cog):
         if member.bot:
             await ctx.send("Bots don't take warnings.")
             return
-        warning_id = add_warning(member.id, ctx.author.id, reason)
-        rows = warnings_for(member.id)
+        warning_id = add_warning(ctx.guild.id, member.id, ctx.author.id, reason)
+        rows = warnings_for(ctx.guild.id, member.id)
 
         notes = []
         try:
@@ -95,13 +98,14 @@ class Warnings(commands.Cog):
     @discord.app_commands.default_permissions(moderate_members=True)
     @staff_check(officer=True, moderate_members=True)
     async def warns(self, ctx: commands.Context, member: discord.Member):
-        await ctx.send(embed=warning_embed(member, warnings_for(member.id)), ephemeral=True)
+        await ctx.send(embed=warning_embed(member, warnings_for(ctx.guild.id, member.id)),
+                       ephemeral=True)
 
     @commands.hybrid_command(name="unwarn", description="Delete a warning by its number")
     @discord.app_commands.default_permissions(moderate_members=True)
     @staff_check(officer=True, moderate_members=True)
     async def unwarn(self, ctx: commands.Context, warning_id: int):
-        if drop_warning(warning_id):
+        if drop_warning(ctx.guild.id, warning_id):
             print(f">> warning #{warning_id} deleted by {ctx.author.id}")
             await log_action(ctx.guild, "Warning deleted", ctx.author, f"Warning `#{warning_id}`")
             await ctx.send(f"Warning `#{warning_id}` deleted.", ephemeral=True)
