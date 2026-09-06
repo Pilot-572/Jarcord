@@ -68,4 +68,30 @@ assert "Cancelled" in cancel_op(a, ROC, 1, False)
 assert get_op(a) is None
 assert conn.execute("SELECT COUNT(*) FROM signups WHERE op_id = ?", (a,)).fetchone()[0] == 0
 
+
+# ── the status line and the running total ──
+from cogs.ops import marks_in, status_text
+
+conn.execute("DELETE FROM signups"); conn.execute("DELETE FROM ops"); conn.commit()
+now = 1_800_000_000
+assert status_text(now) == "the ops board"
+conn.execute("INSERT INTO ops (id, guild_id, title, when_text, created_by) VALUES (1, 1, 'A', 'x', 9)")
+assert status_text(now) == "1 op on the board"                       # free text time, no countdown
+conn.execute("INSERT INTO ops (id, guild_id, title, when_text, created_by, when_ts) VALUES (2, 1, 'B', 'x', 9, ?)",
+             (now + 2 * 86400,))
+assert status_text(now) == "2 ops on the board", status_text(now)   # two days out is not "next"
+conn.execute("INSERT INTO ops (id, guild_id, title, when_text, created_by, when_ts) VALUES (3, 1, 'C', 'x', 9, ?)",
+             (now + 7200,))
+assert status_text(now) == "Op 3, in 2 hours", status_text(now)
+assert status_text(now + 7200 - 600) == "Op 3, in 10 minutes"
+assert status_text(now + 7200 + 60) == "Op 3, live now"
+assert status_text(now + 7200 + 4 * 3600) == "3 ops on the board"   # past the live window, still unclosed
+conn.execute("UPDATE ops SET closed = 1 WHERE id = 3")
+assert status_text(now + 7200 + 60) == "2 ops on the board"
+conn.execute("INSERT INTO ops (id, guild_id, title, when_text, created_by, closed) VALUES (4, 2, 'D', 'x', 9, 1)")
+conn.executemany("INSERT INTO signups (op_id, user_id, attended) VALUES (?, ?, ?)",
+                 [(3, 10, 1), (3, 11, 0), (3, 12, None), (4, 10, 1)])
+conn.commit()
+assert marks_in(1) == 1 and marks_in(2) == 1 and marks_in(3) == 0
+
 print(">> ok")

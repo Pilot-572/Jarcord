@@ -6,7 +6,7 @@ from discord.ext import commands, tasks
 
 from cogs.ops import attendance
 from db import conn
-from ui import ACTIVITY, ago, embed
+from ui import ACTIVITY, ago, clerk, embed, is_me
 
 SQLITE_FMT = "%Y-%m-%d %H:%M:%S"  # matches sqlite datetime('now'), which is UTC
 FLUSH_EVERY = 30                  # seconds. ponytail: a crash loses at most this much counting
@@ -65,6 +65,9 @@ class Activity(commands.Cog):
     # ── Commands ──
     @commands.hybrid_command(name="activity", description="Message count, ops attended, last seen")
     async def activity(self, ctx: commands.Context, member: discord.Member):
+        if is_me(member):
+            await ctx.send(clerk("activity"))
+            return
         flush()  # so a message sent a second ago already counts
         row = conn.execute(
             "SELECT message_count, last_seen FROM activity WHERE user_id = ?", (member.id,)

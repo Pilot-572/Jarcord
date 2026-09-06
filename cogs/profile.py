@@ -9,8 +9,9 @@ import aiohttp
 import discord
 from discord.ext import commands
 
+from cogs.ops import marks_in
 from db import conn
-from ui import ago, embed, is_officer, staff_check
+from ui import ago, clerk, embed, is_me, is_officer, staff_check
 
 CONTINENTS = ("Europe", "North America", "South America", "Asia", "Africa", "Oceania")
 
@@ -39,11 +40,7 @@ def self_card(guild_id: int, name: str, avatar_url: str) -> discord.Embed:
         "SELECT COUNT(*) AS posted, COALESCE(SUM(closed), 0) AS closed FROM ops WHERE guild_id = ?",
         (guild_id,),
     ).fetchone()
-    marks = conn.execute(
-        """SELECT COUNT(*) AS n FROM signups s JOIN ops o ON o.id = s.op_id
-           WHERE o.guild_id = ? AND s.attended IS NOT NULL""",
-        (guild_id,),
-    ).fetchone()["n"]
+    marks = marks_in(guild_id)
     warned = conn.execute(
         "SELECT COUNT(*) AS n FROM warnings WHERE guild_id = ?", (guild_id,)
     ).fetchone()["n"]
@@ -59,7 +56,8 @@ def self_card(guild_id: int, name: str, avatar_url: str) -> discord.Embed:
     e.add_field(name="Continent", value="Hack Club Nest", inline=True)
     e.add_field(
         name="Ops",
-        value=f"{ops['posted']} posted, {ops['closed']} closed\n{marks} attendance marks",
+        value=f"{ops['posted']} posted, {ops['closed']} closed\n"
+              f"{marks} attendance mark{'s' if marks != 1 else ''}",
         inline=True,
     )
     e.add_field(name="Warnings", value=f"{warned} filed, none received", inline=True)
@@ -72,6 +70,34 @@ def self_card(guild_id: int, name: str, avatar_url: str) -> discord.Embed:
     )
     e.set_footer(text=f"Build {BUILD}. {tickets} tickets filed. Made by Chartreuse.")
     return e
+
+
+def streak(user_id: int) -> int:
+    """Ops attended in a row, counting back from the most recent op that has been closed."""
+    rows = conn.execute(
+        """SELECT s.attended FROM signups s JOIN ops o ON o.id = s.op_id
+           WHERE s.user_id = ? AND s.attended IS NOT NULL
+           ORDER BY COALESCE(o.when_ts, 0) DESC, o.id DESC""",
+        (user_id,),
+    ).fetchall()
+    n = 0
+    for r in rows:
+        if r["attended"] != 1:
+            break
+        n += 1
+    return n
+
+
+def turnout_lines(signed: int, came: int, missed: int, run: int) -> str:
+    """The Ops field on a profile: the counts, then a streak line when it is earned."""
+    if not signed:
+        return "none yet"
+    lines = [f"{signed} signed up", f"{came} attended, {missed} no-showed"]
+    if came >= 5 and missed == 0:
+        lines.append(f"Perfect turnout, {run} in a row")
+    elif run >= 3:
+        lines.append(f"{run} in a row")
+    return "\n".join(lines)
 UNITS = ("Ground Unit", "Sniper Unit")
 ROBLOX_LOOKUP = "https://users.roblox.com/v1/usernames/users"
 
@@ -198,7 +224,10 @@ class Profile(commands.Cog):
                 "sits above mine (Server Settings → Roles → drag Jarcord higher)."
             )
             return
-        if nickname:
+        if is_me(member):
+            await ctx.send(f"Jarcord answers to **{nickname}** now." if nickname
+                           else "Jarcord answers to its own name again.")
+        elif nickname:
             await ctx.send(f"Renamed {member.mention} to **{nickname}**.")
         else:
             await ctx.send(f"Cleared {member.mention}'s nickname.")
@@ -207,6 +236,9 @@ class Profile(commands.Cog):
         """Who a profile setter acts on: yourself by default, somebody else only for officers."""
         if member is None or member == ctx.author:
             return ctx.author
+        if is_me(member):
+            await ctx.send(clerk(what))
+            return None
         if is_officer(ctx.author):
             return member
         await ctx.send(f"Only officers can set someone else's {what}.", ephemeral=True)
@@ -292,8 +324,7 @@ class Profile(commands.Cog):
         came, missed = turnout["came"] or 0, turnout["missed"] or 0
         e.add_field(
             name="Ops",
-            value=(f"{turnout['signed']} signed up\n{came} attended, {missed} no-showed"
-                   if turnout["signed"] else "none yet"),
+            value=turnout_lines(turnout["signed"], came, missed, streak(member.id)),
             inline=True,
         )
         e.add_field(name="Warnings", value=str(n_warnings) if n_warnings else "none", inline=True)

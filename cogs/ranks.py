@@ -5,7 +5,7 @@ from discord.ext import commands
 from cogs.ops import attendance
 from cogs.profile import save_profile, set_exclusive_role
 from db import conn, get_setting, set_setting
-from ui import ACCENT, COYOTE, OLIVE, embed, log_action, staff_check
+from ui import ACCENT, COYOTE, OLIVE, clerk, embed, is_me, log_action, staff_check
 
 # Lowest to highest. These are the Discord role names, so renaming here renames the ladder.
 RANKS = (
@@ -180,6 +180,9 @@ class Ranks(commands.Cog):
     @discord.app_commands.default_permissions(manage_roles=True)
     @staff_check(officer=True, manage_roles=True)
     async def promote(self, ctx: commands.Context, member: discord.Member, *, reason: str = None):
+        if is_me(member):
+            await ctx.send(clerk("promote"))
+            return
         await self._move(ctx, member, reason, up=True)
 
     @commands.hybrid_command(name="demote", description="Move a member one rank down the ladder")
@@ -187,6 +190,9 @@ class Ranks(commands.Cog):
     @discord.app_commands.default_permissions(manage_roles=True)
     @staff_check(officer=True, manage_roles=True)
     async def demote(self, ctx: commands.Context, member: discord.Member, *, reason: str = None):
+        if is_me(member):
+            await ctx.send(clerk("demote"))
+            return
         await self._move(ctx, member, reason, up=False)
 
     @commands.hybrid_command(name="promotions-setup", description="Channel where every promotion and demotion is announced")

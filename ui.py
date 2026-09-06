@@ -112,3 +112,34 @@ def check_message(error) -> str | None:
     if isinstance(error, (commands.CheckFailure, app_commands.CheckFailure)):
         return "That command can't be used here."
     return None
+
+
+# ── The clerk ──
+# What Jarcord says when a member command is pointed at the bot itself. One line, third
+# person, because paperwork does not say "I". Keys are command names.
+CLERK = {
+    "promote": "Jarcord holds no rank. It keeps the ladder.",
+    "demote": "There is nothing below clerk.",
+    "warn": "Noted. Jarcord files warnings, it does not collect them.",
+    "warns": "No warnings. Jarcord writes them, it does not receive them.",
+    "rate": "Jarcord is not rated. Ratings go the other way.",
+    "rating-history": "No ratings. Jarcord keeps the scores, it does not get one.",
+    "activity": "Jarcord does not count its own messages. Point /profile at it for what it does count.",
+    "record": "The clerk has no record card. It writes the others.",
+    "nudge": "Nothing to nudge. Jarcord verified itself.",
+    "ticket-add": "Jarcord is already in every ticket.",
+    "tickets": "Jarcord has never opened a ticket. It files them.",
+    "continent": "Hack Club Nest is not a continent, but that is where Jarcord lives.",
+    "unit": "Jarcord is posted to every unit.",
+}
+
+
+def is_me(member) -> bool:
+    """True when a member argument is the bot itself."""
+    guild = getattr(member, "guild", None)
+    me = getattr(guild, "me", None)
+    return me is not None and member.id == me.id
+
+
+def clerk(command: str) -> str:
+    return CLERK[command]

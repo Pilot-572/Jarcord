@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 
 from db import conn
-from ui import RATING, ago, embed
+from ui import RATING, ago, clerk, embed, is_me
 
 STARS_FULL = "★"   # ★
 STARS_EMPTY = "☆"  # ☆
@@ -28,6 +28,9 @@ class Rating(commands.Cog):
         *,
         note: str = None,
     ):
+        if is_me(member):
+            await ctx.send(clerk("rate"))
+            return
         if member.bot:
             await ctx.send("Bots don't take feedback.")
             return
@@ -43,6 +46,9 @@ class Rating(commands.Cog):
 
     @commands.hybrid_command(name="rating-history", description="Average score + recent notes for a member")
     async def rating_history(self, ctx: commands.Context, member: discord.Member):
+        if is_me(member):
+            await ctx.send(clerk("rating-history"))
+            return
         summary = conn.execute(
             "SELECT AVG(score) AS avg, COUNT(*) AS n FROM ratings WHERE user_id = ?",
             (member.id,),

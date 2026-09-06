@@ -15,6 +15,7 @@ OP_PLANNER = "Op Planner"  # position role that may post and run ops without bei
 CLOSE_NUDGE_AFTER = 60 * 60   # an hour after start, ask the host to close it
 NUDGE_WINDOW = 7 * 86400      # ponytail: older unclosed ops are history, not a to-do
 MILESTONES = (1, 5, 10, 25)   # ops attended worth a line in the thread
+LIVE_WINDOW = 3 * 3600        # an op counts as running this long after its start, until closed
 WHEN_FORMATS = ("%Y-%m-%d %H:%M", "%d.%m.%Y %H:%M", "%d.%m %H:%M")
 DEFAULT_TZ = "UTC"  # what op times are read as until /op-setup says otherwise
 # RSVP status -> (button label, embed heading)
@@ -258,6 +259,9 @@ async def post_turnout(bot, op_id: int, attended_ids) -> None:
         elif came in MILESTONES:
             lines.append(f"🎖️ <@{u}> just hit op {came} with ROC.")
     if ids:
+        total = marks_in(op["guild_id"] or thread.guild.id)
+        lines.append(f"That makes {total} attendance mark{'s' if total != 1 else ''} "
+                     f"in {thread.guild.name}.")
         lines.append("Rate who you played with: `/rate @name 1-5 note`")
     try:
         # names render as mentions either way, this just keeps eleven phones from buzzing
@@ -390,6 +394,44 @@ def attendance(user_id: int) -> tuple[int, int]:
     return (row["came"] or 0, row["missed"] or 0)
 
 
+def marks_in(guild_id: int) -> int:
+    """Attendance marks in one guild: every closed-op row that says the member came."""
+    return conn.execute(
+        """SELECT COUNT(*) FROM signups s JOIN ops o ON o.id = s.op_id
+           WHERE o.guild_id = ? AND s.attended = 1""",
+        (guild_id,),
+    ).fetchone()[0]
+
+
+def status_text(now: int) -> str:
+    """What the bot is "watching" in the member list: the op running now, the next one
+    with a time when it is under a day away, otherwise how many are on the board."""
+    live = conn.execute(
+        "SELECT id FROM ops WHERE closed = 0 AND when_ts IS NOT NULL AND when_ts <= ? "
+        "AND when_ts > ? ORDER BY when_ts DESC LIMIT 1",
+        (now, now - LIVE_WINDOW),
+    ).fetchone()
+    if live:
+        return f"Op {live['id']}, live now"
+    nxt = conn.execute(
+        "SELECT id, when_ts FROM ops WHERE closed = 0 AND when_ts IS NOT NULL AND when_ts > ? "
+        "ORDER BY when_ts LIMIT 1",
+        (now,),
+    ).fetchone()
+    if nxt and nxt["when_ts"] - now <= 24 * 3600:
+        minutes = (nxt["when_ts"] - now + 59) // 60
+        if minutes < 60:
+            when = f"in {minutes} minute{'s' if minutes != 1 else ''}"
+        else:
+            hours = round(minutes / 60)
+            when = f"in {hours} hour{'s' if hours != 1 else ''}"
+        return f"Op {nxt['id']}, {when}"
+    n = conn.execute("SELECT COUNT(*) FROM ops WHERE closed = 0").fetchone()[0]
+    if n:
+        return f"{n} op{'s' if n != 1 else ''} on the board"
+    return "the ops board"
+
+
 def cancel_op(op_id: int, guild_id: int, user_id: int, is_officer: bool) -> str:
     op = get_op(op_id, guild_id)
     if op is None:
@@ -443,13 +485,31 @@ def list_embed(guild_id: int) -> discord.Embed:
 class Ops(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self._status = None
 
     async def cog_load(self):
         self.bot.add_view(OpView())  # RSVP buttons survive restarts
         self.reminder_loop.start()
+        self.status_loop.start()
 
     def cog_unload(self):
         self.reminder_loop.cancel()
+        self.status_loop.cancel()
+
+    # ── Presence: the member list shows the next op ──
+    @tasks.loop(minutes=1)
+    async def status_loop(self):
+        text = status_text(int(time.time()))
+        if text == self._status:
+            return  # a presence update is a gateway call, so only send a change
+        self._status = text
+        await self.bot.change_presence(
+            activity=discord.Activity(type=discord.ActivityType.watching, name=text)
+        )
+
+    @status_loop.before_loop
+    async def before_status(self):
+        await self.bot.wait_until_ready()
 
     # ── Reminders ──
     @tasks.loop(minutes=1)

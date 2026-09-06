@@ -124,6 +124,29 @@ class Roles(commands.Cog):
         if ctx.interaction is not None:
             await ctx.send(f"Done, {n} gone.", ephemeral=True)
 
+    @commands.hybrid_command(name="say", description="Post a message as Jarcord")
+    @discord.app_commands.describe(text="What Jarcord should say",
+                                   channel="Where to post it. This channel if left out")
+    @discord.app_commands.default_permissions(manage_messages=True)
+    @staff_check(officer=True, manage_messages=True)
+    async def say(self, ctx: commands.Context, text: str, channel: discord.TextChannel = None):
+        target = channel or ctx.channel
+        try:
+            await target.send(text, allowed_mentions=discord.AllowedMentions(
+                everyone=False, roles=True, users=True))
+        except discord.Forbidden:
+            await ctx.send(f"Jarcord can't post in {target.mention}.", ephemeral=True)
+            return
+        # the words are the bot's, the paper trail says whose they were
+        await log_action(ctx.guild, "Said", ctx.author, f"In {target.mention}: {text}"[:4000])
+        if ctx.interaction is not None:
+            await ctx.send(f"Posted in {target.mention}.", ephemeral=True)
+        else:
+            try:
+                await ctx.message.delete()
+            except discord.HTTPException:
+                pass
+
     @commands.hybrid_command(name="code", description="The current private server code")
     async def code(self, ctx: commands.Context):
         if ctx.interaction is None:  # a prefix reply is public, and the whole point is that this is not

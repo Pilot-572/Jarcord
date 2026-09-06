@@ -60,6 +60,19 @@ async def on_ready():
 
 
 @bot.event
+async def on_message(message):
+    # a bare @Jarcord gets the clerk; anything else goes to the prefix commands as before
+    if message.guild is not None and not message.author.bot and bot.user is not None \
+            and message.content.strip() in (bot.user.mention, f"<@!{bot.user.id}>"):
+        await message.reply(
+            "Company clerk. Point /profile at Jarcord for the details, or type / to see the commands.",
+            mention_author=False,
+        )
+        return
+    await bot.process_commands(message)
+
+
+@bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         return

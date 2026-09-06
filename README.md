@@ -64,6 +64,7 @@ Without setup Jarcord picks the first channel whose name contains `operator-id`,
 |---|---|
 | `/dividers [count]` | Create N blank divider roles (default 10, max 25) to separate groups in the role list |
 | `/c <count>` or `!c <count>` | Clear the last N messages in this channel, 1 to 100, pinned messages skipped, no receipt left behind (needs Manage Messages) |
+| `/say <text> [channel]` | Post a message as Jarcord, here or in the channel named. The log channel records who typed it (officer role or Manage Messages) |
 | `/logs-setup <channel>` | Write every notable action to this channel (needs Manage Server) |
 
 ### Logs
@@ -82,7 +83,7 @@ Setting `/officer-role` grants that role a fixed, curated set. It is not per com
 
 | Tier | Commands | Who |
 |---|---|---|
-| Officer | `/op create`, `/op edit`, `/op cancel`, `/op close`, `/promote`, `/demote`, `/warn`, `/warns`, `/unwarn`, `/nickname`, `/panel`, `/record`, `/verify-panel`, `/c`, `/code-set` | The officer role, plus anyone with the underlying permission. `/code-set` also passes for the **Server Host** role, and the `/op` commands for **Op Planner** |
+| Officer | `/op create`, `/op edit`, `/op cancel`, `/op close`, `/promote`, `/demote`, `/warn`, `/warns`, `/unwarn`, `/nickname`, `/panel`, `/record`, `/verify-panel`, `/c`, `/say`, `/code-set` | The officer role, plus anyone with the underlying permission. `/code-set` also passes for the **Server Host** role, and the `/op` commands for **Op Planner** |
 | Admin | `/op-setup`, `/verify-setup`, `/welcome-setup`, `/welcome-preview`, `/records-setup`, `/officer-role`, `/ranks-setup`, `/promotions-setup`, `/dividers` | Manage Server only |
 | Member | `/profile`, `/code`, `/op join`, `/op leave`, `/op roster`, `/op list`, `/rate`, `/rating-history`, `/continent`, `/unit`, `/roblox`, `/activity`, `/panel-list` | Everyone |
 
@@ -188,6 +189,9 @@ All four need the officer role or Manage Server.
 
 ### Ask
 `/ask <question>` answers from this server's own panels, the live command tree and the server's settings, through any API that speaks the OpenAI chat shape (Groq by default). It is read only: no tool calling and no action path, so a wrong sentence is the worst case. It sees the asker's own record and nobody else's. Two calls a minute per person, 200 a day per server, and every answer is labelled as written by a model. Put `LLM_API_KEY` in `.env` to switch it on; `LLM_BASE_URL` and `LLM_MODEL` change the endpoint and the model. `/ask-status` shows whether it is on and how much of the day's quota is used.
+
+### The clerk
+Jarcord has a character, kept small. Its status in the member list reads the ops table: `Watching Op 14, in 2 hours`, then `Op 14, live now` while it runs, otherwise how many ops are on the board. Point any member command at the bot itself, `/promote @Jarcord`, `/warn @Jarcord`, `/rate @Jarcord`, `/continent`, `/record`, `/ticket-add` and the rest, and it answers for itself in one line instead of running; `/profile @Jarcord` is the long version, with the running build in the footer. A bare @mention gets the same clerk. When an op closes, the thread also says how many attendance marks the server holds in total. A profile shows `3 in a row` from three attended ops onwards and `Perfect turnout` at five or more with no no-shows. The daily duty list notes join anniversaries and the day Op 1 was posted.
 
 Most commands are hybrid, so they work as both slash and prefix versions.
 

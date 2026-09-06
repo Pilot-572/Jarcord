@@ -100,6 +100,29 @@ def chore_lines(advert_due: bool, ops_ahead: int, needs_closing: int,
     ]
 
 
+def anniversary_lines(today: date, joined: list[tuple[str, date]], first_op: date | None) -> list[str]:
+    """One line per member whose join date falls on today, a year or more later, and one
+    for Op 1. Pure, so the wording is testable. 29 February people get theirs in leap years."""
+    out = []
+    for name, when in joined:
+        years = today.year - when.year
+        if years >= 1 and (when.month, when.day) == (today.month, today.day):
+            out.append(f"{name} joined {years} year{'s' if years != 1 else ''} ago today")
+    if first_op is not None:
+        years = today.year - first_op.year
+        if years >= 1 and (first_op.month, first_op.day) == (today.month, today.day):
+            out.append(f"Op 1 was posted {years} year{'s' if years != 1 else ''} ago today")
+    return out
+
+
+def anniversaries(guild: discord.Guild, today: date) -> list[str]:
+    joined = [(m.display_name, m.joined_at.date()) for m in guild.members
+              if not m.bot and m.joined_at is not None]
+    first = conn.execute("SELECT MIN(created_at) FROM ops WHERE guild_id = ?", (guild.id,)).fetchone()[0]
+    first_op = date.fromisoformat(first[:10]) if first else None
+    return anniversary_lines(today, joined, first_op)
+
+
 # ── Settings-backed rota (no table: it is a short list of ids) ──
 def rota_ids() -> list[int]:
     raw = get_setting("duty_rota") or ""
@@ -169,6 +192,9 @@ def chore_card(guild: discord.Guild, holder_id: int | None) -> tuple[discord.Emb
     e = embed(title=title, description=body, colour=colour)
     holder = guild.get_member(holder_id) if holder_id else None
     e.set_author(name=f"On duty: {holder.display_name}" if holder else "On duty: nobody set")
+    today = anniversaries(guild, local_today())
+    if today:
+        e.add_field(name="Today", value="\n".join(today[:5]), inline=False)
     e.set_footer(text="Ticks itself when the work is done. Nobody has to mark anything.")
     return e, open_count
 

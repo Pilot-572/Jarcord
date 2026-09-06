@@ -84,4 +84,18 @@ assert "1 op on the board" in one["ops"]
 assert "1 op started" in one["close"]
 assert "1 member never" in one["verify"]
 
+
+# ── anniversaries on the daily list ──
+from cogs.duty import anniversary_lines
+
+lines = anniversary_lines(
+    date(2027, 9, 6),
+    [("Redux", date(2026, 9, 6)), ("Dan", date(2025, 9, 6)), ("Neh", date(2026, 9, 7)), ("New", date(2027, 9, 6))],
+    date(2026, 9, 6),
+)
+assert lines == ["Redux joined 1 year ago today", "Dan joined 2 years ago today",
+                 "Op 1 was posted 1 year ago today"], lines
+assert anniversary_lines(date(2026, 9, 6), [("Redux", date(2026, 9, 6))], date(2026, 9, 6)) == []
+assert anniversary_lines(date(2027, 9, 6), [], None) == []
+
 print(">> ok")

@@ -9,7 +9,7 @@ from cogs.profile import (CONTINENTS, UNITS, RobloxDown, resolve_roblox,
 from cogs.ranks import RANKS, apply_rank, current_rank
 from cogs.tickets import AlreadyOpen, open_ticket
 from db import conn, get_setting, set_setting
-from ui import ACCENT, embed, log_action, staff_check
+from ui import ACCENT, clerk, embed, is_me, log_action, staff_check
 
 UNVERIFIED = "Unverified"
 OPERATOR = "Operator"
@@ -571,6 +571,9 @@ class Verify(commands.Cog):
             return
 
         if member is not None:
+            if is_me(member):
+                await ctx.send(clerk("nudge"), ephemeral=True)
+                return
             if unverified not in member.roles:
                 await ctx.send(f"{member.mention} isn't unverified.", ephemeral=True)
                 return
@@ -650,6 +653,9 @@ class Verify(commands.Cog):
     @discord.app_commands.default_permissions(manage_guild=True)
     @staff_check(officer=True, manage_guild=True)
     async def record(self, ctx: commands.Context, member: discord.Member):
+        if is_me(member):
+            await ctx.send(clerk("record"))
+            return
         await ctx.send(embed=record_embed(member))
 
     @commands.hybrid_command(name="verify-panel", description="Post a standing verification panel")

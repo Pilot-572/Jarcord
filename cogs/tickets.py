@@ -8,7 +8,7 @@ from discord.ext import commands
 from cogs.ranks import POSITIONS
 from cogs.welcome import named
 from db import conn, get_setting, set_setting
-from ui import ACCENT, NEUTRAL, embed, is_officer, log_action, staff_check
+from ui import ACCENT, NEUTRAL, clerk, embed, is_me, is_officer, log_action, staff_check
 
 PARA = discord.TextStyle.paragraph
 CATEGORY_NAME = "TICKETS"
@@ -584,6 +584,9 @@ class Tickets(commands.Cog):
     @discord.app_commands.default_permissions(manage_messages=True)
     @staff_check(officer=True, manage_messages=True)
     async def ticket_add(self, ctx: commands.Context, member: discord.Member):
+        if is_me(member):
+            await ctx.send(clerk("ticket-add"))
+            return
         if row_for_channel(ctx.channel.id) is None:
             await ctx.send("Run this inside a ticket channel.", ephemeral=True)
             return
@@ -608,6 +611,9 @@ class Tickets(commands.Cog):
     @discord.app_commands.default_permissions(manage_messages=True)
     @staff_check(officer=True, manage_messages=True)
     async def tickets(self, ctx: commands.Context, member: discord.Member = None):
+        if member is not None and is_me(member):
+            await ctx.send(clerk("tickets"))
+            return
         if member is None:
             rows = open_tickets(ctx.guild.id)
             title = f"{len(rows)} open ticket{'s' if len(rows) != 1 else ''}"

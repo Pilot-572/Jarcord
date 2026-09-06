@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 
 from db import conn, get_setting
-from ui import ACCENT, RED, ago, embed, log_action, staff_check
+from ui import ACCENT, RED, ago, clerk, embed, is_me, log_action, staff_check
 
 WARNED = RED  # a warning is done to a person
 
@@ -62,6 +62,9 @@ class Warnings(commands.Cog):
     @discord.app_commands.default_permissions(moderate_members=True)
     @staff_check(officer=True, moderate_members=True)
     async def warn(self, ctx: commands.Context, member: discord.Member, *, reason: str):
+        if is_me(member):
+            await ctx.send(clerk("warn"))
+            return
         if member.bot:
             await ctx.send("Bots don't take warnings.")
             return
@@ -98,6 +101,9 @@ class Warnings(commands.Cog):
     @discord.app_commands.default_permissions(moderate_members=True)
     @staff_check(officer=True, moderate_members=True)
     async def warns(self, ctx: commands.Context, member: discord.Member):
+        if is_me(member):
+            await ctx.send(clerk("warns"))
+            return
         await ctx.send(embed=warning_embed(member, warnings_for(ctx.guild.id, member.id)),
                        ephemeral=True)
 
