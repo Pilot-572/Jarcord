@@ -36,7 +36,7 @@ The card carries **Attending**, **Maybe** and **Can't make it**. Pressing one re
 |---|---|
 | `/roblox <username>` | Link your Roblox account, verified against the Roblox API, then sets your server nickname to it |
 | `/continent <continent> [@member]` | Set your continent; assigns the matching role (created on first use). Officers can set another member's |
-| `/profile [@member]` | Full card: Roblox link, continent, ops attended, average rating, messages, last seen |
+| `/profile [@member]` | Full card: Roblox link, continent, ops attended, average rating, messages, last seen. Pointed at Jarcord itself it answers for the bot: ops posted and closed, attendance marks, warnings filed, uptime and the running build |
 | `/nickname @member [nickname]` | Rename a member (needs Manage Nicknames); omit the nickname to clear it |
 
 Needs **Manage Nicknames** and **Manage Roles**, and Jarcord's role must sit above the members and continent roles it manages.

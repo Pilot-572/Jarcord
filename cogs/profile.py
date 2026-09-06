@@ -1,5 +1,8 @@
 # ── Jarcord: member profiles (Roblox link + continent) cog ──
 import asyncio
+import subprocess
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Literal, Optional
 
 import aiohttp
@@ -10,6 +13,65 @@ from db import conn
 from ui import ago, embed, is_officer, staff_check
 
 CONTINENTS = ("Europe", "North America", "South America", "Asia", "Africa", "Oceania")
+
+# For the bot's own profile card: this module loads at boot, so "now" is close enough to
+# process start, and the commit is read once because it cannot change while running.
+STARTED = datetime.now(timezone.utc)
+
+
+def running_build() -> str:
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True,
+            timeout=5, cwd=Path(__file__).resolve().parent.parent,
+        ).stdout.strip()
+        return out or "unknown"
+    except Exception:
+        return "unknown"
+
+
+BUILD = running_build()
+
+
+def self_card(guild_id: int, name: str, avatar_url: str) -> discord.Embed:
+    """/profile on the bot itself: the same nine fields, answered honestly from its own tables."""
+    ops = conn.execute(
+        "SELECT COUNT(*) AS posted, COALESCE(SUM(closed), 0) AS closed FROM ops WHERE guild_id = ?",
+        (guild_id,),
+    ).fetchone()
+    marks = conn.execute(
+        """SELECT COUNT(*) AS n FROM signups s JOIN ops o ON o.id = s.op_id
+           WHERE o.guild_id = ? AND s.attended IS NOT NULL""",
+        (guild_id,),
+    ).fetchone()["n"]
+    warned = conn.execute(
+        "SELECT COUNT(*) AS n FROM warnings WHERE guild_id = ?", (guild_id,)
+    ).fetchone()["n"]
+    tickets = conn.execute(
+        "SELECT COUNT(*) AS n FROM tickets WHERE guild_id = ?", (guild_id,)
+    ).fetchone()["n"]
+
+    e = embed(title=name)
+    e.set_thumbnail(url=avatar_url)
+    e.add_field(name="Roblox", value="Not a player", inline=True)
+    e.add_field(name="Rank", value="Company clerk", inline=True)
+    e.add_field(name="Unit", value="All of them", inline=True)
+    e.add_field(name="Continent", value="Hack Club Nest", inline=True)
+    e.add_field(
+        name="Ops",
+        value=f"{ops['posted']} posted, {ops['closed']} closed\n{marks} attendance marks",
+        inline=True,
+    )
+    e.add_field(name="Warnings", value=f"{warned} filed, none received", inline=True)
+    e.add_field(name="Rating", value="Rates go the other way", inline=True)
+    e.add_field(name="Messages", value="Doesn't count its own", inline=True)
+    e.add_field(
+        name="Last seen",
+        value=f"Right now. Up since {discord.utils.format_dt(STARTED, 'R')}",
+        inline=True,
+    )
+    e.set_footer(text=f"Build {BUILD}. {tickets} tickets filed. Made by Chartreuse.")
+    return e
 UNITS = ("Ground Unit", "Sniper Unit")
 ROBLOX_LOOKUP = "https://users.roblox.com/v1/usernames/users"
 
@@ -189,6 +251,9 @@ class Profile(commands.Cog):
     @commands.hybrid_command(name="profile", description="Member profile: Roblox, continent, ops, rating, activity")
     async def profile(self, ctx: commands.Context, member: Optional[discord.Member] = None):
         member = member or ctx.author
+        if member.id == self.bot.user.id:
+            await ctx.send(embed=self_card(ctx.guild.id, member.display_name, member.display_avatar.url))
+            return
         p = conn.execute("SELECT * FROM profiles WHERE user_id = ?", (member.id,)).fetchone()
         act = conn.execute(
             "SELECT message_count, last_seen FROM activity WHERE user_id = ?", (member.id,)
