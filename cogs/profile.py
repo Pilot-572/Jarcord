@@ -141,23 +141,46 @@ class Profile(commands.Cog):
         else:
             await ctx.send(f"Cleared {member.mention}'s nickname.")
 
-    @commands.hybrid_command(name="continent", description="Set your continent (assigns the role)")
+    async def _target(self, ctx: commands.Context, member: Optional[discord.Member], what: str):
+        """Who a profile setter acts on: yourself by default, somebody else only for officers."""
+        if member is None or member == ctx.author:
+            return ctx.author
+        if is_officer(ctx.author):
+            return member
+        await ctx.send(f"Only officers can set someone else's {what}.", ephemeral=True)
+        return None
+
+    @commands.hybrid_command(name="continent", description="Set a continent (assigns the role). Officers can set another member's")
     async def continent(
         self,
         ctx: commands.Context,
         continent: Literal["Europe", "North America", "South America", "Asia", "Africa", "Oceania"],
+        member: Optional[discord.Member] = None,
     ):
-        if await set_continent(ctx.author, continent):
-            await ctx.send(f"You're set to **{continent}**. Role assigned.")
+        target = await self._target(ctx, member, "continent")
+        if target is None:
+            return
+        who = "You're" if target == ctx.author else f"{target.mention} is"
+        if await set_continent(target, continent):
+            await ctx.send(f"{who} set to **{continent}**. Role assigned.")
         else:
             await ctx.send(
                 f"Saved **{continent}**, but I couldn't manage roles. Give me the Manage Roles permission."
             )
 
-    @commands.hybrid_command(name="unit", description="Switch unit (swaps the role)")
-    async def unit(self, ctx: commands.Context, unit: Literal["Ground Unit", "Sniper Unit"]):
-        if await set_unit(ctx.author, unit):
-            await ctx.send(f"You're in **{unit}** now.", ephemeral=True)
+    @commands.hybrid_command(name="unit", description="Switch unit (swaps the role). Officers can switch another member's")
+    async def unit(
+        self,
+        ctx: commands.Context,
+        unit: Literal["Ground Unit", "Sniper Unit"],
+        member: Optional[discord.Member] = None,
+    ):
+        target = await self._target(ctx, member, "unit")
+        if target is None:
+            return
+        who = "You're" if target == ctx.author else f"{target.mention} is"
+        if await set_unit(target, unit):
+            await ctx.send(f"{who} in **{unit}** now.", ephemeral=True)
         else:
             await ctx.send(
                 f"Saved **{unit}**, but I couldn't swap the role. Give me Manage Roles.", ephemeral=True

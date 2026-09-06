@@ -35,7 +35,7 @@ The card carries **Attending**, **Maybe** and **Can't make it**. Pressing one re
 | Command | What it does |
 |---|---|
 | `/roblox <username>` | Link your Roblox account, verified against the Roblox API, then sets your server nickname to it |
-| `/continent <continent>` | Set your continent; assigns the matching role (created on first use) |
+| `/continent <continent> [@member]` | Set your continent; assigns the matching role (created on first use). Officers can set another member's |
 | `/profile [@member]` | Full card: Roblox link, continent, ops attended, average rating, messages, last seen |
 | `/nickname @member [nickname]` | Rename a member (needs Manage Nicknames); omit the nickname to clear it |
 
