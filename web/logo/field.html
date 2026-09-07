@@ -1,0 +1,226 @@
+<!doctype html><meta charset="utf-8"><title>field sheet</title>
+<style>
+  body{margin:0;font:17px/1 -apple-system,"Segoe UI",Inter,Helvetica,Arial,sans-serif}
+  .ground{padding:24px 32px}
+  .light{background:#F4F5F5;color:#0B0C0D}
+  .dark{background:#0B0C0D;color:#F4F5F5}
+  .row{display:flex;align-items:center;gap:40px;padding:14px 0}
+  .lbl{width:64px;font:11px ui-monospace,Consolas,monospace;opacity:.55}
+  .cell{display:inline-flex;align-items:center}
+  .nav{gap:10px} .nav b{font-weight:500;font-size:17px}
+  svg{display:block;flex:none}
+  .zoom{width:128px;height:128px;image-rendering:pixelated;background:rgba(127,127,127,.12)}
+  .sq,.ci{width:160px;height:160px;background:#0B0C0D;color:#F4F5F5;display:inline-flex;align-items:center;justify-content:center}
+  .sq{border-radius:36px} .ci{border-radius:50%}
+  .av{background:#F4F5F5;color:#0B0C0D}
+</style>
+<template id="field-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="6" y="20" width="88" height="60" rx="9" fill="none" stroke="currentColor" stroke-width="12"/>
+  <circle cx="50" cy="50" r="9" fill="currentColor"/>
+</svg>
+</template><template id="field-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M4 4H96V60L50 22L4 60Z"/>
+  <path d="M4 78L50 40L96 78V96H4Z"/>
+</svg>
+</template><template id="field-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M50 6L84 40L50 74L16 40Z"/>
+  <rect x="40" y="62" width="20" height="30"/>
+</svg>
+</template>
+<div class="ground light">
+    <div class="row">
+      <span class="lbl">field-1</span>
+      <span class="cell"><canvas class="zoom" data-svg="field-1" width="16" height="16"></canvas></span>
+      <span class="cell"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="6" y="20" width="88" height="60" rx="9" fill="none" stroke="currentColor" stroke-width="12"/>
+  <circle cx="50" cy="50" r="9" fill="currentColor"/>
+</svg>
+</span>
+      <span class="cell nav"><svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="6" y="20" width="88" height="60" rx="9" fill="none" stroke="currentColor" stroke-width="12"/>
+  <circle cx="50" cy="50" r="9" fill="currentColor"/>
+</svg>
+<b>Jarcord</b></span>
+      <span class="cell"><svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="6" y="20" width="88" height="60" rx="9" fill="none" stroke="currentColor" stroke-width="12"/>
+  <circle cx="50" cy="50" r="9" fill="currentColor"/>
+</svg>
+</span>
+      <span class="cell"><svg width="160" height="160" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="6" y="20" width="88" height="60" rx="9" fill="none" stroke="currentColor" stroke-width="12"/>
+  <circle cx="50" cy="50" r="9" fill="currentColor"/>
+</svg>
+</span>
+    </div>
+    <div class="row">
+      <span class="lbl">field-2</span>
+      <span class="cell"><canvas class="zoom" data-svg="field-2" width="16" height="16"></canvas></span>
+      <span class="cell"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M4 4H96V60L50 22L4 60Z"/>
+  <path d="M4 78L50 40L96 78V96H4Z"/>
+</svg>
+</span>
+      <span class="cell nav"><svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M4 4H96V60L50 22L4 60Z"/>
+  <path d="M4 78L50 40L96 78V96H4Z"/>
+</svg>
+<b>Jarcord</b></span>
+      <span class="cell"><svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M4 4H96V60L50 22L4 60Z"/>
+  <path d="M4 78L50 40L96 78V96H4Z"/>
+</svg>
+</span>
+      <span class="cell"><svg width="160" height="160" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M4 4H96V60L50 22L4 60Z"/>
+  <path d="M4 78L50 40L96 78V96H4Z"/>
+</svg>
+</span>
+    </div>
+    <div class="row">
+      <span class="lbl">field-3</span>
+      <span class="cell"><canvas class="zoom" data-svg="field-3" width="16" height="16"></canvas></span>
+      <span class="cell"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M50 6L84 40L50 74L16 40Z"/>
+  <rect x="40" y="62" width="20" height="30"/>
+</svg>
+</span>
+      <span class="cell nav"><svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M50 6L84 40L50 74L16 40Z"/>
+  <rect x="40" y="62" width="20" height="30"/>
+</svg>
+<b>Jarcord</b></span>
+      <span class="cell"><svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M50 6L84 40L50 74L16 40Z"/>
+  <rect x="40" y="62" width="20" height="30"/>
+</svg>
+</span>
+      <span class="cell"><svg width="160" height="160" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M50 6L84 40L50 74L16 40Z"/>
+  <rect x="40" y="62" width="20" height="30"/>
+</svg>
+</span>
+    </div></div>
+<div class="ground dark">
+    <div class="row">
+      <span class="lbl">field-1</span>
+      <span class="cell"><canvas class="zoom" data-svg="field-1" width="16" height="16"></canvas></span>
+      <span class="cell"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="6" y="20" width="88" height="60" rx="9" fill="none" stroke="currentColor" stroke-width="12"/>
+  <circle cx="50" cy="50" r="9" fill="currentColor"/>
+</svg>
+</span>
+      <span class="cell nav"><svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="6" y="20" width="88" height="60" rx="9" fill="none" stroke="currentColor" stroke-width="12"/>
+  <circle cx="50" cy="50" r="9" fill="currentColor"/>
+</svg>
+<b>Jarcord</b></span>
+      <span class="cell"><svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="6" y="20" width="88" height="60" rx="9" fill="none" stroke="currentColor" stroke-width="12"/>
+  <circle cx="50" cy="50" r="9" fill="currentColor"/>
+</svg>
+</span>
+      <span class="cell"><svg width="160" height="160" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="6" y="20" width="88" height="60" rx="9" fill="none" stroke="currentColor" stroke-width="12"/>
+  <circle cx="50" cy="50" r="9" fill="currentColor"/>
+</svg>
+</span>
+    </div>
+    <div class="row">
+      <span class="lbl">field-2</span>
+      <span class="cell"><canvas class="zoom" data-svg="field-2" width="16" height="16"></canvas></span>
+      <span class="cell"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M4 4H96V60L50 22L4 60Z"/>
+  <path d="M4 78L50 40L96 78V96H4Z"/>
+</svg>
+</span>
+      <span class="cell nav"><svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M4 4H96V60L50 22L4 60Z"/>
+  <path d="M4 78L50 40L96 78V96H4Z"/>
+</svg>
+<b>Jarcord</b></span>
+      <span class="cell"><svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M4 4H96V60L50 22L4 60Z"/>
+  <path d="M4 78L50 40L96 78V96H4Z"/>
+</svg>
+</span>
+      <span class="cell"><svg width="160" height="160" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M4 4H96V60L50 22L4 60Z"/>
+  <path d="M4 78L50 40L96 78V96H4Z"/>
+</svg>
+</span>
+    </div>
+    <div class="row">
+      <span class="lbl">field-3</span>
+      <span class="cell"><canvas class="zoom" data-svg="field-3" width="16" height="16"></canvas></span>
+      <span class="cell"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M50 6L84 40L50 74L16 40Z"/>
+  <rect x="40" y="62" width="20" height="30"/>
+</svg>
+</span>
+      <span class="cell nav"><svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M50 6L84 40L50 74L16 40Z"/>
+  <rect x="40" y="62" width="20" height="30"/>
+</svg>
+<b>Jarcord</b></span>
+      <span class="cell"><svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M50 6L84 40L50 74L16 40Z"/>
+  <rect x="40" y="62" width="20" height="30"/>
+</svg>
+</span>
+      <span class="cell"><svg width="160" height="160" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M50 6L84 40L50 74L16 40Z"/>
+  <rect x="40" y="62" width="20" height="30"/>
+</svg>
+</span>
+    </div></div>
+<div class="ground av">
+    <div class="row">
+      <span class="lbl">field-1</span>
+      <span class="sq"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="6" y="20" width="88" height="60" rx="9" fill="none" stroke="currentColor" stroke-width="12"/>
+  <circle cx="50" cy="50" r="9" fill="currentColor"/>
+</svg>
+</span>
+      <span class="ci"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="6" y="20" width="88" height="60" rx="9" fill="none" stroke="currentColor" stroke-width="12"/>
+  <circle cx="50" cy="50" r="9" fill="currentColor"/>
+</svg>
+</span>
+    </div>
+    <div class="row">
+      <span class="lbl">field-2</span>
+      <span class="sq"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M4 4H96V60L50 22L4 60Z"/>
+  <path d="M4 78L50 40L96 78V96H4Z"/>
+</svg>
+</span>
+      <span class="ci"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M4 4H96V60L50 22L4 60Z"/>
+  <path d="M4 78L50 40L96 78V96H4Z"/>
+</svg>
+</span>
+    </div>
+    <div class="row">
+      <span class="lbl">field-3</span>
+      <span class="sq"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M50 6L84 40L50 74L16 40Z"/>
+  <rect x="40" y="62" width="20" height="30"/>
+</svg>
+</span>
+      <span class="ci"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <path d="M50 6L84 40L50 74L16 40Z"/>
+  <rect x="40" y="62" width="20" height="30"/>
+</svg>
+</span>
+    </div></div>
+<script>
+  // rasterise each mark at a true 16px and blow the pixels up, so the tab icon can be judged
+  document.querySelectorAll('canvas.zoom').forEach(c => {
+    const dark = c.closest('.dark');
+    const src = document.getElementById(c.dataset.svg).innerHTML
+      .replace(/currentColor/g, dark ? '#F4F5F5' : '#0B0C0D');
+    const img = new Image();
+    img.onload = () => c.getContext('2d').drawImage(img, 0, 0, 16, 16);
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(src);
+  });
+</script>

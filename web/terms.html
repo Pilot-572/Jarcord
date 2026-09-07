@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terms, Jarcord</title>
+<link rel="icon" type="image/svg+xml" href="img/logo.svg">
+<script>(function(){try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}})();</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500&family=Geist+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root { color-scheme: light; --red: #0E0F10; --ink: #0E0F10; --muted: #6B6F73; --paper: #F4F5F5; --hairline: #D9DCDE; }
+:root[data-theme="dark"] { color-scheme: dark; --ink: #F4F5F5; --muted: #9AA0A5; --paper: #0B0C0D; --hairline: #26292D; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; --ink: #F4F5F5; --muted: #9AA0A5; --paper: #0B0C0D; --hairline: #26292D; } }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--paper); scrollbar-color: var(--ink) var(--paper); }
+body { margin: 0; font: 400 17px/1.55 "Host Grotesk", "Helvetica Neue", Arial, sans-serif; color: var(--ink); background: var(--paper); }
+::selection { background: var(--ink); color: var(--paper); }
+:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+.wrap { max-width: 1280px; margin-inline: auto; padding-inline: 24px; }
+.nav { height: 68px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--hairline); }
+.mark { font: 500 22px/1 "Host Grotesk", "Helvetica Neue", Arial, sans-serif; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+.nav a:not(.mark) { color: var(--ink); font-weight: 500; text-decoration: underline; text-decoration-color: var(--red); text-decoration-thickness: 2px; text-underline-offset: 5px; }
+main { padding: 72px 0 112px; max-width: 64ch; }
+h1 { font: 500 clamp(30px, 3vw, 44px)/1.05 "Host Grotesk", "Helvetica Neue", Arial, sans-serif; letter-spacing: -0.02em; margin: 0 0 12px; }
+h2 { font: 500 22px/1.2 "Host Grotesk", "Helvetica Neue", Arial, sans-serif; margin: 44px 0 10px; }
+p { margin: 0 0 16px; }
+a { color: var(--ink); text-decoration-color: var(--red); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+a:hover { color: var(--red); }
+.meta { color: var(--muted); font-weight: 500; margin-bottom: 40px; }
+@media (max-width: 720px) { .wrap { padding-inline: 20px; } body { font-size: 16px; } main { padding: 48px 0 80px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="Main">
+    <a class="mark" href="index.html"><svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:22px;height:22px;vertical-align:-4px;margin-right:8px"><path d="M66 14 V60 L44 82 L24 62"/></svg>Jarcord</a>
+    <a href="index.html">Back to the page</a>
+  </nav>
+  <main>
+    <h1>Terms</h1>
+    <p class="meta">In force from 6 September 2026.</p>
+
+    <h2>The service</h2>
+    <p>Jarcord is a bot you add to a Discord server. Adding it means you have the right to manage that server and accept these terms on its behalf. Discord's own terms and community guidelines apply on top of these.</p>
+    <p>The free plan is provided as is. There is no promise of uptime, and the bot may be changed or withdrawn. Records are kept as described on the <a href="privacy.html">privacy page</a>.</p>
+
+    <h2>Jarcord+</h2>
+    <p>A Jarcord+ pass is bought once and redeemed in one server with a code. It can be moved to another server at most once every 30 days. A pass consumed in a server is not refundable, except where the law where you live says otherwise. Prices and what each pass includes are listed on the <a href="plus.html#compare">Plus page</a> and may change for new purchases.</p>
+
+    <h2>What is not allowed</h2>
+    <p>Using the bot to harass, to store content that breaks Discord's rules, or to get around a Discord ban. A server that does so can have its access removed without notice.</p>
+
+    <h2>Liability</h2>
+    <p>To the extent the law allows, the person running Jarcord is not liable for anything lost through using it, including a record that turns out to be wrong. Keep your own backups of anything you cannot afford to lose.</p>
+
+    <h2>Changes and contact</h2>
+    <p>These terms can change. The date at the top is the version in force. Questions go to <a href="https://github.com/Pilot-572/Jarcord/issues">GitHub</a>.</p>
+  </main>
+</div>
+</body>
+</html>

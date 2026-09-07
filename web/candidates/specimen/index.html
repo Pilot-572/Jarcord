@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jarcord for Discord</title>
+<meta name="description" content="Jarcord posts the op with RSVP buttons, closes it with who actually turned up, and files that on each member's record, from inside Discord.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ground: #F4F5F7;
+  --ink: #101113;
+  --ink-2: #55595F;
+  --ink-3: #61666E;
+  --line: #D9DCE1;
+  --accent: #C8311C;
+  --plate: #101113;
+  --plate-text: #B5B8BE;
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Fragment Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --gap: 24px;
+  --pad: 32px;
+  --max: 1376px;
+  --section: 128px;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: var(--ground);
+  scrollbar-color: var(--ink) var(--ground);
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 17px/24px var(--sans);
+  font-stretch: 100%;
+  accent-color: var(--accent);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--ink); color: var(--ground); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+img { display: block; max-width: 100%; height: auto; }
+
+a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a:hover { text-decoration-thickness: 2px; }
+
+h1, h2, h3, p, figure, dl, dd, ol, ul { margin: 0; }
+
+code { font-family: var(--mono); font-size: inherit; }
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--max) + 2 * var(--pad));
+  margin: 0 auto;
+  padding: 0 var(--pad);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gap);
+}
+
+.sr {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Buttons and links */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 22px;
+  background: var(--ink);
+  color: var(--ground);
+  font: 600 16px/24px var(--sans);
+  text-decoration: none;
+  white-space: nowrap;
+  border: 0;
+}
+.btn:hover { background: #2A2C31; text-decoration: none; }
+.btn:active { transform: translateY(1px); }
+
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  font-weight: 500;
+}
+
+/* Nav */
+.nav {
+  height: 68px;
+  border-bottom: 1px solid var(--line);
+}
+.nav .wrap {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.mark {
+  font-weight: 700;
+  font-stretch: 112%;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+.nav-links {
+  display: flex;
+  gap: 28px;
+  margin-left: auto;
+  font-size: 16px;
+}
+.nav-links a { text-decoration: none; }
+.nav-links a:hover { text-decoration: underline; }
+.nav .btn { min-height: 40px; padding: 0 16px; }
+
+/* Hero */
+.hero { padding: 36px 0 88px; }
+
+.hero h1 {
+  font-weight: 800;
+  font-stretch: 104%;
+  font-size: clamp(2.25rem, 6.5vw, 6rem);
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  max-width: 24ch;
+}
+
+.hero-row {
+  margin-top: 32px;
+  row-gap: 40px;
+  align-items: start;
+}
+
+.hero-copy { grid-column: 1 / span 12; }
+.hero-copy p {
+  font-size: 19px;
+  line-height: 28px;
+  max-width: 34ch;
+  color: var(--ink-2);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  align-items: center;
+  margin-top: 28px;
+}
+
+.specimen { grid-column: 1 / span 12; }
+
+.plate {
+  background: var(--plate);
+  padding: 20px;
+  width: 100%;
+  max-width: 520px;
+}
+.stage {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  padding-bottom: calc((0.8626 + 0.0591 * var(--t)) * 100%);
+}
+.stage img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+}
+.stage .open { opacity: calc(1 - var(--t)); }
+.stage .closed { opacity: var(--t); }
+
+.band {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  font: 14px/20px var(--mono);
+  color: var(--plate-text);
+}
+
+.scrub { max-width: 520px; margin-top: 20px; }
+.scrub-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+}
+.end {
+  font: 14px/20px var(--mono);
+  color: var(--ink-3);
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  cursor: pointer;
+}
+.end:hover { color: var(--ink); }
+.end[aria-pressed="true"] { color: var(--accent); }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 36px;
+  margin: 0;
+  background: transparent;
+  cursor: ew-resize;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(to right, var(--accent) calc(var(--t) * 100%), var(--line) 0);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 36px;
+  margin-top: -17px;
+  background: var(--accent);
+  border: 0;
+  border-radius: 0;
+}
+input[type="range"]::-moz-range-track { height: 2px; background: var(--line); }
+input[type="range"]::-moz-range-progress { height: 2px; background: var(--accent); }
+input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 36px;
+  background: var(--accent);
+  border: 0;
+  border-radius: 0;
+}
+input[type="range"]:hover::-webkit-slider-thumb { background: #A8250F; }
+input[type="range"]:hover::-moz-range-thumb { background: #A8250F; }
+input[type="range"]:focus-visible { outline-offset: 0; }
+
+.hint {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-3);
+}
+
+.aside {
+  grid-column: 1 / span 12;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.readout {
+  font: 14px/20px var(--mono);
+  border-top: 1px solid var(--ink);
+  padding-top: 12px;
+}
+.readout dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: 4px 24px;
+}
+.readout dt { color: var(--ink-2); }
+.readout dd {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.readout dd.is-on { color: var(--accent); }
+
+.labels {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.label { color: var(--ink-3); }
+.label b { display: block; font-weight: 600; color: inherit; }
+.label.is-on { color: var(--ink); }
+.label.is-on b { color: var(--accent); }
+
+/* Sections */
+.section {
+  border-top: 1px solid var(--line);
+  padding: var(--section) 0;
+}
+.section h2 {
+  font-weight: 700;
+  font-stretch: 100%;
+  font-size: clamp(1.9rem, 3.6vw, 3.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  max-width: 22ch;
+}
+.lede {
+  margin-top: 24px;
+  max-width: 58ch;
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--ink-2);
+}
+
+/* The record */
+.mosaic {
+  margin-top: 64px;
+  row-gap: 40px;
+}
+.mosaic figure { grid-column: 1 / span 12; }
+.plate-fit { width: fit-content; max-width: 100%; }
+.mosaic figcaption {
+  margin-top: 16px;
+  max-width: 44ch;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-2);
+}
+.mosaic figcaption b { color: var(--ink); font-weight: 600; }
+.mosaic figcaption code { font-size: 14px; color: var(--ink); }
+
+/* Set up */
+.cascade {
+  list-style: none;
+  padding: 0;
+  margin-top: 64px;
+  row-gap: 40px;
+}
+.cascade li { grid-column: 1 / span 12; }
+.cascade code {
+  display: block;
+  font-size: 22px;
+  line-height: 28px;
+  overflow-wrap: anywhere;
+}
+.cascade p, .finale p {
+  margin-top: 8px;
+  max-width: 52ch;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--ink-2);
+}
+.finale {
+  margin-top: 64px;
+  padding-top: 40px;
+  border-top: 1px solid var(--ink);
+}
+.finale code {
+  display: block;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.finale p { margin-top: 20px; }
+
+/* Plans */
+.plans {
+  width: 100%;
+  margin-top: 64px;
+  border-collapse: collapse;
+  text-align: left;
+}
+.plans th, .plans td {
+  padding: 20px 24px 20px 0;
+  vertical-align: top;
+  font-weight: 400;
+}
+.plans thead th { padding-top: 0; padding-bottom: 32px; }
+.plans tbody tr { border-top: 1px solid var(--line); }
+.plans tbody th { font-weight: 600; }
+.plans td { color: var(--ink-2); }
+.plan {
+  display: block;
+  font-weight: 800;
+  font-stretch: 108%;
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.price {
+  display: block;
+  margin-top: 16px;
+  font: 14px/20px var(--mono);
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.plans td::before {
+  display: none;
+  content: attr(data-plan);
+  font: 14px/20px var(--mono);
+  color: var(--ink-3);
+  margin-bottom: 4px;
+}
+
+/* Footer */
+.foot {
+  border-top: 1px solid var(--ink);
+  padding: 48px 0 64px;
+}
+.foot .wrap {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 32px var(--gap);
+  align-items: start;
+}
+.foot-mark {
+  grid-column: 1 / span 12;
+  font-weight: 700;
+  font-stretch: 112%;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+.foot-links {
+  grid-column: 1 / span 12;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  font-size: 16px;
+}
+.foot-links a { text-decoration: none; }
+.foot-links a:hover { text-decoration: underline; }
+.credit {
+  grid-column: 1 / span 12;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  color: var(--ink-2);
+}
+.swatch {
+  width: 12px;
+  height: 12px;
+  background: #DFFF00;
+  border: 1px solid var(--ink);
+}
+
+/* Layout at width */
+@media (min-width: 720px) {
+  .hero-copy { grid-column: 1 / span 12; }
+  .specimen { grid-column: 1 / span 7; }
+  .aside { grid-column: 8 / span 5; }
+
+  .mosaic { grid-template-rows: auto auto; }
+  .mosaic .m-closed { grid-column: 1 / span 6; grid-row: 1 / span 2; }
+  .mosaic .m-rank { grid-column: 7 / span 6; grid-row: 1; }
+  .mosaic .m-profile { grid-column: 7 / span 6; grid-row: 2; }
+
+  .cascade li { grid-column: var(--i) / -1; }
+
+  .foot-mark { grid-column: 1 / span 4; }
+  .foot-links { grid-column: 5 / span 5; }
+  .credit { grid-column: 10 / span 3; justify-content: flex-end; }
+}
+
+@media (min-width: 1040px) {
+  .hero-copy { grid-column: 1 / span 4; }
+  .specimen { grid-column: 5 / span 5; }
+  .aside { grid-column: 10 / span 3; }
+  .cascade li { grid-column: var(--i) / -1; }
+}
+
+@media (max-width: 719px) {
+  :root { --pad: 20px; --section: 80px; }
+  .nav .wrap { gap: 16px; }
+  .nav-links { display: none; }
+  .hero { padding: 32px 0 64px; }
+  .hero-row { margin-top: 32px; }
+  .actions .btn { width: 100%; justify-content: center; }
+  .plate { padding: 16px; }
+  .plans thead, .plans tbody, .plans tr, .plans th, .plans td { display: block; }
+  .plans thead th:first-child { display: none; }
+  .plans thead th { padding: 0 0 28px; }
+  .plans tbody tr { padding: 20px 0; }
+  .plans th, .plans td { padding: 0; }
+  .plans td { margin-top: 12px; }
+  .plans td::before { display: block; }
+  .finale code { overflow-wrap: anywhere; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn:active { transform: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="mark" href="#top">Jarcord</a>
+    <nav class="nav-links" aria-label="Site">
+      <a href="https://github.com/Pilot-572/Jarcord#readme">Docs</a>
+      <a href="#plans">Pricing</a>
+    </nav>
+    <a class="btn" href="https://discord.com/oauth2/authorize?client_id=1541920512203030568&amp;scope=bot%20applications.commands&amp;permissions=19027107900432">Add to your server</a>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="hero" aria-labelledby="hero-h">
+  <div class="wrap">
+    <h1 id="hero-h">Post the op. Close it with who turned up.</h1>
+
+    <div class="hero-row grid">
+      <div class="hero-copy">
+        <p>Jarcord records who actually turned up after the op, from inside Discord, and files it on each member's record.</p>
+        <div class="actions">
+          <a class="btn" href="https://discord.com/oauth2/authorize?client_id=1541920512203030568&amp;scope=bot%20applications.commands&amp;permissions=19027107900432">Add to your server</a>
+          <a class="text-link" href="#record">How closing works</a>
+        </div>
+      </div>
+
+      <div class="specimen" id="specimen" style="--t: 0">
+        <div class="plate">
+          <div class="stage">
+            <img class="open" src="../../img/op-open.png" width="473" height="408" alt="Open op card in Discord: Op Nightfall, Saturday 5 September 2026 at 19:00, six attending, two maybe, one not coming, with Attending, Maybe and Can't make it buttons under it" id="img-open">
+            <img class="closed" src="../../img/op-closed.png" width="549" height="506" alt="Closed op card in Discord: Op READY FIVE, eight attending, three maybe, one not coming, turned out 7 attended and 1 no-showed, Op 7 closed" id="img-closed" aria-hidden="true">
+          </div>
+          <div class="band">
+            <span id="band-op">Op 10 Nightfall</span>
+            <span id="band-state">posted</span>
+          </div>
+        </div>
+
+        <div class="scrub">
+          <div class="scrub-row">
+            <button class="end" type="button" data-to="0" aria-pressed="true">posted</button>
+            <input type="range" id="scrub" min="0" max="1000" value="0" step="1" aria-label="Scrub the op from posted to closed" aria-valuetext="posted">
+            <button class="end" type="button" data-to="1000" aria-pressed="false">closed</button>
+          </div>
+          <p class="hint">Drag to close the op</p>
+        </div>
+      </div>
+
+      <div class="aside">
+        <div class="readout" aria-live="polite" aria-atomic="true">
+          <dl>
+            <dt>state</dt><dd id="ro-state" class="is-on">posted</dd>
+            <dt>signed up</dt><dd id="ro-signed">6</dd>
+            <dt>attended</dt><dd id="ro-attended">not yet</dd>
+            <dt>no-showed</dt><dd id="ro-noshow">not yet</dd>
+          </dl>
+        </div>
+
+        <div class="labels">
+          <p class="label is-on" data-state="open"><b>RSVP buttons</b>Attending, Maybe, Can't make it. Pressing one rewrites the card in place, so the three lists stay current and changing your mind moves you instead of adding you twice.</p>
+          <p class="label is-on" data-state="open"><b>Attending (6)</b>Who said they are coming. Ten minutes before start they get pinged in the op thread, and Maybe gets a last call.</p>
+          <p class="label" data-state="closed"><b>Turned out</b>Written when the host closes the op. The picker opens with everyone marked Attending ticked; untick the no-shows, tick the walk-ins. The card loses its buttons and keeps the numbers.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="record" aria-labelledby="record-h">
+  <div class="wrap">
+    <h2 id="record-h">Close the op and the record is written.</h2>
+    <p class="lede">The picker opens with everyone marked Attending already ticked. Untick the no-shows, tick the walk-ins. Whoever said they were coming and was not picked is logged as a no-show. The promotion notice and the profile read from the same record.</p>
+
+    <div class="mosaic grid">
+      <figure class="m-closed">
+        <div class="plate plate-fit">
+          <img src="../../img/op-closed.png" width="549" height="506" alt="Closed op card in Discord: Op READY FIVE with its roster and the line Turned out, 7 attended, 1 no-showed">
+        </div>
+        <figcaption><b>Op 7, closed.</b> Turned out: <code>7 attended, 1 no-showed</code>. The buttons are gone and the numbers stay on the card.</figcaption>
+      </figure>
+      <figure class="m-rank">
+        <div class="plate plate-fit">
+          <img src="../../img/rank.png" width="482" height="268" alt="Promotion notice in Discord: PVT3 Jay Jay, Private 2 to Private 3, 3 of 9, record 5 attended and 0 no-showed, reason: led a squad on two ops without being asked">
+        </div>
+        <figcaption><b>Promotion notice.</b> Record: <code>5 attended, 0 no-showed</code>, with the reason. Filed in the records channel, the member pinged.</figcaption>
+      </figure>
+      <figure class="m-profile">
+        <div class="plate plate-fit">
+          <img src="../../img/profile.png" width="418" height="243" alt="Profile card in Discord for Pilot_572: Roblox linked, rank Private 1, continent Europe, 6 signed up, 4 attended, 0 no-showed, no warnings, 308 messages, last seen 18 hours ago">
+        </div>
+        <figcaption><b>Profile.</b> Ops: <code>6 signed up, 4 attended, 0 no-showed</code>, next to rank, warnings, rating, messages and last seen.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="setup" aria-labelledby="setup-h">
+  <div class="wrap">
+    <h2 id="setup-h">Set up in six commands.</h2>
+    <p class="lede">Run them once, in this order. Each one needs Manage Server. Then post the first op.</p>
+
+    <ol class="cascade grid">
+      <li style="--i: 1">
+        <code>/op-setup #ops @Members</code>
+        <p>Where ops get posted and who gets pinged when one goes up.</p>
+      </li>
+      <li style="--i: 2">
+        <code>/officer-role @Officers</code>
+        <p>The role that posts ops, promotes, warns and handles tickets without being handed Manage Server.</p>
+      </li>
+      <li style="--i: 3">
+        <code>/verify-setup #verify</code>
+        <p>The channel new members are greeted in. Verifying puts them on Private 1, the bottom of the ladder.</p>
+      </li>
+      <li style="--i: 4">
+        <code>/ranks-setup</code>
+        <p>Creates every rank from Private 1 to Staff Sergeant, the NCO marker and the position roles that are missing.</p>
+      </li>
+      <li style="--i: 5">
+        <code>/tickets-setup</code>
+        <p>Posts the ticket panel and creates the ticket channels you have not made yourself.</p>
+      </li>
+      <li style="--i: 6">
+        <code>/logs-setup #command-log</code>
+        <p>Writes every notable action to this channel: promotions, warnings, tickets, ops posted and closed.</p>
+      </li>
+    </ol>
+
+    <div class="finale">
+      <code>/op create</code>
+      <p>Post an op card with RSVP buttons. Close it later with who turned up.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="plans" aria-labelledby="plans-h">
+  <div class="wrap">
+    <h2 id="plans-h">Two plans. Ops and attendance are free in both.</h2>
+    <p class="lede">Jarcord+ is not on sale yet; the prices are set. Anyone can pay, and the code is redeemed inside the server with a slash command.</p>
+
+    <table class="plans">
+      <thead>
+        <tr>
+          <th scope="col"><span class="sr">What</span></th>
+          <th scope="col"><span class="plan">Jarcord</span><span class="price">0 EUR</span></th>
+          <th scope="col"><span class="plan">Jarcord+</span><span class="price">9 EUR for 3 months<br>25 EUR for 12 months<br>55 EUR perpetual<br>4.99 EUR a month</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Scheduled ops at a time</th>
+          <td data-plan="Jarcord">5</td>
+          <td data-plan="Jarcord+">Unlimited, and recurring</td>
+        </tr>
+        <tr>
+          <th scope="row">Attendance history</th>
+          <td data-plan="Jarcord">60 days visible, everything retained</td>
+          <td data-plan="Jarcord+">Full history and CSV export</td>
+        </tr>
+        <tr>
+          <th scope="row">RSVP options</th>
+          <td data-plan="Jarcord">Attending, Maybe, Can't make it</td>
+          <td data-plan="Jarcord+">Custom options and slot roles</td>
+        </tr>
+        <tr>
+          <th scope="row">Reminders</th>
+          <td data-plan="Jarcord">One, 10 minutes before start</td>
+          <td data-plan="Jarcord+">Up to five</td>
+        </tr>
+        <tr>
+          <th scope="row">Rank ladder</th>
+          <td data-plan="Jarcord">One, up to 10 ranks</td>
+          <td data-plan="Jarcord+">Unlimited ranks and ladders</td>
+        </tr>
+        <tr>
+          <th scope="row">Ticket panels</th>
+          <td data-plan="Jarcord">One</td>
+          <td data-plan="Jarcord+">Several, with transcripts</td>
+        </tr>
+        <tr>
+          <th scope="row">Bot avatar and banner per server</th>
+          <td data-plan="Jarcord">Not included</td>
+          <td data-plan="Jarcord+">Included</td>
+        </tr>
+        <tr>
+          <th scope="row">Warnings, audit log, welcome, verification, profiles, the record</th>
+          <td data-plan="Jarcord">Included</td>
+          <td data-plan="Jarcord+">Included</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p class="foot-mark">Jarcord for Discord</p>
+    <nav class="foot-links" aria-label="Footer">
+      <a href="https://github.com/Pilot-572/Jarcord">GitHub</a>
+      <a href="https://github.com/Pilot-572/Jarcord#readme">Docs</a>
+      <a href="https://github.com/Pilot-572/Jarcord/issues">Support</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </nav>
+    <p class="credit"><span class="swatch" aria-hidden="true"></span>Made by Chartreuse</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var spec = document.getElementById('specimen');
+  var range = document.getElementById('scrub');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ends = spec.querySelectorAll('.end');
+  var labels = document.querySelectorAll('.label');
+  var el = {
+    open: document.getElementById('img-open'),
+    closed: document.getElementById('img-closed'),
+    bandOp: document.getElementById('band-op'),
+    bandState: document.getElementById('band-state'),
+    state: document.getElementById('ro-state'),
+    signed: document.getElementById('ro-signed'),
+    attended: document.getElementById('ro-attended'),
+    noshow: document.getElementById('ro-noshow')
+  };
+  /* The two ends are the two real cards: Op 10 while posted, Op 7 once closed. */
+  var open = { op: 'Op 10 Nightfall', signed: 6 };
+  var closed = { op: 'Op 7 READY FIVE', signed: 8, attended: 7, noshow: 1 };
+  var frame = 0;
+
+  function mix(a, b, t) { return Math.round(a + (b - a) * t); }
+
+  function render(value) {
+    var t = value / 1000;
+    if (reduce) { t = t < 0.5 ? 0 : 1; }
+    var isClosed = t >= 0.5;
+    spec.style.setProperty('--t', t);
+
+    el.open.setAttribute('aria-hidden', isClosed ? 'true' : 'false');
+    el.closed.setAttribute('aria-hidden', isClosed ? 'false' : 'true');
+    el.bandOp.textContent = isClosed ? closed.op : open.op;
+    el.bandState.textContent = isClosed ? 'closed' : 'posted';
+
+    el.state.textContent = isClosed ? 'closed' : 'posted';
+    el.signed.textContent = mix(open.signed, closed.signed, t);
+    el.attended.textContent = t === 0 ? 'not yet' : mix(0, closed.attended, t);
+    el.noshow.textContent = t === 0 ? 'not yet' : mix(0, closed.noshow, t);
+
+    range.setAttribute('aria-valuetext', t === 0 ? 'posted' : t === 1 ? 'closed' : 'between posted and closed');
+    for (var i = 0; i < ends.length; i++) {
+      ends[i].setAttribute('aria-pressed', (ends[i].dataset.to === '1000') === isClosed ? 'true' : 'false');
+    }
+    for (var j = 0; j < labels.length; j++) {
+      var forClosed = labels[j].dataset.state === 'closed';
+      labels[j].classList.toggle('is-on', forClosed === isClosed);
+    }
+  }
+
+  function goTo(target) {
+    cancelAnimationFrame(frame);
+    var from = +range.value;
+    if (reduce || from === target) {
+      range.value = target;
+      render(target);
+      return;
+    }
+    var start = performance.now();
+    var dur = 450;
+    function step(now) {
+      var p = Math.min(1, (now - start) / dur);
+      var e = 1 - Math.pow(1 - p, 3);
+      var v = Math.round(from + (target - from) * e);
+      range.value = v;
+      render(v);
+      if (p < 1) { frame = requestAnimationFrame(step); }
+    }
+    frame = requestAnimationFrame(step);
+  }
+
+  range.addEventListener('input', function () {
+    cancelAnimationFrame(frame);
+    render(+range.value);
+  });
+  for (var k = 0; k < ends.length; k++) {
+    ends[k].addEventListener('click', function () { goTo(+this.dataset.to); });
+  }
+  render(+range.value);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jarcord for Discord</title>
+<meta name="description" content="Jarcord posts the op with RSVP buttons, closes it with who actually turned up, and files that on each member's record, inside the Discord server the faction already lives in.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Schibsted+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*
+  A club's roster page and the board after the match. One team red owns the first
+  viewport and the turnout board; everything else is white ground and near-black ink.
+  Archivo carries the headings wide and the numerals condensed, Schibsted Grotesk the
+  text. Sharp corners, one shadow tinted to the surface it sits on, one motion: the
+  turnout numerals settle into their jersey width when the board comes into view.
+*/
+:root {
+  --red: #C0122D;
+  --red-deep: #A30F27;
+  --tint: #FFD9DE;
+  --ink: #141416;
+  --muted: #5B5B63;
+  --paper: #FFFFFF;
+  --band: #F3F3F4;
+  --hairline: #E2E2E5;
+  --hairline-band: #DADADE;
+  --plate: #16161A;
+  --foot-text: #C9C9CE;
+  --foot-muted: #9A9AA2;
+  --chartreuse: #DFFF00;
+  --display: "Archivo", "Arial Narrow", Arial, sans-serif;
+  --sans: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "Cascadia Code", Consolas, "SF Mono", Menlo, monospace;
+  --focus: var(--red);
+  --wrap: 1280px;
+  --gutter: 24px;
+  --overhang: 120px;   /* how far the hero plate hangs off the red field onto the white */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--paper);
+  scrollbar-color: var(--ink) var(--paper);
+}
+
+body {
+  margin: 0;
+  font: 400 17px/1.55 var(--sans);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+img { display: block; max-width: 100%; height: auto; }
+figure { margin: 0; }
+h1, h2, h3, p, ul, ol { margin: 0; }
+
+::selection { background: var(--red); color: #fff; }
+.field ::selection, .board ::selection { background: #fff; color: var(--red); }
+.footer ::selection { background: var(--foot-text); color: var(--ink); }
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.field, .board, .footer { --focus: #fff; }
+
+.wrap {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+
+/* Type roles */
+h1, h2, h3, .mark, .word, .num, .plan-head, .plan-price {
+  font-family: var(--display);
+}
+
+h1 {
+  font-weight: 800;
+  font-stretch: 118%;
+  font-size: clamp(28px, 3.1vw, 46px);
+  line-height: 1.03;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+h2 {
+  font-weight: 800;
+  font-stretch: 118%;
+  font-size: clamp(28px, 2.5vw, 36px);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+h3 {
+  font-weight: 700;
+  font-stretch: 110%;
+  font-size: 19px;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.lede {
+  font-size: 19px;
+  line-height: 1.5;
+  max-width: 62ch;
+}
+
+a { color: inherit; }
+
+/* Buttons: one shape, two colourways */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 22px;
+  font: 600 16px/1 var(--sans);
+  border-radius: 2px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color .16s ease, color .16s ease, transform .08s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn-onred { background: #fff; color: var(--ink); }
+.btn-onred:hover { background: var(--tint); }
+.btn-red { background: var(--red); color: #fff; }
+.btn-red:hover { background: var(--red-deep); }
+.btn-small { height: 44px; padding: 0 16px; }
+
+/* The team field: nav and hero share it. Its last stretch is white, so the plate
+   at the bottom of the hero straddles the edge between the field and the page. */
+.field {
+  color: #fff;
+  background-color: var(--red);
+  background-image: linear-gradient(to bottom,
+    var(--red) calc(100% - var(--overhang)),
+    var(--paper) calc(100% - var(--overhang)));
+}
+
+.nav {
+  width: 100%;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, .22);
+}
+
+.mark {
+  font-weight: 800;
+  font-stretch: 118%;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  color: #fff;
+  text-decoration: none;
+}
+
+.nav-links {
+  list-style: none;
+  padding: 0;
+  margin-left: auto;
+  display: flex;
+  gap: 24px;
+}
+.nav-links a {
+  color: #fff;
+  font-weight: 500;
+  font-size: 16px;
+  text-decoration: none;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 2px;
+  transition: text-decoration-color .16s ease;
+}
+.nav-links a:hover { text-decoration: underline; }
+
+.hero {
+  width: 100%;
+  min-height: min(calc(100dvh - 68px), 820px);
+  align-items: start;
+  padding: 72px var(--gutter) 0;
+}
+
+.hero-copy {
+  grid-column: 1 / span 6;
+  padding: 24px 0 calc(var(--overhang) + 64px);
+}
+.hero-copy p {
+  margin-top: 22px;
+  font-size: 19px;
+  line-height: 1.5;
+  max-width: 34ch;
+  color: #fff;
+}
+.hero-actions {
+  margin-top: 36px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.link-onred {
+  color: #fff;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  text-decoration-color: rgba(255, 255, 255, .55);
+  transition: text-decoration-color .16s ease;
+}
+.link-onred:hover { text-decoration-color: #fff; }
+
+.hero-plate {
+  grid-column: 7 / span 6;
+  align-self: end;
+  justify-self: end;
+}
+
+/* The plate: a near-black board that holds a dark screenshot on any ground */
+.plate {
+  background: var(--plate);
+  padding: 20px;
+  border-radius: 2px;
+  width: fit-content;
+  max-width: 100%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), 0 20px 40px -18px rgba(20, 20, 22, .3);
+}
+.plate img { width: auto; }
+.field .plate, .board .plate {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), 0 24px 48px -16px rgba(80, 0, 12, .5);
+}
+
+/* The record */
+.record-head {
+  padding: 96px var(--gutter) 56px;
+}
+.record-head .lede { margin-top: 20px; color: var(--muted); }
+
+.board {
+  background: var(--red);
+  color: #fff;
+  padding: 64px 0;
+}
+.board .grid { align-items: center; }
+
+.turnout { grid-column: 1 / span 5; }
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: 22px;
+}
+.stat + .stat { margin-top: 8px; }
+.num {
+  font-weight: 900;
+  font-stretch: 62%;
+  font-size: clamp(104px, 11vw, 160px);
+  line-height: .86;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.word {
+  font-weight: 700;
+  font-stretch: 105%;
+  font-size: clamp(26px, 2.5vw, 36px);
+  line-height: 1;
+}
+.board-note {
+  margin-top: 32px;
+  color: var(--tint);
+  font-size: 17px;
+  max-width: 34ch;
+}
+
+.board-plate { grid-column: 7 / span 6; justify-self: end; }
+
+.readback {
+  padding: 72px var(--gutter) 96px;
+  row-gap: 48px;
+}
+.readback-item { display: flex; flex-direction: column; gap: 20px; }
+.readback-item p { color: var(--muted); max-width: 46ch; margin-top: 6px; }
+.readback-item .plate { margin-top: auto; }
+.rank { grid-column: 1 / span 6; }
+.profile { grid-column: 7 / span 6; }
+
+/* Setup: the heading stays put while the lineup scrolls */
+.setup {
+  border-top: 1px solid var(--hairline);
+  padding: 96px 0;
+}
+.setup-head {
+  grid-column: 1 / span 4;
+  align-self: start;
+  position: sticky;
+  top: 40px;
+}
+.setup-head p { margin-top: 20px; color: var(--muted); max-width: 30ch; }
+
+.lineup {
+  grid-column: 6 / span 7;
+  list-style: none;
+  padding: 0;
+  counter-reset: step;
+}
+.lineup li, .then {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 5fr) minmax(0, 6fr);
+  column-gap: 20px;
+  align-items: baseline;
+  padding: 20px 0;
+  border-top: 1px solid var(--hairline);
+}
+.lineup li::before {
+  counter-increment: step;
+  content: counter(step);
+  font-family: var(--display);
+  font-weight: 800;
+  font-stretch: 62%;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.lineup code, .then code {
+  font: 500 16px/1.6 var(--mono);
+  color: var(--ink);
+  background: var(--band);
+  padding: 3px 7px;
+  border-radius: 2px;
+  overflow-wrap: anywhere;
+}
+.does { color: var(--muted); }
+
+/* The seventh command is the payoff, so it gets its own row under a heavier rule */
+.then {
+  grid-column: 6 / span 7;
+  border-top: 2px solid var(--ink);
+  padding: 28px 0 0;
+}
+.then code {
+  grid-column: 2;
+  font-size: 22px;
+  font-weight: 600;
+  background: var(--tint);
+  justify-self: start;
+}
+.then .does { color: var(--ink); font-weight: 500; }
+
+/* Plans: one table, two value columns */
+.plans {
+  background: var(--band);
+  padding: 96px 0;
+}
+.plans .lede { margin-top: 20px; color: var(--muted); }
+.plans-table {
+  width: 100%;
+  margin-top: 56px;
+  border-collapse: collapse;
+  text-align: left;
+}
+.plans-table th, .plans-table td {
+  padding: 18px 20px 18px 0;
+  vertical-align: top;
+  border-top: 1px solid var(--hairline-band);
+}
+.plans-table thead th { border-top: 0; padding-top: 0; padding-bottom: 22px; }
+.plans-table th[scope="row"] { font-weight: 400; color: var(--muted); width: 32%; }
+.plans-table td { font-weight: 500; width: 34%; }
+.plan-head {
+  display: block;
+  font-weight: 800;
+  font-stretch: 118%;
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.plan-price {
+  display: block;
+  margin-top: 8px;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: 17px;
+  color: var(--muted);
+}
+.plans-table tfoot td, .plans-table tfoot th { padding-top: 26px; }
+.plans-table tfoot .quiet { color: var(--muted); font-weight: 400; }
+.passes { line-height: 1.6; }
+.plans-note { margin-top: 28px; color: var(--muted); max-width: 62ch; }
+
+.vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Footer */
+.footer {
+  background: var(--ink);
+  color: var(--foot-text);
+  padding: 64px 0 56px;
+}
+.footer .grid { row-gap: 40px; }
+.foot-brand { grid-column: 1 / span 5; }
+.foot-brand .mark { font-size: 22px; }
+.credit {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--foot-muted);
+}
+.credit .swatch {
+  width: 12px;
+  height: 12px;
+  background: var(--chartreuse);
+  border-radius: 2px;
+  flex: none;
+}
+.foot-links {
+  grid-column: 7 / span 6;
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 32px;
+  justify-content: flex-end;
+  align-self: start;
+}
+.foot-links a {
+  color: var(--foot-text);
+  font-weight: 500;
+  text-decoration: none;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 2px;
+}
+.foot-links a:hover { color: #fff; text-decoration: underline; }
+
+/* Motion: the turnout numerals settle into their jersey width once the board comes into view.
+   They are legible in every frame, so a still or a page without JS shows a complete board. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+  .js .board .num { font-stretch: 86%; }
+  .js .board.in .num {
+    font-stretch: 62%;
+    transition: font-stretch .9s cubic-bezier(.16, 1, .3, 1);
+  }
+  .js .board.in .stat + .stat .num { transition-delay: .14s; }
+}
+
+@media (max-width: 1100px) {
+  .turnout { grid-column: 1 / span 6; }
+  .board-plate { grid-column: 7 / span 6; }
+  .rank, .profile { grid-column: 1 / -1; }   /* side by side their captions get too narrow */
+}
+
+@media (max-width: 880px) {
+  :root { --overhang: 80px; }
+  .hero { min-height: 0; padding: 40px var(--gutter) 0; row-gap: 40px; }
+  .hero-copy, .hero-plate { grid-column: 1 / -1; }
+  .hero-copy { padding: 0 0 8px; }
+  .hero-plate { justify-self: start; }
+  .turnout, .board-plate { grid-column: 1 / -1; }
+  .board-plate { margin-top: 44px; justify-self: start; }
+  .rank, .profile { grid-column: 1 / -1; }
+  .setup-head { grid-column: 1 / -1; position: static; }
+  .lineup { grid-column: 1 / -1; margin-top: 44px; }
+  .then { grid-column: 1 / -1; }
+  .foot-brand, .foot-links { grid-column: 1 / -1; }
+  .foot-links { justify-content: flex-start; }
+}
+
+@media (max-width: 720px) {
+  :root { --gutter: 20px; }
+  body { font-size: 16px; }
+  .setup, .plans { padding: 64px 0; }
+  .record-head { padding: 64px var(--gutter) 40px; }
+  .readback { padding: 56px var(--gutter) 64px; }
+  .board { padding: 48px 0; }
+  .plate { padding: 14px; }
+  .nav { gap: 16px; }
+  .nav-links { gap: 16px; }
+  .nav .mark { font-size: 20px; }
+  .btn-small { padding: 0 14px; }
+  .lineup li, .then {
+    grid-template-columns: 36px minmax(0, 1fr);
+    row-gap: 8px;
+  }
+  .lineup li::before { grid-row: 1 / span 2; font-size: 26px; }
+  .lineup .does { grid-column: 2; }
+  .lineup code { justify-self: start; }
+  .then .does { grid-column: 2; }
+
+  .plans-table thead { display: none; }
+  .plans-table, .plans-table tbody, .plans-table tfoot, .plans-table tr { display: block; }
+  .plans-table tr { padding: 18px 0; border-top: 1px solid var(--hairline-band); }
+  .plans-table th, .plans-table td { display: block; border: 0; padding: 0; width: auto; }
+  .plans-table th[scope="row"] { font-weight: 600; color: var(--ink); margin-bottom: 10px; width: auto; }
+  .plans-table td {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    column-gap: 12px;
+    padding: 4px 0;
+  }
+  .plans-table td::before { content: attr(data-plan); color: var(--muted); font-weight: 400; }
+  .plans-table tfoot td { padding-top: 8px; }
+  .plans-table tfoot tr:last-child th { display: none; }
+  .plans-table tfoot tr:last-child td[data-plan="Jarcord"] { display: block; padding-bottom: 14px; }
+  .plans-table tfoot tr:last-child td[data-plan="Jarcord"]::before { content: none; }
+}
+
+@media (max-width: 440px) {
+  .nav-links { display: none; }   /* Docs is in the footer and Pricing is the plans section */
+}
+</style>
+</head>
+<body id="top">
+
+<header class="field">
+  <nav class="nav wrap" aria-label="Main">
+    <a class="mark" href="#top">Jarcord</a>
+    <ul class="nav-links">
+      <li><a href="https://github.com/Pilot-572/Jarcord#readme">Docs</a></li>
+      <li><a href="#plans">Pricing</a></li>
+    </ul>
+    <a class="btn btn-onred btn-small" href="https://discord.com/oauth2/authorize?client_id=1541920512203030568&scope=bot%20applications.commands&permissions=19027107900432">Add to your server</a>
+  </nav>
+
+  <section class="hero wrap grid" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <h1 id="hero-title">Post the op. Close it with who turned up.</h1>
+      <p>Jarcord records who actually turned up after the op, from inside Discord, and files it on each member's record.</p>
+      <div class="hero-actions">
+        <a class="btn btn-onred" href="https://discord.com/oauth2/authorize?client_id=1541920512203030568&scope=bot%20applications.commands&permissions=19027107900432">Add to your server</a>
+        <a class="link-onred" href="#record">See the record</a>
+      </div>
+    </div>
+    <figure class="plate hero-plate">
+      <img src="img/op-open.png" width="473" height="408" alt="An open op card posted by Jarcord in Discord: Op Nightfall, Saturday 5 September 2026 at 19:00, six attending, two maybe, one not coming, with the Attending, Maybe and Can't make it buttons still live">
+    </figure>
+  </section>
+</header>
+
+<main>
+  <section id="record" class="record" aria-labelledby="record-title">
+    <div class="wrap record-head">
+      <h2 id="record-title">Closing the op writes the record.</h2>
+      <p class="lede">The picker opens with everyone marked Attending already ticked. The host unticks the no-shows and ticks the walk-ins. Anyone who said they were coming and was not picked is logged as a no-show.</p>
+    </div>
+
+    <div class="board">
+      <div class="wrap grid">
+        <div class="turnout">
+          <p class="stat"><span class="num">7</span> <span class="word">attended</span></p>
+          <p class="stat"><span class="num">1</span> <span class="word">no-showed</span></p>
+          <p class="board-note">Op 7, closed. Eight said they were coming. The card keeps the turnout and loses its buttons.</p>
+        </div>
+        <figure class="plate board-plate">
+          <img src="img/op-closed.png" width="549" height="506" alt="The closed card for Op READY FIVE in Discord: eight attending, three maybe, one not coming, and the line Turned out, 7 attended, 1 no-showed">
+        </figure>
+      </div>
+    </div>
+
+    <div class="wrap grid readback">
+      <figure class="readback-item rank">
+        <figcaption>
+          <h3>The promotion notice reads from it</h3>
+          <p>Private 2 to Private 3, with the record next to the reason: 5 attended, 0 no-showed.</p>
+        </figcaption>
+        <div class="plate">
+          <img src="img/rank.png" width="482" height="268" alt="A promotion notice in Discord: PVT3 Jay Jay, Private 2 to Private 3, 3 of 9, record 5 attended and 0 no-showed, reason Led a squad on two ops without being asked">
+        </div>
+      </figure>
+      <figure class="readback-item profile">
+        <figcaption>
+          <h3>So does the profile</h3>
+          <p>Signed up, attended and no-showed, instead of a signup count that means nothing.</p>
+        </figcaption>
+        <div class="plate">
+          <img src="img/profile.png" width="418" height="243" alt="A member profile card in Discord: Roblox link, rank Private 1, continent Europe, 6 signed up, 4 attended, 0 no-showed, no warnings, 308 messages, last seen 18 hours ago">
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="setup" aria-labelledby="setup-title">
+    <div class="wrap grid">
+      <div class="setup-head">
+        <h2 id="setup-title">Set up in six commands.</h2>
+        <p>Run them once from Discord with Manage Server. Then post the first op.</p>
+      </div>
+      <ol class="lineup">
+        <li><code>/op-setup #ops @Members</code><span class="does">Where ops get posted and who gets pinged.</span></li>
+        <li><code>/officer-role @Officers</code><span class="does">The role that runs officer commands without holding Manage Server.</span></li>
+        <li><code>/verify-setup #verify</code><span class="does">The channel new members are greeted in.</span></li>
+        <li><code>/ranks-setup</code><span class="does">Create every rank role that is missing and start verified members on Private 1.</span></li>
+        <li><code>/tickets-setup</code><span class="does">Create the ticket channels and post the panel.</span></li>
+        <li><code>/logs-setup #command-log</code><span class="does">Write every notable action to this channel.</span></li>
+      </ol>
+      <div class="then"><code>/op create</code><span class="does">Post the first op. The card goes up with its RSVP buttons.</span></div>
+    </div>
+  </section>
+
+  <section id="plans" class="plans" aria-labelledby="plans-title">
+    <div class="wrap">
+      <h2 id="plans-title">Ops and attendance are free. Jarcord+ adds room.</h2>
+      <p class="lede">Everything in the Jarcord column is free, and Rapid Ops Company runs it today. Jarcord+ passes are not on sale yet.</p>
+
+      <table class="plans-table">
+        <thead>
+          <tr>
+            <th scope="col"><span class="vh">Feature</span></th>
+            <th scope="col"><span class="plan-head">Jarcord</span><span class="plan-price">Free</span></th>
+            <th scope="col"><span class="plan-head">Jarcord+</span><span class="plan-price">Passes from 9 EUR, or 4.99 EUR a month</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Scheduled ops at a time</th>
+            <td data-plan="Jarcord">5</td>
+            <td data-plan="Jarcord+">Unlimited, and recurring ops</td>
+          </tr>
+          <tr>
+            <th scope="row">Attendance history</th>
+            <td data-plan="Jarcord">60 days visible, everything retained</td>
+            <td data-plan="Jarcord+">Full history and CSV export</td>
+          </tr>
+          <tr>
+            <th scope="row">RSVP options</th>
+            <td data-plan="Jarcord">Attending, Maybe, Can't make it</td>
+            <td data-plan="Jarcord+">Custom options and slot roles</td>
+          </tr>
+          <tr>
+            <th scope="row">Reminders before an op</th>
+            <td data-plan="Jarcord">1, ten minutes before</td>
+            <td data-plan="Jarcord+">Up to 5</td>
+          </tr>
+          <tr>
+            <th scope="row">Rank ladders</th>
+            <td data-plan="Jarcord">1, up to 10 ranks</td>
+            <td data-plan="Jarcord+">Unlimited ranks and ladders</td>
+          </tr>
+          <tr>
+            <th scope="row">Ticket panels</th>
+            <td data-plan="Jarcord">1</td>
+            <td data-plan="Jarcord+">Several</td>
+          </tr>
+          <tr>
+            <th scope="row">Information panels</th>
+            <td data-plan="Jarcord">3</td>
+            <td data-plan="Jarcord+">Unlimited</td>
+          </tr>
+          <tr>
+            <th scope="row">Bot avatar and banner</th>
+            <td data-plan="Jarcord">Jarcord's own</td>
+            <td data-plan="Jarcord+">Your server's own</td>
+          </tr>
+          <tr>
+            <th scope="row">Warnings, audit log, welcome, verification, profiles and the record</th>
+            <td data-plan="Jarcord">Included</td>
+            <td data-plan="Jarcord+">Included</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row">Price</th>
+            <td data-plan="Jarcord">Free</td>
+            <td data-plan="Jarcord+" class="passes">9 EUR for 3 months<br>25 EUR for 12 months<br>55 EUR perpetual<br>4.99 EUR a month</td>
+          </tr>
+          <tr>
+            <th scope="row"><span class="vh">Action</span></th>
+            <td data-plan="Jarcord"><a class="btn btn-red" href="https://discord.com/oauth2/authorize?client_id=1541920512203030568&scope=bot%20applications.commands&permissions=19027107900432">Add to your server</a></td>
+            <td data-plan="Jarcord+"><span class="quiet">Not on sale yet</span></td>
+          </tr>
+        </tfoot>
+      </table>
+      <p class="plans-note">A pass is a code. Anyone can pay for one, and an officer redeems it in the server with a slash command.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap grid">
+    <div class="foot-brand">
+      <span class="mark">Jarcord for Discord</span>
+      <p class="credit"><span class="swatch" aria-hidden="true"></span>Made by Chartreuse</p>
+    </div>
+    <ul class="foot-links">
+      <li><a href="https://github.com/Pilot-572/Jarcord">GitHub</a></li>
+      <li><a href="https://github.com/Pilot-572/Jarcord#readme">Docs</a></li>
+      <li><a href="https://github.com/Pilot-572/Jarcord/issues">Support</a></li>
+      <li><a href="privacy.html">Privacy</a></li>
+      <li><a href="terms.html">Terms</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+(function () {
+  document.documentElement.classList.add('js');
+  var board = document.querySelector('.board');
+  if (!board) return;
+  if (!('IntersectionObserver' in window)) { board.classList.add('in'); return; }
+  var io = new IntersectionObserver(function (entries) {
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].isIntersecting) {
+        board.classList.add('in');
+        io.disconnect();
+        break;
+      }
+    }
+  }, { threshold: 0.35 });
+  io.observe(board);
+})();
+</script>
+</body>
+</html>
