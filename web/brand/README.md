@@ -19,10 +19,17 @@ four sides.
 | `mark-black.svg` | `#16181D` on light |
 | `mark-white.svg` | `#F6F5F2` on dark |
 | `mark-amber.svg` | `#F0A736`, for ink grounds |
-| `avatar-square.svg` | Ink ground, amber mark. The Discord application icon and the favicon |
+| `avatar-square.svg` | Ink ground, amber mark, rounded. For light web backgrounds and the favicon |
 | `avatar-circle.svg` | Amber disc, ink mark. How Discord crops it in the member list |
-| `avatar-512.png` | 512px render of the square lock, ready to upload |
-| `avatar-512-circle.png` | 512px render of the circle lock |
+| `icon.svg` | Ink ground, square, full bleed. What gets uploaded |
+| `icon-grey.svg` | Grey ground, square, full bleed. The one currently live |
+| `avatar-512.png`, `avatar-1024.png` | Ink renders of the icon |
+| `avatar-512-grey.png`, `avatar-1024-grey.png` | Grey renders of the icon |
+| `avatar-512-circle.png` | Render of the circle lock |
+
+Anything uploaded to Discord ships square and full bleed. Discord applies its own rounding
+and its own circle crop, so baking corners into the file leaves them filled with whatever the
+render sat on.
 
 The avatars carry a shorter sweep and bump the stroke one step to 14, so the slot survives
 at 32px. Do not swap the full sweep back in.
@@ -46,6 +53,7 @@ missed.
 | | Hex |
 |---|---|
 | Ink | `#16181D` |
+| Icon grey | `#2B2E33` |
 | Amber | `#F0A736` |
 | Paper | `#F6F5F2` |
 
