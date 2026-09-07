@@ -1,0 +1,36 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟡  MEDIUM",
+      "body": "You need a plan before anyone loads in: phases, roles handed out, and a number written down at the end. Some want a pilot or the Sniper Unit. Host one of these after you have run an easy one."
+    },
+    {
+      "title": "6  DRAG HIM OUT",
+      "body": "> Training · 4 to 8 players · 60 min\n\nThe medical system is fully documented and completely unknown to new players, and it is the mechanic ROC's whole identity claim rests on. The drill needs no tooling, no editor and no scripted casualty, because the dry half is roleplayed prone and the live half scores whatever the AI hands you. Measurable, cheap, and it directly produces the best recruiting clip ROC can film.\n\n**Op card**\n```\nDRILL // Drag Him Out // Medical\nTraining, 60 min, 4 to 8. Medical. Dry drags at the FOB, then a live push at Kozlovka\nwhere every real down is scored. Free meds at the armory. Dressing first then bandage,\n35 HP. F to drag, dragging stops the bleed, revive while standing still.\n```"
+    },
+    {
+      "title": "7  READY FIVE",
+      "body": "> QRF/SAR · 4 to 8 players · 90 min\n\nThis is the service ROC advertises, rehearsed internally so it works before a client ever books it. The host plays the forward element lead, so he controls when it collapses and he is inside the game rather than adjudicating from outside it. The score is launch time, which is a number the host can read off a phone, and it stays true whether or not the recovery works.\n\n**Op card**\n```\nOP READY FIVE // QRF // standby night\nQRF, 90 min, 4 to 8. Half of us go out and get in trouble, the rest sit at the FOB and\nlaunch cold when the call comes. Score is launch time, under 90 seconds, not whether\nthe rescue works. Two reps, halves swap after the first. Medic is mandatory.\n```"
+    },
+    {
+      "title": "10  TWO EYES, ONE RIFLE",
+      "body": "> Training · 4 to 8 players · 75 min\n\nROC has a second unit and needs to give it something to be good at. This drills one call format until it is automatic, it scores on kills plus correct calls plus a forced displacement, and the host rotates between pairs rather than watching everything at once. The rangefinder gives a real numeric range, so the call has a real number in it.\n\n**Op card**\n```\nDRILL // Two Eyes One Rifle // Sniper Unit\nTraining, 75 min, 4 to 8. Sniper pairs. Spotter carries the rangefinder and never\nfires. Sniper never fires without a bearing, feature, range call. Three blocks, swap\nseats halfway, displace before your third kill. Under level 10, take binoculars.\n```"
+    },
+    {
+      "title": "11  FAST ROPE CERT",
+      "body": "> Training · 4 to 8 players · 60 min\n\nOne bad pilot ruins a Friday for eight people, and this is the hour that fixes it with a pass or fail written down. It is also the best clip on the list. The MH-6 unlocks at level 15 and carries its fast rope system as standard, so the whole drill runs on the cheapest airframe in the game.\n\n**Op card**\n```\nDRILL // Fast Rope Cert // Air\nTraining, 60 min, 4 to 8. Fast rope and pilot work on the MH-6, which has the rope\nfitted as standard. Hover circuits, rope onto the Killhouse roof, then three live\nropes near the FOB. Needs one pilot at level 15 or it does not run. Pilots on PC only.\n```"
+    },
+    {
+      "title": "12  GLASS EYE",
+      "body": "> PvE · 4 to 6 players · 75 min\n\nThe op that makes the Sniper Unit worth having, and the one that gives an NCO a decision to own rather than a lane to hold. The recon report is typed into the op thread, so it becomes a reusable template and a piece of evidence for a promotion board. It needs no editor, no pilot and no marking tool.\n\n**Op card**\n```\nOP GLASS EYE // PvE // Quarry\nPvE, 75 min, 4 to 6. Sniper pair goes in first and Ground does not move until they\nhave typed a recon report into this thread. Then Ground attacks the plan the snipers\nwrote. Quarry, on foot. Nobody drives the main entrance road, it is mined.\n```"
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to the board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

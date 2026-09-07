@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 132" role="img" aria-label="Jarcord">
+  <rect width="132" height="132" rx="30" fill="#16181D"/>
+  <g transform="translate(34 27) scale(0.62)">
+    <g fill="none" stroke="#F0A736" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M50 9 C30 45 20 58 19 70"/>
+    <path d="M50 9 C70 45 83 62 83 78 C83 104 63 120 42 113 C30 108 20 102 19 94"/>
+    </g>
+    <path d="M23 51 C46 48 72 44 96 35 C74 56 46 64 25 61 Z" fill="#F0A736"/>
+  </g>
+</svg>

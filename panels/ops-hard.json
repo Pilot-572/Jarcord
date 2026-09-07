@@ -1,0 +1,36 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🔴  HARD",
+      "body": "Ninety minutes, another faction to book, or a mechanic that punishes you for getting it wrong. Worth the most and costs the most. Do not make one of these your first."
+    },
+    {
+      "title": "4  RED SIDE",
+      "body": "> OPFOR · 5 from ROC plus a guest five, 10 total players · 90 min\n\nThe mode enforces every rule, so there is no ROE to negotiate, no adjudication, and nothing for the host to track. Booking is one message and a server code. Sides swap automatically every round, so ROC cannot be accused of stacking, and both factions get a scoreline to post. This is the cheapest first date with a faction ROC has never met.\n\n**Op card**\n```\nOP RED SIDE // OPFOR // 5v5 scrim block\nOPFOR, 90 min. Needs five of us plus a guest five. Competitive, Capture the Objective\n5v5, close quarters maps, attacker and defender swap every round. Snipers take rifles\ntonight. Six or seven names on the card so a no show does not cancel. Score gets\nposted either way.\n```"
+    },
+    {
+      "title": "5  RED CELL",
+      "body": "> OPFOR · 4 to 6 from ROC players · 90 min\n\nThe lowest hosting cost of anything on the list, because ROC does not host it. The client owns the server, runs their own night, and ROC turns up as the enemy. Ninety minutes in front of another faction's entire roster advertises harder than any Discord post, and ROC's whole job is to arrive on time and touch nothing.\n\n**Op card**\n```\nCONTRACT 001 // OPFOR // client hosted\nOPFOR for hire, 90 min, 4 to 6 of us. The client hosts, we join by their code and\ntouch nothing in their server. Competitive if we are shooting their players,\nreinforcement role if it is Openworld. Turn up on time, follow their host, we post\ntheir feedback afterwards.\n```"
+    },
+    {
+      "title": "13  COLD CALL",
+      "body": "> QRF/SAR · 4 to 8 players · 90 min\n\nThis is literally ROC's stated identity played as a game mode, on a different map, with the game supplying the search, the timer and a graded scorecard at the end. It is the change of scenery that stops a small faction burning out on one island, and the fast rope insert is a finished advert clip.\n\n**Op card**\n```\nOP COLD CALL // SAR // Quarantine Zone\nSAR, 90 min, 4 to 8. Zombies Rescue. Half of us spawn in the Quarantine Zone with a\nknife, the other half fly in and get them out. Claim your daily Operator Token the day\nbefore or you cannot be an operator. Only the JTAC presses the CSEL.\n```"
+    },
+    {
+      "title": "14  SILENT LADDER",
+      "body": "> PvE · 4 to 6 players · 75 min\n\nThe payoff op for STOPWATCH, scored on something the game shows you rather than on kills, and it degrades cleanly: a blown stealth run becomes a normal compound assault that still finishes. It runs without the editor, so the session still pays credits, and Kozlovka is off the gunship patrol circuit so nothing scripted can ruin it.\n\n**Op card**\n```\nOP SILENT LADDER // PvE // Kozlovka\nPvE, 75 min, 4 to 6. Take Kozlovka without one enemy finishing a radio call.\nSuppressors, body bags, prone. When the sun comes up we hold and wait for dark instead\nof pushing. Scored on completed radio reports, not on kills. Do STOPWATCH first.\n```"
+    },
+    {
+      "title": "15  COUNTER-BATTERY",
+      "body": "> PvE · 5 to 6 players · 75 min\n\nA four part objective where every part is progress, so a session that finishes three tubes is still a result and not a wipe. Hold F sabotages a mortar whether or not somebody is crewing it, which is the single mechanic that lets five people take on a city. It is the hardest thing on this list, so it goes last.\n\n**Op card**\n```\nOP COUNTER BATTERY // PvE // Sochraina City\nPvE, 75 min, 5 to 6. Kill all four mortars in Sochraina City so the bird can land in\nit. Hold F on a tube to sabotage it, you do not have to clear the crew first. We come\nin from the north, the west field is mined. Every tube down counts even if we do not\nfinish.\n```"
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to the board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

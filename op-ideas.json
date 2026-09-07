@@ -1,0 +1,68 @@
+{
+  "_comment": "The op ideas board. /ideas board:op-ideas posts the header, then one message per op with a thumbs up and thumbs down. Add ops to this file and post it into a fresh channel.",
+  "title": "Op ideas",
+  "ping_note": "{mention} you are on XO Trial, and hosting is the half of it that is not just turning up. Pick one off this board, claim it in here so nobody doubles up, and run it. `/op create` posts the card, `/op close` records who actually showed. Three of these run properly is a better argument than anything anyone can say for you.",
+  "intro": "Ops we could run, one message each.\n\nReact 👍 on the ones you would turn up to and 👎 on the ones you would not. That is the whole point of the board: no more guessing what people actually want on a Thursday night.\n\nIf you want to **host** one, say so under it and it is yours. You do not need a rank to host, you need an idea and a time. `/op create` does the rest, and `/op close` afterwards is what puts everyone's attendance on the record.\n\nGot a better idea? Post it in here and it goes on the board.",
+  "ideas": [
+    {
+      "title": "Night Insert",
+      "tag": "1 pilot, 6+ ground · about 45 min · after dark",
+      "body": "Bird drops the ground team a good distance off the objective with no lights, and they walk the rest in.\n\nThe walk is the op. It sorts out who can actually navigate and who just follows the person in front. Contact on the way in is a bonus, not the plan.\n\nRuns well with a small group, so it is a good one for a quiet night when only six people turn up."
+    },
+    {
+      "title": "Convoy",
+      "tag": "8+ split into two sides · about an hour · any time",
+      "body": "Vehicles move something from one end of the map to the other. A smaller element sets an ambush somewhere along the route and the convoy does not know where.\n\nOne side is meant to lose. That is fine, say so up front, because the point is teaching people how to move as a group and how to react when the shooting starts from a direction nobody was watching.\n\nSwap sides halfway and run it again."
+    },
+    {
+      "title": "CASEVAC",
+      "tag": "1 pilot, 6+ ground · about 40 min · any time",
+      "body": "A team takes casualties and a bird has to come and get them out while the area is still hot.\n\nThe pilots and whoever is playing medic do the actual work. Everyone else holds a perimeter and does nothing exciting, which is the part most people are bad at.\n\nGood for the Reserve Pilots who never get a reason to fly."
+    },
+    {
+      "title": "FOB Defence",
+      "tag": "any number, more is better · about 45 min · any time",
+      "body": "We hold, they come. Sectors handed out before it starts, nobody leaves their arc to go and chase kills.\n\nCheapest op on this board to organise and it scales to whatever number turns up. No route planning, no timings, no vehicles. Post it, hand out arcs, go.\n\nRun this when somebody wants to host their first one."
+    },
+    {
+      "title": "Overwatch",
+      "tag": "2 Sniper Unit, 5+ ground · about an hour · daylight",
+      "body": "Sniper Unit sets up first and gets eyes on the objective. The ground team does not move until overwatch calls it.\n\nThis one is a comms test dressed up as an op. If people talk over each other it falls apart within ten minutes, and everybody learns something from that.\n\nThe snipers are not there for kills, they are there to talk. Say that in the briefing or it turns into a shooting range."
+    },
+    {
+      "title": "Snatch",
+      "tag": "4 to 6 only · about 30 min · after dark",
+      "body": "Small team goes in, takes one target, comes out. Contact means the op has already gone wrong.\n\nDeliberately tiny. Six people maximum, and everyone has a job. The temptation to open fire early is the whole difficulty, so brief it hard and mean it.\n\nQuick enough to run twice in an evening with different teams and compare."
+    },
+    {
+      "title": "Two-Team Raid",
+      "tag": "10+ split in two · about an hour · any time",
+      "body": "Two elements, two approach routes, one H-hour. Both hit the objective at the same minute or neither does.\n\nWhoever is late finds out exactly why timings matter, in front of everyone, which teaches it faster than any briefing.\n\nNeeds a host who will actually hold the clock rather than waiting for stragglers."
+    },
+    {
+      "title": "Air Assault",
+      "tag": "1 to 2 pilots, 8+ ground · about 45 min · any time",
+      "body": "Everybody goes in by air on one lift. One landing zone, everyone off in seconds, bird gone before it gets shot down.\n\nThe loading and the unloading are the skill. Most factions never practise it and it shows the moment the LZ is not empty.\n\nLooks incredible in clips, which is not nothing when we are recruiting."
+    },
+    {
+      "title": "Blackout",
+      "tag": "6+ ground · about 40 min · any time",
+      "body": "No voice comms for the first ten minutes. Text and hand signals only, then the radio opens up.\n\nSounds stupid. It is not. People stop talking and start looking, and the difference in how much of the map they notice is obvious the moment voice comes back on.\n\nUnpopular with about half the faction, which is why it is on a board with a vote button."
+    },
+    {
+      "title": "Selection",
+      "tag": "however many are trying out, plus assessors · about an hour · any time",
+      "body": "An op run as a tryout. Anybody who wants a Ground Unit or Sniper Unit slot runs it, and the after-action decides who gets in.\n\nEverybody gets rated with `/rate` afterwards, so the decision sits on the record instead of in somebody's memory.\n\nWorth running before we hand out any more unit slots."
+    },
+    {
+      "title": "Joint Op",
+      "tag": "however many both sides bring · about an hour · needs planning ahead",
+      "body": "Invite another faction and run one operation together, either alongside each other or against each other.\n\nCosts us nothing and it recruits by itself. People who have played with us once are the easiest people to get to join.\n\nSomebody has to actually go and talk to another faction first, which is the only hard part."
+    },
+    {
+      "title": "Free Play Friday",
+      "tag": "anyone · as long as people stay · once a month",
+      "body": "No briefing, no structure, no sectors. Everyone spawns in and does whatever.\n\nThe point is that not every op is a lecture. A faction that only ever runs serious ops loses the people who joined to play a game with mates.\n\nStill gets `/op close` run on it, so it still counts towards attendance."
+    }
+  ]
+}

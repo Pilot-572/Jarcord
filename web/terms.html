@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Terms, Jarcord</title>
-<link rel="icon" type="image/svg+xml" href="img/logo.svg">
-<script>(function(){try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}})();</script>
+<link rel="icon" type="image/svg+xml" href="brand/avatar-square.svg">
+<script>(function(){try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}})();</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,12 +32,22 @@ a { color: var(--ink); text-decoration-color: var(--red); text-decoration-thickn
 a:hover { color: var(--red); }
 .meta { color: var(--muted); font-weight: 500; margin-bottom: 40px; }
 @media (max-width: 720px) { .wrap { padding-inline: 20px; } body { font-size: 16px; } main { padding: 48px 0 80px; } }
+
+/* the ligature lockup: the mark reads Ja, the word carries on */
+.lockup { font-family: "Space Grotesk", var(--sans); font-weight: 500; }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mark" viewBox="11 1 157 128" fill="none">
+    <g stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M50 9 C30 45 20 58 19 70"/>
+      <path d="M50 9 C70 45 83 62 83 78 C83 104 63 120 42 113 C30 108 20 102 19 94"/>
+    </g>
+    <path d="M23 51 C60 46 118 40 160 21 C119 53 61 64 25 61 Z" fill="currentColor"/>
+  </symbol></svg>
 <div class="wrap">
   <nav class="nav" aria-label="Main">
-    <a class="mark" href="index.html"><svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:22px;height:22px;vertical-align:-4px;margin-right:8px"><path d="M66 14 V60 L44 82 L24 62"/></svg>Jarcord</a>
+    <a class="mark" href="index.html"><svg viewBox="11 1 157 128" fill="none" aria-hidden="true" style="width:33px;height:27px;vertical-align:-8px;margin-right:4px"><use href="#mark"/></svg><span class="lockup">rcord</span></a>
     <a href="index.html">Back to the page</a>
   </nav>
   <main>

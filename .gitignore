@@ -19,3 +19,16 @@ data/backups/
 
 # impeccable working files
 .impeccable/
+
+# logo exploration rounds, kept locally
+web/logo3/
+web/logo4/
+web/logo5/
+web/logo6/
+web/logo7/
+web/logo8/
+brush.py
+
+# the Command brief is a document for ROC, not repo content
+docs/brief/
+docs/jarcord-for-command.pdf

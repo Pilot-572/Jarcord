@@ -1,0 +1,113 @@
+{
+  "_comment": "The ideas board. /ideas posts the header, then one message per idea with a thumbs up and thumbs down to vote on. Edit this file and post it again in a fresh channel.",
+  "title": "One bot for the whole faction",
+  "ping_note": "{mention} the Trials idea in here is the one aimed at your XO Trial. You are the one person who can say whether having the bot count it for you would have helped, or whether it would just be noise. Say so in here, or react on the idea itself.",
+  "intro": "We run twenty-five bots. Ten of them do a job Jarcord already does today.\n\nBelow is every idea for replacing the rest, one message each. React 👍 or 👎 on the ones you have an opinion about. Nothing here is decided, and nothing gets uninstalled until its replacement has run beside it for a week.\n\nThe full write-up is in the PDF. This channel is so you can argue with the ideas one at a time instead of replying to a document.",
+  "ideas": [
+    {
+      "title": "Enforcement",
+      "tag": "A week · Free · retires Dyno, YAGPDB, Sapphire",
+      "body": "Mute, kick, ban and a case history per member.\n\nThe escalation rule reads the warnings we already store, so a fourth warning inside thirty days can time somebody out without an officer doing the arithmetic. Cases land in the log channel that already exists."
+    },
+    {
+      "title": "Recruitment",
+      "tag": "A week · Free · retires Invite Tracker and InviteLogger",
+      "body": "Who invited whom, a leaderboard, and bonus invites an officer can hand out.\n\nOne module retires two bots, because we are running both of them for the same job. Optional invite ranks if we want recruiting to be worth something."
+    },
+    {
+      "title": "Roblox link",
+      "tag": "A week · Free · retires Bloxlink and RoWifi",
+      "body": "Proof a member actually owns the account, group rank read into Discord roles, and a nightly sync so ranks do not drift.\n\nAnother two bots for one module. It reads ranks, it does not write them back to the group. Writing needs a key from an account inside the group, which is a security risk for something two people would use."
+    },
+    {
+      "title": "Levels",
+      "tag": "A week · Free · retires MEE6 and Arcane",
+      "body": "XP, a rank card and role rewards, reading the activity counter that is already running.\n\nOpen question for Command: levels beside ranks means two ladders in one server. Worth deciding whether XP should feed the rank ladder instead."
+    },
+    {
+      "title": "Applications",
+      "tag": "A week · Free · retires Appy and Melonly applications",
+      "body": "An apply form, a review channel, and roles granted the moment somebody is accepted.\n\nBuilt on the same modal and record-card work that verification and tickets already use, so it is a week rather than a month."
+    },
+    {
+      "title": "Leave of absence",
+      "tag": "A week · Free · retires the Melonly LOA",
+      "body": "Request leave with dates and a reason, officers approve it, and the record knows not to count the absence against anybody.\n\nThat last part is the reason to build it here rather than keep a separate bot. No other bot can see the attendance it is supposed to excuse."
+    },
+    {
+      "title": "Server log",
+      "tag": "A week · Free · retires Carl-bot and Sapphire logging",
+      "body": "Edits, deletes, joins, leaves and role changes, with one channel per event group and an ignore list for the noisy channels."
+    },
+    {
+      "title": "Stats",
+      "tag": "A week · Plus · retires Statbot",
+      "body": "Most active by messages, by voice or by ops turned up to, over any window.\n\nAlso an inactive role applied automatically past a threshold, which is the part that actually saves an officer time."
+    },
+    {
+      "title": "Ping",
+      "tag": "A day · Free · retires Role Mention Cooldown",
+      "body": "Ping a role on a cooldown, so nobody can spam something shaped like an everyone ping.\n\nSet which roles are pingable, by whom, and how often."
+    },
+    {
+      "title": "Merit",
+      "tag": "A day · Free · retires Points",
+      "body": "A points currency that pays out when an op closes, so turning up earns something visible.\n\nOpen question for Command: should it pay automatically on close, or only by an officer's hand?"
+    },
+    {
+      "title": "Bump",
+      "tag": "A day · Free · retires Fibo",
+      "body": "Reminds somebody to bump on DISBOARD once the cooldown is up, and pings a role if we want it pinged.\n\nJarcord cannot bump for us. DISBOARD's own rules forbid a bot doing it on a server's behalf, so reminding is the whole feature."
+    },
+    {
+      "title": "Autoresponder",
+      "tag": "A day · Free · retires Mimu autoresponders",
+      "body": "Canned replies to the questions that get asked every single week. Set a trigger, set the reply, choose whether it fires server wide or in one channel."
+    },
+    {
+      "title": "Leaver",
+      "tag": "A day · Free · retires Welcomer and Mimu leave messages",
+      "body": "A leave message, so departures land in the same channel as arrivals instead of quietly not happening. Extends the welcome setup we already have rather than adding another command to learn."
+    },
+    {
+      "title": "Panel extras",
+      "tag": "A day · Free · retires Embed Generator",
+      "body": "Edit a panel in place after it is posted, import one from JSON, and post a one-off embed without writing a panel file for it."
+    },
+    {
+      "title": "Counters",
+      "tag": "A day · Plus · retires ServerStats and Statbot counters",
+      "body": "Live member counts, op counts and anything else we track, written into voice channel names.\n\nCapped at three so we are not renaming channels every minute and eating the rate limit."
+    },
+    {
+      "title": "Welcome image",
+      "tag": "A day · Plus · retires Welcomer Pro",
+      "body": "A background image behind the welcome card, so a new member's first message from us looks like it came from a faction rather than a default template."
+    },
+    {
+      "title": "Ticket extras",
+      "tag": "A day · Plus · retires Tickety auto-close",
+      "body": "Close a ticket automatically after a set number of hours of silence, and define our own ticket kinds beyond the ones shipped."
+    },
+    {
+      "title": "Trials",
+      "tag": "A day · Free · nothing else does this",
+      "body": "Put somebody on trial for a rank and write down what they have to do to earn it. Three ops hosted, five attended, no warnings inside the window, whatever Command decides the bar is.\n\nThe bot already knows every one of those numbers, because hosting, attendance, ratings and warnings are all on the record. So the trial tracks itself and posts in the command channel the moment somebody clears the bar, instead of a trial quietly running for two months because nobody remembered to check on it.\n\n`/trial start @member <rank>` to open one, `/trial` to see who is on a trial and how far along they are, `/trial pass` or `/trial fail` to close it. The result lands on the member's record either way, so a failed trial is not invisible the next time they come up.\n\nWe have a live one running right now, and the only way to know where it stands is to go and count by hand. That is the whole argument for this."
+    },
+    {
+      "title": "The settings channel",
+      "tag": "Phase one · Free · nothing else can be built first",
+      "body": "Melonly's selling point is a browser dashboard. It is a second thing to log into, and an officer is already in Discord, so the switches live in Discord too.\n\n`/setup channel` creates a locked channel and posts one panel. Every module is a row with a toggle and a Configure button. Manage Server can toggle anything, officers can toggle officer business, nobody else can see the channel.\n\nNo bot gets removed in this phase. Everything after it waits on this, so it goes first regardless."
+    },
+    {
+      "title": "What we are deliberately not building",
+      "tag": "For the record · say so if you disagree",
+      "body": "**Music.** Google shut Groovy and Rythm down in 2021. Any source is a takedown waiting to happen.\n\n**TikTok feeds.** No public API. A self-built poller is scraping, and it breaks whenever the page changes.\n\n**Economy games.** Merit covers what a faction needs. Dank Memer stays where it is.\n\n**Writing Roblox ranks.** Needs a key from an account inside the group. Support burden and security risk for no revenue.\n\n**Moderation filters.** Discord AutoMod already does this, free, and does it better."
+    },
+    {
+      "title": "Six things Command has to answer",
+      "tag": "None of these block phase one · all of them change the order after it",
+      "body": "1. Do we keep a Roblox group whose ranks should drive Discord roles, or are ranks Discord only?\n2. Should Merit pay out automatically when an op closes, or only by an officer's hand?\n3. Levels beside ranks means two ladders. Do we want that, or should XP feed the rank ladder?\n4. Is the settings channel a new channel, or a pinned panel in the existing Command category?\n5. Which modules should be on the moment a new server adds Jarcord, and which start off?\n6. Voice TTS needs extra dependencies on the host for something one or two people use. Build it, or leave TTS Bot installed?"
+    }
+  ]
+}

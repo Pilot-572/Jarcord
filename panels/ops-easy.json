@@ -1,0 +1,36 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟢  EASY",
+      "body": "Five minutes of prep or less. No pilot, no specialist, no editor, and every one of them runs at four people on a dead Tuesday. If you have never hosted, start here."
+    },
+    {
+      "title": "1  FIRST CALL",
+      "body": "> PvE · 4 to 6 players · 60 min\n\nThe game writes the op. The host queues one mission from the FOB tablet and reads the objective list, so prep is about five minutes and the night ends on a mission complete banner rather than on the host's judgement. It is the easiest mission in the game, it has no prerequisites, and it pays credits and EXP, so a bad night still leaves everyone better off. This is the op you bring a stranger to.\n\n**Op card**\n```\nOP FIRST CALL // PvE // Pushkino\nPvE, 60 min, 4 to 6. Pushkino crew recovery, the easiest mission in the game, no\nprerequisites. Bring a breaching charge from the armory. We come in on the northeast\nroad. Pays credits and EXP. Good night to bring a friend. RSVP on the buttons by\n18:00.\n```"
+    },
+    {
+      "title": "2  HOLD THE LINE",
+      "body": "> PvE · 4 to 8 players · 60 min\n\nOne location, one clock, one call from the host. He says the wave direction and nothing else, so he can host it off a phone while playing. It ends on the clock rather than on a wipe or a capture, which means it never overruns and never leaves people standing around. Sectors are assigned before anyone moves, so two bad players cannot lose it for everybody.\n\n**Op card**\n```\nOP HOLD THE LINE // PvE // Kozlovka\nPvE, 60 min, 4 to 8. We take one building on the edge of Kozlovka and hold it for\ntwenty minutes against reinforcement waves. Sectors assigned before we move. Nobody\npushes deeper and nobody chases outside the wire. Ends on the clock, not on a wipe.\n```"
+    },
+    {
+      "title": "3  FOUR MINUTE HOUSE",
+      "body": "> Training · 4 to 8 players · 60 min\n\nZero prep, zero tooling, one stopwatch, and a number written in the thread at the end. The FOB Killhouse gives a free dry rep with no AI and no travel, which is where the stack order actually gets fixed. It is the drill that makes every other op faster, and it is the cheapest hour of hosting on the list.\n\n**Op card**\n```\nDRILL // Four Minute House // CQB\nTraining, 60 min, 4 to 8. Room clearing. One dry rep in the FOB Killhouse, then three\nlive reps at Kozlovka, Pushkino and Depot. Rifle, one flash, one charge, no launchers.\nStack lead rotates so everyone leads once. Standard is a block cleared under four\nminutes with no downs.\n```"
+    },
+    {
+      "title": "8  BOUND AND COVER",
+      "body": "> Training · 4 to 8 players · 60 min\n\nThe cheapest drill on the list and the one that fixes the single worst habit a teenage roster has, which is everybody sprinting at once. The host walks behind and counts faults out loud. It needs no mission, no editor, no pilot and no specialist, and it runs at four people on a dead Tuesday.\n\n**Op card**\n```\nDRILL // Bound and Cover // Movement\nTraining, 60 min, 4 to 8. Fire and movement. Two pairs cross five hundred metres of\nopen ground into Kozlovka in bounds. One pair moving, one pair stopped and shooting,\nnever both. Two crossings. Score is double move faults and the second crossing has to\nbe zero.\n```"
+    },
+    {
+      "title": "9  STOPWATCH",
+      "body": "> Training · 3 to 6 players · 60 min\n\nStealth in this game is a published numbers system and nobody joins knowing any of it. Three runs at one village turn the numbers into something a fifteen year old can feel, and the measured output is a distance a rangefinder reads out loud, so there is nothing for the host to judge. It needs no editor, so the session still pays, and it is the gate before anyone goes on SILENT LADDER.\n\n**Op card**\n```\nDRILL // Stopwatch // Stealth numbers\nTraining, 60 min, 3 to 6. Stealth at Lesdolina, done wrong on purpose and then done\nright. Bring a rangefinder. We measure the range you get spotted at: standing, then\nprone, then prone through dead ground. Nobody goes on a stealth op before doing this.\n```"
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to the board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "colour": "94A3B8",
+  "banner": "file:ops-board.png",
+  "sections": [
+    {
+      "title": "🎯  OP BOARD",
+      "body": "> Fifteen operations, written up so anybody can pick one and run it.\n\nPress a button. You get the ops in that tier, only you can see them, and the op card in each one pastes straight into `/op create`.\n\nThe tiers are about **how hard it is to host**, not how hard the fight is."
+    },
+    {
+      "title": "📖  WHAT EACH ONE GIVES YOU",
+      "body": "Every op comes with what it needs, how long it runs, why it is worth an hour, and a ready-made op card.\n\nThe full brief for any of them, with phases, roles, win conditions and what goes wrong, is in the Operations Playbook.",
+      "fields": [
+        {
+          "name": "🟢  Easy",
+          "value": "Five ops. No prep, no specialists, runs at four people.",
+          "inline": true
+        },
+        {
+          "name": "🟡  Medium",
+          "value": "Five ops. Needs a plan and a scoreline.",
+          "inline": true
+        },
+        {
+          "name": "🔴  Hard",
+          "value": "Five ops. Ninety minutes or another faction.",
+          "inline": true
+        }
+      ]
+    },
+    {
+      "title": "🎙  HOSTING ONE",
+      "body": "You do not need a rank to host. Claim one in here so nobody doubles up, then `/op create` to post the card and `/op close` afterwards to record who actually showed.\n\nClosing it is what puts everyone's attendance on the record, so an op nobody closes is an op that counted for nobody."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Easy",
+      "panel": "ops-easy",
+      "emoji": "🟢"
+    },
+    {
+      "label": "Medium",
+      "panel": "ops-medium",
+      "emoji": "🟡"
+    },
+    {
+      "label": "Hard",
+      "panel": "ops-hard",
+      "emoji": "🔴"
+    }
+  ]
+}
