@@ -1,0 +1,45 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟢  FIRST CALL",
+      "body": "> PvE · 4 to 6 players · 60 min\n\nThe game writes the op. The host queues one mission from the FOB tablet and reads the objective list, so prep is about five minutes and the night ends on a mission complete banner rather than on the host's judgement. It is the easiest mission in the game, it has no prerequisites, and it pays credits and EXP, so a bad night still leaves everyone better off. This is the op you bring a stranger to."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nOP FIRST CALL // PvE // Pushkino\nPvE, 60 min, 4 to 6. Pushkino crew recovery, the easiest mission in the game, no\nprerequisites. Bring a breaching charge from the armory. We come in on the northeast\nroad. Pays credits and EXP. Good night to bring a friend. RSVP on the buttons by\n18:00.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server on Ronograd, whitelist ROC, no editor, so credits and EXP save normally. Queue Blackhawk Rescue from the tablet in the FOB Conference Room before deploying. Pushkino must not already be secured or the mission will not start, so run this first on a fresh server. Before anyone leaves, one member picks up a breaching or demo charge at the armory in case the plant step does not hand you one. THE REAL OBJECTIVE CHAIN, read aloud in this order: find the crash site at Pushkino, locate the survivors on the third floor of the rightmost building, clear Pushkino of hostiles, plant explosives on the wreck, leave the area. The survivors do not need a ride home and the downed pilot cannot be killed, so nobody babysits them.\n\n**The objective chain, read it aloud in this order.** , read aloud in this order: find the crash site at Pushkino, locate the survivors on the third floor of the rightmost building, clear Pushkino of hostiles, plant explosives on the wreck, leave the area. The survivors do not need a ride home and the downed pilot cannot be killed, so nobody babysits them."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "T+0 to T+10 roll call, gear at the armory, queue the mission. T+10 to T+20 drive out, or fly if somebody has the MH-6. Approach on the northeast road, it is covered by a single RLF sniper nest and it is the cheapest way in. T+20 to T+45 clear the garage complex and the housing. Reinforcements arrive at the eastern housing in M1038s and Urals, so one man watches east from the moment the first shot goes. T+45 to T+55 plant on the wreck, then leave the area to trigger the complete. T+55 to T+60 debrief in the thread, one line on the Ledger."
+    },
+    {
+      "title": "👥  ROLES",
+      "body": "At four, one fireteam of three including the host, plus the medic. At six, add a pair on the northeast road covering the sniper nest and the reinforcement route. No pilot required, no JTAC."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Mission shows complete. A member dying and respawning does not fail it. Media only uses the clip if nobody died.\n\n**What goes wrong.** If the mission will not queue, Pushkino is already secured and the server needs restarting. If reinforcements stack up, hold the housing choke and let them come to you instead of pushing east into open ground."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "The element stacked beside the crashed Black Hawk before the charge goes on, then the detonation and the mission complete banner."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to easy",
+      "panel": "ops-easy",
+      "emoji": "🟢"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

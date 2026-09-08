@@ -1,0 +1,45 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟢  FOUR MINUTE HOUSE",
+      "body": "> Training · 4 to 8 players · 60 min\n\nZero prep, zero tooling, one stopwatch, and a number written in the thread at the end. The FOB Killhouse gives a free dry rep with no AI and no travel, which is where the stack order actually gets fixed. It is the drill that makes every other op faster, and it is the cheapest hour of hosting on the list."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nDRILL // Four Minute House // CQB\nTraining, 60 min, 4 to 8. Room clearing. One dry rep in the FOB Killhouse, then three\nlive reps at Kozlovka, Pushkino and Depot. Rifle, one flash, one charge, no launchers.\nStack lead rotates so everyone leads once. Standard is a block cleared under four\nminutes with no downs.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server, Ronograd. Loadout capped: rifle, one flash, one breaching charge, no launchers. Friendly fire is off by default in Openworld and the host is not turning the editor on for a training night, so muzzle discipline is scored by eye rather than by hits."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "T+0 to T+10 one dry rep in the Killhouse, the CQB warehouse north of the FOB command centre. No AI, no travel, no clock. This is where you fix who is number one and who is number two, while nothing is being timed. T+10 to T+50 three live reps, one per compound, in this order: Kozlovka, Pushkino, Depot. One rep per location so nothing depends on AI repopulating a building you already cleared. The clock starts on the breach, or on the first man through the door if that door will not take a charge, and stops on the stack lead's CLEAR call for that building only. The stack lead rotates every rep so everyone leads once. T+50 to T+60 debrief, three numbers read aloud and written in the thread."
+    },
+    {
+      "title": "👥  ROLES",
+      "body": "Host walks behind the stack with a stopwatch and does not fire. Two fireteams of two. Sniper Unit members run this as riflemen, no exceptions."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Rep three: one building block cleared under four minutes, zero downs, zero shots fired across the stack. Missing any one of the three is a fail and the fail goes in the thread. Four minutes is a starting standard, not a law. If rep one comes in at seven minutes, say so and move the standard for next time instead of pretending.\n\n**What goes wrong.** A reinforcement wave landing mid rep stops the clock. That rep is re run, not failed. If a location turns out to be alerted before you arrive, skip to the next one on the list rather than waiting for it to settle."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "Over the stack lead's shoulder, flash through the doorway, two men in, room clear in three seconds."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to easy",
+      "panel": "ops-easy",
+      "emoji": "🟢"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟡  DRAG HIM OUT",
+      "body": "> Training · 4 to 8 players · 60 min\n\nThe medical system is fully documented and completely unknown to new players, and it is the mechanic ROC's whole identity claim rests on. The drill needs no tooling, no editor and no scripted casualty, because the dry half is roleplayed prone and the live half scores whatever the AI hands you. Measurable, cheap, and it directly produces the best recruiting clip ROC can film."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nDRILL // Drag Him Out // Medical\nTraining, 60 min, 4 to 8. Medical. Dry drags at the FOB, then a live push at Kozlovka\nwhere every real down is scored. Free meds at the armory. Dressing first then bandage,\n35 HP. F to drag, dragging stops the bleed, revive while standing still.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server. Everybody draws free bandages and dressings at the FOB armory. Read the numbers off the card before anything moves. Hold spacebar when you are down and the bleed slows for up to one minute. F drags a downed man, and dragging stops the bleeding completely. You can revive while dragging if you stand still, which makes the window unlimited. Any medical item revives. Healing order is a dressing first and then a bandage, which is 35 HP together. A bandage first wastes the dressing. BLOCK ONE, DRY, T+0 to T+25, at the FOB. The host calls a man hit. He drops prone and does not move. That is roleplay, not a mechanic, because nothing in the game lets a player put himself down on command and the host is not turning the editor on for a drill. The medic drags him about fifty feet into cover behind smoke while a pair covers, then applies the dressing and the bandage in that order. Rotate so everyone medics at least once and everyone covers at least once. BLOCK TWO, LIVE, T+25 to T+50. Push a small compound, Kozlovka or Pushkino. Every real casualty is scored the same way: dragged into cover before the revive, back on his feet inside sixty seconds, and the two men who were covering say so out loud at the time. T+50 to T+60 debrief. Name every casualty and whether he was dragged first or revived in the open."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Every casualty that session, dry or live, dragged into cover before the revive and back up inside a minute. One bleed out fails the block, and the host names who was moving and who was covering.\n\n**What goes wrong.** If the live block produces no casualties at all, the block passes and the host says so. Do not manufacture one and do not send somebody to die for the drill."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "The drag itself, smoke behind them, medic pulling a man backwards into a doorway while rounds come in."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to medium",
+      "panel": "ops-medium",
+      "emoji": "🟡"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

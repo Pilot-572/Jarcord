@@ -3,7 +3,7 @@
   "sections": [
     {
       "title": "🟢  EASY",
-      "body": "Five minutes of prep or less. No pilot, no specialist, no editor, and every one of them runs at four people on a dead Tuesday. If you have never hosted, start here."
+      "body": "Five minutes of prep or less. No pilot, no specialist, no editor, and every one of them runs at four people on a dead Tuesday. If you have never hosted, start here.\n\nPress an op below for its full brief: setup, phases, roles, what wins it and what goes wrong."
     },
     {
       "title": "1  FIRST CALL",
@@ -28,7 +28,27 @@
   ],
   "buttons": [
     {
-      "label": "Back to the board",
+      "label": "First Call",
+      "panel": "op-first-call"
+    },
+    {
+      "label": "Hold The Line",
+      "panel": "op-hold-the-line"
+    },
+    {
+      "label": "Four Minute House",
+      "panel": "op-four-minute-house"
+    },
+    {
+      "label": "Bound And Cover",
+      "panel": "op-bound-and-cover"
+    },
+    {
+      "label": "Stopwatch",
+      "panel": "op-stopwatch"
+    },
+    {
+      "label": "Op board",
       "panel": "ops-board",
       "emoji": "📋"
     }

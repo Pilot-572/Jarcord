@@ -3,7 +3,7 @@
   "sections": [
     {
       "title": "🟡  MEDIUM",
-      "body": "You need a plan before anyone loads in: phases, roles handed out, and a number written down at the end. Some want a pilot or the Sniper Unit. Host one of these after you have run an easy one."
+      "body": "You need a plan before anyone loads in: phases, roles handed out, and a number written down at the end. Some want a pilot or the Sniper Unit. Host one of these after you have run an easy one.\n\nPress an op below for its full brief: setup, phases, roles, what wins it and what goes wrong."
     },
     {
       "title": "6  DRAG HIM OUT",
@@ -28,7 +28,27 @@
   ],
   "buttons": [
     {
-      "label": "Back to the board",
+      "label": "Drag Him Out",
+      "panel": "op-drag-him-out"
+    },
+    {
+      "label": "Ready Five",
+      "panel": "op-ready-five"
+    },
+    {
+      "label": "Two Eyes, One Rifle",
+      "panel": "op-two-eyes-one-rifle"
+    },
+    {
+      "label": "Fast Rope Cert",
+      "panel": "op-fast-rope-cert"
+    },
+    {
+      "label": "Glass Eye",
+      "panel": "op-glass-eye"
+    },
+    {
+      "label": "Op board",
       "panel": "ops-board",
       "emoji": "📋"
     }

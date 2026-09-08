@@ -1,0 +1,41 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🔴  RED CELL",
+      "body": "> OPFOR · 4 to 6 from ROC players · 90 min\n\nThe lowest hosting cost of anything on the list, because ROC does not host it. The client owns the server, runs their own night, and ROC turns up as the enemy. Ninety minutes in front of another faction's entire roster advertises harder than any Discord post, and ROC's whole job is to arrive on time and touch nothing."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nCONTRACT 001 // OPFOR // client hosted\nOPFOR for hire, 90 min, 4 to 6 of us. The client hosts, we join by their code and\ntouch nothing in their server. Competitive if we are shooting their players,\nreinforcement role if it is Openworld. Turn up on time, follow their host, we post\ntheir feedback afterwards.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "The client owns the private server and sends a code. ROC joins by code and asks for nothing else. No admin, no settings changes, no editor. Say this in the booking message and say why: appointing a ROC member as server admin gives them the P key, the editor cannot be turned off once it is on, and it wipes everyone's credits and EXP for that whole session. Not touching their server is the selling point, so lead with it. WHAT ROC NEEDS IN WRITING BEFORE THE DAY. The mode and map. The start time. Their headcount. One sentence on what ROC is playing. The name of the person who gives orders on the night. Also agree respawn rules as an honour agreement, because neither Competitive nor Openworld has a respawn limit setting and pretending otherwise causes an argument at minute twenty. WHERE THIS CAN ACTUALLY RUN. Competitive only, if ROC is shooting the client's players. Openworld Ronograd puts every human on the same coalition against the AI, so ROC cannot damage the client there unless their host enables friendly fire with the editor, which costs them the session. If the client wants Openworld, ROC plays the reinforcement instead of the enemy: they run their own raid and call ROC in when it goes wrong. Same booking, other side of the coin, and it is the better first contract anyway."
+    },
+    {
+      "title": "👥  ROLES",
+      "body": "ROC's host is OPFOR commander and holds the only line to the client's host. Everyone else stays off the client's comms entirely. The sniper pair is the thing the client is paying for, a static overwatch that makes their assault feel like an assault."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** There is no ROC scoreline. The op succeeds if the client says it was a good fight and asks for a second date. Write their own words into the contract line in the thread.\n\n**What goes wrong.** If they cannot get ROC onto the opposing team, switch to the reinforcement version rather than cancelling. If they turn the editor on themselves, warn them once and then leave it, it is their server."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "One long shot from the sniper position watching the client faction's stack cross open ground. Ask them before posting it and credit them by name."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to hard",
+      "panel": "ops-hard",
+      "emoji": "🔴"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

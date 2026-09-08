@@ -1,0 +1,45 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟡  FAST ROPE CERT",
+      "body": "> Training · 4 to 8 players · 60 min\n\nOne bad pilot ruins a Friday for eight people, and this is the hour that fixes it with a pass or fail written down. It is also the best clip on the list. The MH-6 unlocks at level 15 and carries its fast rope system as standard, so the whole drill runs on the cheapest airframe in the game."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nDRILL // Fast Rope Cert // Air\nTraining, 60 min, 4 to 8. Fast rope and pilot work on the MH-6, which has the rope\nfitted as standard. Hover circuits, rope onto the Killhouse roof, then three live\nropes near the FOB. Needs one pilot at level 15 or it does not run. Pilots on PC only.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server, start at the FOB apron. Fly the MH-6. It unlocks at level 15 for 4,125 credits, seats six, and has its fast rope fitted as standard at no extra cost, which the Black Hawk and the NH90 do not, they need a FRIES bar added in customisation first. Confirm before posting the card that somebody is actually level 15. If nobody is, this op does not exist yet, so post a different drill and run this the week someone unlocks the bird. CONTROLS ON THE CARD. Space up, shift down, W and S pitch, A and D roll, Q and E yaw, X autohover, R deploys the rope, R again after ten seconds releases it if nobody is on it, passengers press R from a passenger seat to ride it. Helicopters are started from the Tab menu. Mobile players cannot fly this game, so pilot candidates are on PC."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "T+0 to T+15 hover circuits over the FOB runway, quick stop and loiter, both pilots. T+15 to T+30 rope onto the Killhouse roof, which is inside the FOB with nothing shooting at it. T+30 to T+50 three live ropes onto a named LZ in the southern third of the island near the FOB. Keep well clear of Fort Ronograd and Naval Base, which have SAM batteries, and off the Ronograd City to Quarry to Sochraina City line, where an Mi-8 patrols. Reserve Pilot flies the last two. T+50 to T+60 debrief and the certification written in the thread."
+    },
+    {
+      "title": "👥  ROLES",
+      "body": "Primary Pilot flies the first half. Reserve Pilot rides a passenger seat calling altitude and drift, then takes the controls. A stick of four ropes in a fixed order and fans out on landing. Medic waits on the ground for the falls."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Four men on the ground and dispersed within twenty seconds of the rope going out, three times running, and the helicopter still flyable at the end. Time rep one before you enforce the twenty seconds, the MH-6's rope is slow and the number may need moving.\n\n**What goes wrong.** Nobody has confirmed whether a rope fall downs or kills outright, which is why the medic is already standing on the LZ."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "A stick of four coming down the rope onto the Killhouse roof at dusk, filmed from the ground looking up at the rotor disc."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to medium",
+      "panel": "ops-medium",
+      "emoji": "🟡"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

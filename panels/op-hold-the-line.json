@@ -1,0 +1,45 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟢  HOLD THE LINE",
+      "body": "> PvE · 4 to 8 players · 60 min\n\nOne location, one clock, one call from the host. He says the wave direction and nothing else, so he can host it off a phone while playing. It ends on the clock rather than on a wipe or a capture, which means it never overruns and never leaves people standing around. Sectors are assigned before anyone moves, so two bad players cannot lose it for everybody."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nOP HOLD THE LINE // PvE // Kozlovka\nPvE, 60 min, 4 to 8. We take one building on the edge of Kozlovka and hold it for\ntwenty minutes against reinforcement waves. Sectors assigned before we move. Nobody\npushes deeper and nobody chases outside the wire. Ends on the clock, not on a wipe.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server, Ronograd, no editor. The host names one location before anybody moves, from the list that actually gets vehicle reinforcements: Kozlovka, Lesdolina, Pushkino, Department of Utilities, Ronograd City, Sochraina City. Kozlovka is the default. It has a church and an apartment block on the edge of the village, no SAM, no mortar, and it is off the Mi-8 patrol circuit. Sectors are assigned by compass point at the FOB, before the drive. THE ONE THING THAT MAKES THIS WORK. Do not clear the compound. Reinforcements are called by the enemies defending a location during an active raid, so a dead garrison stops the waves and leaves you holding an empty yard for twenty minutes. Seize one building or courtyard on the near edge and leave the rest of them alive on purpose."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "T+0 to T+10 brief and sectors. Host says out loud that the assault is not the op, the hold is. T+10 to T+25 go loud and take the near building only. Nobody pushes deeper. T+25 to T+45 the hold clock. Host posts the finish time in the thread and from there calls each incoming wave by direction only. Nobody chases a runner outside the wire. T+45 to T+55 withdrawal on the host's word, everyone out together, no last stands. T+55 to T+60 debrief."
+    },
+    {
+      "title": "👥  ROLES",
+      "body": "Pairs on sectors. Medic floats between them. Sniper pair takes the approach road rather than the building. Pilot on standby for the withdrawal only, and never at Fort Ronograd or Naval Base, which have SAM batteries that destroy a helicopter in one hit."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Building still held at the end of the clock with no full wipe. A wipe ends the op and the surviving time is the number to beat next time.\n\n**What goes wrong.** If the garrison dies faster than planned, start the clock with whatever is left. If waves stop coming, the compound is effectively finished, so call the withdrawal early and end on time anyway. If the host picks Sochraina City, rotate sector positions every few minutes, four mortars there fire at your last known position."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "An M1038 unloading a squad a stone's throw from a window you are already holding, and the sector calling it before it stops."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to easy",
+      "panel": "ops-easy",
+      "emoji": "🟢"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🔴  COLD CALL",
+      "body": "> QRF/SAR · 4 to 8 players · 90 min\n\nThis is literally ROC's stated identity played as a game mode, on a different map, with the game supplying the search, the timer and a graded scorecard at the end. It is the change of scenery that stops a small faction burning out on one island, and the fast rope insert is a finished advert clip."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nOP COLD CALL // SAR // Quarantine Zone\nSAR, 90 min, 4 to 8. Zombies Rescue. Half of us spawn in the Quarantine Zone with a\nknife, the other half fly in and get them out. Claim your daily Operator Token the day\nbefore or you cannot be an operator. Only the JTAC presses the CSEL.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Zombies, Rescue mode, Lower Manhattan Quarantine Zone. BEFORE POSTING THE CARD the host opens Custom Game and checks whether Zombies appears in the private server map list. If it does not, this runs on a public Rescue server with the whole unit squadded, because the squad bar puts squad members in the same server, and Media is told in advance that strangers will be in frame. PvP is disabled in Rescue, so nothing can go wrong between players. TOKENS. Spawning as an operator costs one Operator Token, from a daily login, from being rescued as a survivor, or from certain missions. Post this in the thread the day before: claim your daily token. No token means no operator, and there is no way around it on the night. THE SPLIT. Half the unit spawns as survivors, deep in the Zone with clothes and a knife, at survivor spawns they do not choose. The other half spawns as operators in the UNS New York hangar with a full loadout, a radio and a CSEL, and inserts by AI flown shuttle, fast roping onto one of three insertion points with a short protection window. THE LINE THAT MATTERS, SAY IT TWICE. Every operator spawns with a CSEL. Calling an exfil while the helicopter is already active sends everyone to the caller's point regardless of distance. So only the JTAC presses it. Two people calling two points is how this op fails."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "T+0 to T+10 split, tokens checked, JTAC named. T+10 to T+25 insert and push. T+25 to T+60 the search, which is the op. T+60 to T+80 CSEL call and exfil, and the helicopter waits up to thirty seconds and then leaves. T+80 to T+90 debrief, with the extraction scorecard read out, graded on zombies killed, damage taken and distance travelled."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Every survivor extracted in one lift. If the thirty second window closes on somebody, the op continues and the unit logs a man left behind, out loud, in the debrief.\n\n**What goes wrong.** Survivors have no radio, so regrouping is on Discord voice. Anyone already extracted to the New York can draw a full loadout from a crate on board and go back in without burning a fresh token."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "Fast roping off the shuttle into the Zone, then the same helicopter lifting off the exfil with the whole element aboard as the timer runs out."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to hard",
+      "panel": "ops-hard",
+      "emoji": "🔴"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

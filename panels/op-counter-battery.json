@@ -1,0 +1,45 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🔴  COUNTER-BATTERY",
+      "body": "> PvE · 5 to 6 players · 75 min\n\nA four part objective where every part is progress, so a session that finishes three tubes is still a result and not a wipe. Hold F sabotages a mortar whether or not somebody is crewing it, which is the single mechanic that lets five people take on a city. It is the hardest thing on this list, so it goes last."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nOP COUNTER BATTERY // PvE // Sochraina City\nPvE, 75 min, 5 to 6. Kill all four mortars in Sochraina City so the bird can land in\nit. Hold F on a tube to sabotage it, you do not have to clear the crew first. We come\nin from the north, the west field is mined. Every tube down counts even if we do not\nfinish.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server. Sochraina City is a southern coastal city with mixed PoD and RLF, mined and patrolled approach roads and snipers. Four 82mm mortars: two in the northwest houses, one on the eastern apartment walkways, one at the pier near the sniper tower. The west approach is a heavily mined open field, so do not use it. The northern entrance by the quarry is the least defended and is the way in. THE MECHANIC THAT MAKES THIS RUNNABLE FOR FIVE PEOPLE. Walk up to a mortar and hold F to sabotage it permanently, regardless of whether an NPC is operating it. You do not clear the crew first. Killing the operator alone is useless because another NPC takes over. Sabotage lasts until the compound resets, so a full wipe loses everything you did."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "T+0 to T+10 brief and the tube order: the two northwest houses first, then the eastern apartments, then the pier. T+10 to T+20 approach from the north on foot. T+20 to T+60 tubes in order, JTAC counting them out loud so everybody hears the number rising. T+60 to T+70 the pilot lands inside the city. T+70 to T+75 debrief. ROLES at five: sniper pair kills the pier tower sniper first, then holds the eastern apartments and doubles as spotter; ground pair sabotages; medic moves with the ground pair; pilot orbits offshore and lands on clearance. At six, add a second man to the ground pair."
+    },
+    {
+      "title": "👥  ROLES",
+      "body": "at five: sniper pair kills the pier tower sniper first, then holds the eastern apartments and doubles as spotter; ground pair sabotages; medic moves with the ground pair; pilot orbits offshore and lands on clearance. At six, add a second man to the ground pair."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** All four mortars sabotaged and a helicopter on the ground inside the city. Each tube down is a result, so a night that gets three is a number for the next attempt to beat.\n\n**What goes wrong.** Killing tubes does not capture Sochraina, the radar installation in the south does that, so the pilot is landing in a live compound. He lands only when all four tubes are down, the infantry around the LZ is clear and the Mi-8 is not overhead, and he hovers for a pickup instead if the JTAC is unsure. Mortars have a hundred foot minimum range and fire at your last known position, so keep moving in the open and never stand still beside a live tube."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "Shell splashes walking toward the team just before the fourth tube gets sabotaged."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to hard",
+      "panel": "ops-hard",
+      "emoji": "🔴"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

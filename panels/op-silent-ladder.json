@@ -1,0 +1,41 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🔴  SILENT LADDER",
+      "body": "> PvE · 4 to 6 players · 75 min\n\nThe payoff op for STOPWATCH, scored on something the game shows you rather than on kills, and it degrades cleanly: a blown stealth run becomes a normal compound assault that still finishes. It runs without the editor, so the session still pays credits, and Kozlovka is off the gunship patrol circuit so nothing scripted can ruin it."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nOP SILENT LADDER // PvE // Kozlovka\nPvE, 75 min, 4 to 6. Take Kozlovka without one enemy finishing a radio call.\nSuppressors, body bags, prone. When the sun comes up we hold and wait for dark instead\nof pushing. Scored on completed radio reports, not on kills. Do STOPWATCH first.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server, Ronograd, whitelist ROC, no editor, so the session still pays. Kozlovka: coastal village, residential buildings, a church and an apartment block, RLF militia plus two marksmen, objectives are the P-80 radars and one High Value Target. It is not on the Mi-8 patrol circuit. Suppressed primaries. Everybody knows how to bag a body before the op starts. THE NUMBERS. A suppressed shot carries about 130 ft, an unsuppressed one seven to eight hundred. Prone cuts detection to a third. A body left lying is 40 percent fear when found, lasts sixty seconds, and is spotted at about 250 ft by day and 60 ft at night. Bagging takes about three seconds. At 100 percent fear an NPC pulls a radio and lights up red with a bar over his head, and you have five seconds to kill him before the compound flips to raid mode. NIGHT, AND HOW WE GET IT. Night runs 19:00 to 06:00 and drops detection to under seventy feet for everything except snipers. The host does not force it with the editor, because that would cost the session's credits and cannot be undone. Instead the team pushes during a night window, and when the sun comes up mid infiltration the host calls a hold: everyone goes prone or gets inside and waits for the next window. Waiting out daylight is the drill, not a failure."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "T+0 to T+10 brief. T+10 to T+25 approach, pair sets overwatch on the church and the apartment block and calls patrol timings. T+25 to T+60 the breach pair does takedowns and bags bodies inside sixty seconds, with one floater doing nothing but bagging and watching the two marksmen. T+60 to T+70 radars and the HVT. T+70 to T+75 debrief."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Radars destroyed and the HVT dead with zero completed radio reports. One completed report is a partial: finish the objective loud, and log it as a fail on stealth with the compound still taken.\n\n**What goes wrong.** If it goes loud, it goes loud. Finish it. Reinforcements arrive in M1038s and Urals."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "The five second radio window, an NPC lit up red with the report bar over his head, dropped by the pair before it fills."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to hard",
+      "panel": "ops-hard",
+      "emoji": "🔴"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

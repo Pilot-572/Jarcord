@@ -1,0 +1,41 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🔴  RED SIDE",
+      "body": "> OPFOR · 5 from ROC plus a guest five, 10 total players · 90 min\n\nThe mode enforces every rule, so there is no ROE to negotiate, no adjudication, and nothing for the host to track. Booking is one message and a server code. Sides swap automatically every round, so ROC cannot be accused of stacking, and both factions get a scoreline to post. This is the cheapest first date with a faction ROC has never met."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nOP RED SIDE // OPFOR // 5v5 scrim block\nOPFOR, 90 min. Needs five of us plus a guest five. Competitive, Capture the Objective\n5v5, close quarters maps, attacker and defender swap every round. Snipers take rifles\ntonight. Six or seven names on the card so a no show does not cancel. Score gets\nposted either way.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Competitive private server set to 5v5, Capture the Objective. ROC squads up so all five land on the same team, the client faction squads separately. Close quarters maps only: Office, Favela, Tokyo, Coast, New York City, Lookout. Host picks the first map, the losing side picks the next one. THE FORMAT DOES THE WORK. Rounds are exactly 90 seconds. Blue defends and Red attacks by default and roles swap every round, so nobody has to agree anything. Capture takes about ten seconds and pauses the round timer. First to three round wins takes the game, five rounds maximum, which means one full game is only eight to twelve minutes of play. That is why this is posted as a block: five or six games back to back, extras rotating in between games."
+    },
+    {
+      "title": "👥  ROLES",
+      "body": "ROC fields exactly five from Ground Unit. Sniper Unit players take rifles tonight, the maps are close quarters and a scope is a liability, and being told that in advance stops it being an argument. One NCO calls the defensive setup each round. No pilot, no medic, no JTAC, there is nothing to fly and there is no revive in this mode. BOOKING. Send the client the map list, the start time and the server code. Nothing else needs agreeing. Put six or seven ROC names on the card so a single no show does not cancel the night."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Report the series score in the thread whichever way it went. Being the faction others call means being the faction that shows up and posts the result.\n\n**What goes wrong.** Check before round one that all five ROC members are actually on the same team and restart if not. If the client only brings four, run Duo 2v2 brackets instead and rotate pairs. If the server will not hold ten bodies, that is the free server player cap, so test with six people in it before you advertise a date."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "A last man standing defender holding the objective as the capture bar climbs, then killing the capper with two seconds left."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to hard",
+      "panel": "ops-hard",
+      "emoji": "🔴"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

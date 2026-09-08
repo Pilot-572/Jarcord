@@ -1,0 +1,41 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟢  STOPWATCH",
+      "body": "> Training · 3 to 6 players · 60 min\n\nStealth in this game is a published numbers system and nobody joins knowing any of it. Three runs at one village turn the numbers into something a fifteen year old can feel, and the measured output is a distance a rangefinder reads out loud, so there is nothing for the host to judge. It needs no editor, so the session still pays, and it is the gate before anyone goes on SILENT LADDER."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nDRILL // Stopwatch // Stealth numbers\nTraining, 60 min, 3 to 6. Stealth at Lesdolina, done wrong on purpose and then done\nright. Bring a rangefinder. We measure the range you get spotted at: standing, then\nprone, then prone through dead ground. Nobody goes on a stealth op before doing this.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server, Ronograd, Lesdolina. Rural village in the centre of the island with road patrols, watchtowers, houses and a windmill holding one or two snipers or marksmen. It sits in a bowl below a mountain range, so the host can watch the whole drill from high ground without joining it. Somebody brings a rangefinder from the armory, because what gets measured is a distance and not a time. THE NUMBERS, read aloud between runs. Riflemen spot you at about 390 ft in daylight, marksmen and snipers at about 774 ft. Lying prone cuts that to roughly a third. Running is heard at 60 ft, walking at 40 ft, crouch and prone are silent. Being spotted is an instant 100 percent on the fear meter and so is taking damage, which is why the measured number is the range you were spotted at and not a stopwatch time. A dead body found is 40 percent, a flashbang 50, a shot 75."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "Three runs, same approach every time, rotating the point man. Run one, walk in standing, in daylight, in the open, on purpose. Run two, the same approach prone. Run three, the same approach prone and through the mountain dead ground, out of the windmill's line of sight, because a marksman in a tower is the one thing that does not go blind at night either. Between runs the host reads the last number out and the team walks back to the start."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Run three is spotted at a shorter range than run one, and the point man can say the three numbers back without looking at the card. Nobody is promoted for this and nobody goes on a stealth op until they have done it.\n\n**What goes wrong.** If the compound stays alerted and will not settle, restart the server, which costs a few minutes and nothing else. If the in game clock happens to roll into night, run a fourth pass and watch the number collapse to under seventy feet, which is the best free lesson in the game. Do not promise a night run on the card, the cycle length is not documented."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "The same approach twice in one cut, spotted at three hundred odd feet standing, then walking past a patrol prone."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to easy",
+      "panel": "ops-easy",
+      "emoji": "🟢"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

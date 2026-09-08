@@ -3,7 +3,7 @@
   "sections": [
     {
       "title": "🔴  HARD",
-      "body": "Ninety minutes, another faction to book, or a mechanic that punishes you for getting it wrong. Worth the most and costs the most. Do not make one of these your first."
+      "body": "Ninety minutes, another faction to book, or a mechanic that punishes you for getting it wrong. Worth the most and costs the most. Do not make one of these your first.\n\nPress an op below for its full brief: setup, phases, roles, what wins it and what goes wrong."
     },
     {
       "title": "4  RED SIDE",
@@ -28,7 +28,27 @@
   ],
   "buttons": [
     {
-      "label": "Back to the board",
+      "label": "Red Side",
+      "panel": "op-red-side"
+    },
+    {
+      "label": "Red Cell",
+      "panel": "op-red-cell"
+    },
+    {
+      "label": "Cold Call",
+      "panel": "op-cold-call"
+    },
+    {
+      "label": "Silent Ladder",
+      "panel": "op-silent-ladder"
+    },
+    {
+      "label": "Counter-Battery",
+      "panel": "op-counter-battery"
+    },
+    {
+      "label": "Op board",
       "panel": "ops-board",
       "emoji": "📋"
     }

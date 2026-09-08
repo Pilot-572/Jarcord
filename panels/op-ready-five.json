@@ -1,0 +1,45 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟡  READY FIVE",
+      "body": "> QRF/SAR · 4 to 8 players · 90 min\n\nThis is the service ROC advertises, rehearsed internally so it works before a client ever books it. The host plays the forward element lead, so he controls when it collapses and he is inside the game rather than adjudicating from outside it. The score is launch time, which is a number the host can read off a phone, and it stays true whether or not the recovery works."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nOP READY FIVE // QRF // standby night\nQRF, 90 min, 4 to 8. Half of us go out and get in trouble, the rest sit at the FOB and\nlaunch cold when the call comes. Score is launch time, under 90 seconds, not whether\nthe rescue works. Two reps, halves swap after the first. Medic is mandatory.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server, Ronograd, no editor. QRF sits at the FOB, geared, with the helicopter already spawned and running on the apron if anybody has one, or a 4x4 with the engine on if not. Startup time cannot be shortened by any setting, which is exactly why the bird is pre spun."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "T+0 to T+15 brief and split. Host plus one is the forward element. Everyone else is the QRF under an NCO. Name the compound, use a different one for each rep, and keep off Fort Ronograd and Naval Base, which have SAM batteries that destroy a helicopter in one hit. T+15 to T+35 the forward pair pushes the compound alone and overextends on purpose. T+35 the recall goes out on voice and the host starts a stopwatch. T+35 to T+55 the QRF launches, flies or drives, and recovers. T+55 to T+75 second rep with the halves swapped. T+75 to T+90 debrief and both launch times posted in the thread. THE HONEST THING TO SAY OUT LOUD IN THE BRIEF. A downed man has about one minute on spacebar and the flight from the FOB to a northern compound is longer than that. So the forward pair's real job is that whoever is still standing drags the downed one, because dragging stops the bleed entirely and buys unlimited time. If both go down they respawn at the FOB and the rep still scores, because launch time is the score and survival is not."
+    },
+    {
+      "title": "👥  ROLES",
+      "body": "Pilot flies if he has the MH-6 at level 15, otherwise the QRF drives and nothing else changes. Medic rides on the first lift. NCO leads the QRF, and this is the slot where Corporals get tested. JTAC talks the pilot onto the LZ by voice, there is no marking tool in game."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** QRF launched inside 90 seconds of the recall, twice. The recovery succeeding is a bonus.\n\n**What goes wrong.** Do not try three reps. Drive out, fight, recover and return is twenty to thirty minutes each. Two reps and one swap fills ninety minutes."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "A member on the ground with the drag animation running while the helicopter comes over the treeline. This is the single best advert clip ROC can produce."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to medium",
+      "panel": "ops-medium",
+      "emoji": "🟡"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

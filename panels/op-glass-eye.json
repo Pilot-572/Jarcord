@@ -1,0 +1,45 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟡  GLASS EYE",
+      "body": "> PvE · 4 to 6 players · 75 min\n\nThe op that makes the Sniper Unit worth having, and the one that gives an NCO a decision to own rather than a lane to hold. The recon report is typed into the op thread, so it becomes a reusable template and a piece of evidence for a promotion board. It needs no editor, no pilot and no marking tool."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nOP GLASS EYE // PvE // Quarry\nPvE, 75 min, 4 to 6. Sniper pair goes in first and Ground does not move until they\nhave typed a recon report into this thread. Then Ground attacks the plan the snipers\nwrote. Quarry, on foot. Nobody drives the main entrance road, it is mined.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server, Ronograd, no editor. Default location is the Quarry: rocky ground with real elevated positions, snipers on the towers and pulley structures, riflemen on the rim, a heavy machine gun covering the main entrance, an HVT in the central processing building, and five buried mines on the main entrance road that will destroy a ground vehicle. Alternate is Pushkino if only four turn up. Do not use the Mountain Radar Station, it carries nine plant objectives, two HVTs and a loitering gunship, and a four man ground element cannot take that inside the window. THE ONE RULE. Ground does not move until the sniper pair has reported."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "T+0 to T+10 brief and the one rule. T+10 to T+20 the pair infils alone. Ground does not sit at spawn, it walks to a named holding point short of the objective and waits there, so nobody is parked at the FOB doing nothing. T+20 to T+30 RECON REPORT typed into the op thread by the spotter: numbers, where the sniper or marksman is, best approach, worst approach. The host reads it back aloud and asks one question the pair did not answer. T+30 to T+60 Ground moves on the pair's route, and the pair, not the host, calls when Ground goes. T+60 to T+70 the pair covers the exfil and comes off the hill last. T+70 to T+75 debrief, and the report stays pinned as the template for the next one."
+    },
+    {
+      "title": "👥  ROLES",
+      "body": "Sniper pair, one shooter one spotter, the spotter writes. Ground Unit two to four. Medic with Ground. No pilot needed, though a lift for the pair's insert is a nice touch."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Objective taken along the route the snipers called. Bonus objective, the enemy sniper or marksman is down before Ground is ever spotted.\n\n**What goes wrong.** An Mi-8 patrols between Ronograd City, Quarry and Sochraina City and can blow the pair's stealth through no fault of theirs. They go prone and wait it out, that is not their failure. Nobody drives down the main entrance road."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "The typed recon report in the thread, then the first shot that opens the assault, cut together."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to medium",
+      "panel": "ops-medium",
+      "emoji": "🟡"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

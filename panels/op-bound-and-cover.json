@@ -1,0 +1,45 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟢  BOUND AND COVER",
+      "body": "> Training · 4 to 8 players · 60 min\n\nThe cheapest drill on the list and the one that fixes the single worst habit a teenage roster has, which is everybody sprinting at once. The host walks behind and counts faults out loud. It needs no mission, no editor, no pilot and no specialist, and it runs at four people on a dead Tuesday."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nDRILL // Bound and Cover // Movement\nTraining, 60 min, 4 to 8. Fire and movement. Two pairs cross five hundred metres of\nopen ground into Kozlovka in bounds. One pair moving, one pair stopped and shooting,\nnever both. Two crossings. Score is double move faults and the second crossing has to\nbe zero.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server. The host names a start landmark and an AI held location roughly five hundred metres away across open ground. Pick an RLF village, Kozlovka or Pushkino. Do not pick Fort Ronograd or Naval Base, the pairs will die at eight hundred metres without ever bounding, and enemy snipers reach about three kilometres with almost no falloff. WHY THE DISTANCE IS RIGHT. Riflemen see about 390 ft in daylight and marksmen about 774 ft, so a five hundred metre start line is outside contact and the team walks into engagement range halfway across. That is the lesson: the ground where it starts mattering is not the ground where you set off. THE RULE. One pair moves, one pair is stopped and shooting. Never both moving. No bound longer than about five seconds of running. The man moving calls MOVING, the man stopped calls SET, every time, out loud."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "T+0 to T+10 brief and pairs. T+10 to T+30 first crossing, host walks behind counting double move faults out loud as they happen so nobody argues later. T+30 to T+50 second crossing on a different axis. T+50 to T+60 debrief with both fault counts read aloud and written in the thread."
+    },
+    {
+      "title": "👥  ROLES",
+      "body": "Host counts and does not fire. Alpha and Bravo, one caller in each pair. Medic carries the drag."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Second crossing reaches the objective with at least three of four still up and zero double move faults.\n\n**What goes wrong.** A pair that stays SET too long in the open near Sochraina City gets shelled, because mortars reach about a thousand feet and fire at your last known position. That is a genuine lesson but pick a village without mortars for the first run. If the AI beelines instead of suppressing, the drill still scores, because the score is our discipline and not their behaviour."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "Wide third person, one pair sprinting low while the other pair's fire goes over their heads."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to easy",
+      "panel": "ops-easy",
+      "emoji": "🟢"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}

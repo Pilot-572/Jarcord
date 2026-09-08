@@ -1,0 +1,41 @@
+{
+  "colour": "94A3B8",
+  "sections": [
+    {
+      "title": "🟡  TWO EYES, ONE RIFLE",
+      "body": "> Training · 4 to 8 players · 75 min\n\nROC has a second unit and needs to give it something to be good at. This drills one call format until it is automatic, it scores on kills plus correct calls plus a forced displacement, and the host rotates between pairs rather than watching everything at once. The rangefinder gives a real numeric range, so the call has a real number in it."
+    },
+    {
+      "title": "📋  OP CARD",
+      "body": "Paste this into `/op create`, change the time.\n```\nDRILL // Two Eyes One Rifle // Sniper Unit\nTraining, 75 min, 4 to 8. Sniper pairs. Spotter carries the rangefinder and never\nfires. Sniper never fires without a bearing, feature, range call. Three blocks, swap\nseats halfway, displace before your third kill. Under level 10, take binoculars.\n```"
+    },
+    {
+      "title": "🔧  SETUP",
+      "body": "Private Openworld server. Each pair takes a hill overlooking a different AI held location. First run uses Kozlovka and Pushkino: Kozlovka has two marksmen and open coastal ground, Pushkino has a single sniper nest on the northeast road. Keep off Fort Ronograd and Naval Base. The spotter carries a rangefinder or binoculars and a compass and no scoped rifle. The rangefinder needs level 10 and reads out to about 1189 m, so a spotter under level 10 takes binoculars and calls range in hundreds of metres instead. Binoculars are free in Openworld. THE CALL. Every shot is preceded out loud by three parts, in the same order every time: bearing, reference feature, range. The spotter never fires. The sniper never fires without a call."
+    },
+    {
+      "title": "⏱  PHASES",
+      "body": "T+0 to T+10 brief and kit check. T+10 to T+25 block one. T+25 to T+40 block two with spotter and shooter swapped, so both men do both jobs. T+40 to T+65 block three. The host sits with one pair per block and rotates. Every pair must displace to a second hide before their third kill."
+    },
+    {
+      "title": "🎯  WIN, AND WHAT GOES WRONG",
+      "body": "**Win.** Five kills per pair per block, every one preceded by a correct three part call, and the displacement done before kill three. If pairs are stalling at three kills, extend the block to fifteen minutes rather than dropping the call format. The format is the drill, the kills are just the excuse.\n\n**What goes wrong.** The first unsuppressed shot is 75 percent fear and carries seven to eight hundred feet, so kills two to five are against alerted AI that uses cover and retreats into buildings, and vehicle reinforcements will arrive. That is expected and it is what makes displacement mean anything. Enemy snipers reach roughly three kilometres, so stay prone in the hide, which also cuts your own detection to a third."
+    },
+    {
+      "title": "🎬  THE CLIP",
+      "body": "Cut from the spotter's binocular view to the sniper's scope on the same target, then the hit."
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Back to medium",
+      "panel": "ops-medium",
+      "emoji": "🟡"
+    },
+    {
+      "label": "Op board",
+      "panel": "ops-board",
+      "emoji": "📋"
+    }
+  ]
+}
