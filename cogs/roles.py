@@ -21,6 +21,7 @@ SETTINGS = (
     ("Officer role",         "officer_role_id",    "role",    "/officer-role"),
     ("Promotions channel",   "promotions_channel_id", "channel", "/promotions-setup"),
     ("Log channel",          "log_channel_id",     "channel", "/logs-setup"),
+    ("Deleted messages",     "deleted_log_channel_id", "channel", "/deleted-setup"),
     ("Ticket panel",         "ticket_panel_channel_id", "channel", "/tickets-setup"),
     ("Ticket transcripts",   "ticket_log_channel_id",   "channel", "/tickets-setup"),
     ("Server code",          "server_code",        "secret",  "/code-set"),
@@ -93,6 +94,20 @@ class Roles(commands.Cog):
         await ctx.send(
             f"Logging to {channel.mention}: verifications, promotions, warnings, ops, "
             "message clears and code changes. Keep it Command only, it names members.",
+            ephemeral=True)
+
+    @commands.hybrid_command(name="deleted-setup", description="Channel where Jarcord posts deleted messages")
+    @discord.app_commands.default_permissions(manage_guild=True)
+    @commands.has_permissions(manage_guild=True)
+    async def deleted_setup(self, ctx: commands.Context, channel: discord.TextChannel):
+        set_setting("deleted_log_channel_id", str(channel.id))
+        await log_action(ctx.guild, "Deleted-message log started", ctx.author,
+                         f"Deleted messages go to {channel.mention}")
+        await ctx.send(
+            f"Deleted messages go to {channel.mention}, with who wrote them, what they said "
+            "and any files. Jarcord only holds the text of messages posted since it last "
+            "started, so anything older than that is deleted without a trace. Keep it "
+            "Command only.",
             ephemeral=True)
 
     @commands.hybrid_command(name="c", description="Clear the last N messages in this channel")
