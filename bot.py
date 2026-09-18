@@ -27,6 +27,7 @@ FAILED = " (failed)"
 intents = discord.Intents.default()
 intents.message_content = True  # prefix commands + activity tracking
 intents.members = True          # !inactive needs the full member list
+intents.auto_moderation_execution = True  # a block by AutoMod becomes a warning on the record
 
 
 class Jarcord(commands.Bot):

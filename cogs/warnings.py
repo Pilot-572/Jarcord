@@ -118,6 +118,49 @@ class Warnings(commands.Cog):
         else:
             await ctx.send(f"No warning with ID `{warning_id}`.", ephemeral=True)
 
+    # ── AutoMod strikes ──
+    # The message is already blocked and deleted by the time this fires, so Jarcord does not
+    # moderate anything here. Its job is that the block counts: one warning on the record, so
+    # a second offence shows up in /warns instead of living in an alert channel nobody reads.
+    @commands.Cog.listener()
+    async def on_automod_action(self, execution: discord.AutoModAction):
+        # one blocked message fires this once per action, so block, alert and timeout would
+        # otherwise be three warnings for the same sentence
+        if execution.action.type is not discord.AutoModRuleActionType.block_message:
+            return
+        guild = self.bot.get_guild(execution.guild_id)
+        member = guild.get_member(execution.user_id) if guild else None
+        if member is None or member.bot:
+            return
+
+        hit = execution.matched_keyword or execution.rule_trigger_type.name.replace("_", " ")
+        reason = f"AutoMod blocked a message: {hit}"
+        warning_id = add_warning(guild.id, member.id, self.bot.user.id, reason)
+        rows = warnings_for(guild.id, member.id)
+
+        try:
+            await member.send(
+                f"A message you sent in **{guild.name}** was blocked automatically. That is "
+                f"warning {len(rows)} on your record, and **{hit}** is what tripped it.\n"
+                "Take it up with Command in DMs if you think it is wrong."
+            )
+        except discord.HTTPException:
+            pass  # closed DMs. The warning is on the record either way
+
+        channel_id = get_setting("records_channel_id")
+        if channel_id:
+            channel = guild.get_channel(int(channel_id))
+            if channel is not None:
+                try:
+                    await channel.send(embed=warning_embed(member, rows, warning_id))
+                except discord.HTTPException:
+                    pass
+
+        print(f">> automod warned {member.id} (#{warning_id}) for {hit!r}")
+        await log_action(guild, f"Strike: {member.display_name}", member,
+                         f"Warning `#{warning_id}`, {len(rows)} on record\n"
+                         f"Blocked in <#{execution.channel_id}>\n{reason}")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Warnings(bot))
